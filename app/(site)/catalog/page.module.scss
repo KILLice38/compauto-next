@@ -1,0 +1,42 @@
+@use '../../styles/mixins';
+
+.catalog {
+  padding: 20px 0 40px 0;
+  &__title {
+    @include mixins.h1;
+  }
+  &__actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__buttons {
+    padding-top: 45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__button {
+    border-radius: 100%;
+    width: 68px;
+    height: 68px;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+  }
+}
+
+@media (max-width: 575px) {
+  .catalog {
+    &__actions {
+      gap: 15px;
+    }
+    &__title {
+      @include mixins.h1Mobile;
+    }
+    &__buttons {
+      padding-top: 20px;
+    }
+  }
+}

@@ -1,0 +1,24 @@
+@use '../../styles/vars';
+
+.burger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  span {
+    width: 24px;
+    height: 2px;
+    background-color: vars.$color-text-main;
+    transition: transform 0.2s ease;
+    transform-origin: center;
+  }
+  &.active {
+    span:first-child {
+      transform: rotate(45deg) translateY(4.5px);
+    }
+    span:last-child {
+      transform: rotate(-45deg) translateY(-4.5px);
+    }
+  }
+}

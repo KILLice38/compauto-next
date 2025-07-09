@@ -1,0 +1,32 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.header {
+  padding: 23px 0 23px 0;
+  &__container {
+    padding: 0 25px 0 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &__wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  &__tel {
+    @include mixins.h3;
+    color: vars.$color-text-main;
+    text-decoration: none;
+  }
+  &__socials {
+    display: flex;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  .header {
+    padding: 40px 0 20px 0;
+  }
+}

@@ -1,0 +1,44 @@
+@use '../../styles/mixins';
+
+.logo {
+  max-height: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  svg {
+    max-width: 111px;
+    max-height: 53px;
+  }
+  &__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+  }
+  &__title {
+    @include mixins.logoTitle;
+  }
+  &__slogan {
+    @include mixins.logoSlogan;
+  }
+}
+
+@media (max-width: 575px) {
+  .logo {
+    max-height: 39px;
+    svg {
+      max-width: 78px;
+      max-height: 35px;
+    }
+    &__text {
+      gap: 5px;
+    }
+    &__title {
+      @include mixins.logoTitleMobile;
+    }
+    &__slogan {
+      @include mixins.logoSloganMobile;
+    }
+  }
+}

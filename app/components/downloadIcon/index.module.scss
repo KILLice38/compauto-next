@@ -1,0 +1,138 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.downloadIcon {
+  &__button {
+    position: relative;
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    transition:
+      width 0.4s ease-in,
+      height 0.4s ease-in,
+      border-radius 0.4s ease-in;
+
+    &.expanded,
+    &:hover,
+    &.success {
+      width: 276px;
+      height: 68px;
+      border-radius: 8px;
+    }
+
+    &.success .downloadIcon__text {
+      font-weight: 500;
+    }
+  }
+
+  &__round {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background-color: vars.$color-background-secondary;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition:
+      width 0.4s ease-in,
+      height 0.4s ease-in,
+      border-radius 0.4s ease-in;
+
+    .downloadIcon__button:hover &,
+    .downloadIcon__button.expanded &,
+    .downloadIcon__button.success & {
+      width: 276px;
+      height: 68px;
+      border-radius: 8px;
+    }
+
+    &:hover {
+      background-color: vars.$color-background-nonactive;
+
+      .downloadIcon__icon {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  &__iconWrapper {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    inset: 0;
+    opacity: 1;
+    transition: opacity 0.2s ease-in 0.15s;
+    pointer-events: none;
+  }
+
+  &__labelWrapper {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease-in 0s;
+    pointer-events: none;
+  }
+
+  &__icon {
+    color: vars.$color-text-main;
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s ease-in;
+  }
+
+  &__text {
+    @include mixins.h3;
+    color: vars.$color-text-main;
+  }
+
+  &__button.expanded {
+    .downloadIcon__iconWrapper {
+      opacity: 0;
+      transition-delay: 0s;
+    }
+
+    .downloadIcon__labelWrapper {
+      opacity: 1;
+      transition-delay: 0.25s;
+    }
+  }
+  &__statusIcon {
+    width: 32px;
+    height: 32px;
+    color: vars.$color-text-main;
+    animation: fadeIn 0.3s ease-in;
+    &.loading {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

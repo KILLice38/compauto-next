@@ -1,0 +1,54 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.nav {
+  padding: 16px 0 20px 0;
+  &__container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  .nav {
+    overflow: hidden;
+    background-color: vars.$color-background-main;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    padding: 104px 0 0 0;
+    z-index: 1000;
+    &__container {
+      display: block;
+    }
+    &__links {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      width: 70%;
+      margin: 0 auto;
+    }
+    &__link {
+      @include mixins.h3Mobile;
+      font-weight: 400;
+      text-align: center;
+    }
+    &__icons {
+      margin-top: 40px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+    &__button {
+      padding: 0;
+      border: none;
+      border-radius: 100%;
+      background-color: transparent;
+    }
+  }
+}

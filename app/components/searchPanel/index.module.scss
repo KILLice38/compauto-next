@@ -1,0 +1,48 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.searchPanel {
+  position: relative;
+  &__input {
+    caret-color: vars.$color-background-secondary;
+    outline: none;
+    width: 560px;
+    border: 2px solid vars.$color-background-secondary;
+    border-radius: 8px;
+    padding: 25px;
+    @include mixins.description;
+    color: #1f1f1f;
+    font-size: 25px;
+    height: 72px;
+    &::placeholder {
+      @include mixins.description;
+      font-size: 25px;
+    }
+  }
+  &__icon {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    color: #e0e0e0;
+  }
+}
+
+@media (max-width: 575px) {
+  .searchPanel {
+    &__input {
+      padding: 17px 23px;
+      height: 50px;
+      width: 100%;
+      @include mixins.descriptionMobile;
+      font-weight: 500;
+      color: #1f1f1f;
+      &::placeholder {
+        @include mixins.descriptionMobile;
+        font-size: 16px;
+      }
+    }
+    &__icon {
+      top: 15px;
+    }
+  }
+}

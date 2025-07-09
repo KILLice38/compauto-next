@@ -1,0 +1,119 @@
+@use './vars';
+
+@mixin h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 75px;
+  letter-spacing: -8%;
+  line-height: 100%;
+  color: vars.$color-text-main;
+  text-align: left;
+}
+
+@mixin h1Mobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 45px;
+  letter-spacing: -8%;
+  line-height: 100%;
+  color: vars.$color-text-main;
+  text-align: left;
+}
+
+@mixin h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 75px;
+  letter-spacing: -8%;
+  line-height: 100%;
+  color: vars.$color-text-main;
+  text-align: left;
+}
+
+@mixin h2Mobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 45px;
+  letter-spacing: -8%;
+  line-height: 100%;
+  color: vars.$color-text-main;
+  text-align: left;
+}
+
+@mixin h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 120%;
+  letter-spacing: -6%;
+  color: vars.$color-text-main;
+}
+
+@mixin h3Mobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: -6%;
+  color: vars.$color-text-main;
+}
+
+@mixin description {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 120%;
+  letter-spacing: -3%;
+  text-align: left;
+  color: vars.$color-text-description;
+}
+
+@mixin descriptionMobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 120%;
+  letter-spacing: -3%;
+  text-align: left;
+  color: vars.$color-text-description;
+}
+
+@mixin logoTitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -6%;
+  line-height: 70%;
+  text-align: left;
+  color: vars.$color-text-main;
+}
+
+@mixin logoTitleMobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -6%;
+  line-height: 70%;
+  text-align: left;
+  color: vars.$color-text-main;
+}
+
+@mixin logoSlogan {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 70%;
+  letter-spacing: -6%;
+  text-align: left;
+  color: vars.$color-text-description;
+}
+
+@mixin logoSloganMobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 8px;
+  line-height: 70%;
+  letter-spacing: -6%;
+  text-align: left;
+  color: vars.$color-text-description;
+}

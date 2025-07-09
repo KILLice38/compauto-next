@@ -1,0 +1,37 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.filterList {
+  position: absolute;
+  min-width: 200px;
+  padding: 25px;
+  background-color: vars.$color-background-secondary;
+  border-radius: 20px;
+  top: calc(100% + 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  align-items: flex-start;
+  z-index: 100;
+}
+.filterItem {
+  @include mixins.h3;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover,
+  &.active {
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 575px) {
+  .filterList {
+    top: calc(100% + 20px);
+  }
+  .filterItem {
+    @include mixins.descriptionMobile;
+    letter-spacing: -6%;
+  }
+}

@@ -1,0 +1,37 @@
+.gallery {
+  padding: 40px 0 100px 0;
+  &__mainImage {
+    width: 100%;
+    height: 773px;
+    border-radius: 10px;
+  }
+  &__wrapper {
+    margin-top: 60px;
+    display: grid;
+    gap: 40px;
+    grid-template-columns: repeat(4, minmax(110px, 1fr));
+  }
+  &__image {
+    height: 113px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 575px) {
+  .gallery {
+    padding: 0 0 40px 0;
+    &__mainImage {
+      width: 100%;
+      height: auto;
+    }
+    &__wrapper {
+      margin-top: 40px;
+      overflow: hidden;
+      gap: 15px;
+      grid-template-columns: repeat(4, minmax(165px, 1fr));
+    }
+    &__image {
+      height: 72px;
+    }
+  }
+}

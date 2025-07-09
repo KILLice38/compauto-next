@@ -1,0 +1,40 @@
+@use './styles/mixins';
+
+.notFound {
+  padding: 67px 0 166px 0;
+  &__container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+  &__content {
+    background-color: #40444e;
+    // blur
+    border-radius: 10px;
+    padding: 40px 55px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  &__title {
+    @include mixins.h1;
+    text-transform: uppercase;
+  }
+  &__description {
+    @include mixins.description;
+  }
+  &__error {
+    font-family: 'Inter', sans-serif;
+    font-size: 222px;
+    font-weight: 500;
+    line-height: 100%;
+    letter-spacing: -8%;
+    color: #484c56;
+    line-height: 72%;
+  }
+  &__image {
+    width: 560px;
+    height: 567px;
+    border-radius: 10px;
+  }
+}

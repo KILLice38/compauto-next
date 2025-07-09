@@ -1,0 +1,83 @@
+@use '../../styles/mixins';
+
+.aboutUs {
+  padding: 20px 0;
+  &__content {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    align-items: center;
+  }
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  &__title {
+    @include mixins.h1;
+  }
+  &__description {
+    @include mixins.description;
+    &:nth-child(2) {
+      margin-top: 20px;
+    }
+  }
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  &__item {
+    @include mixins.description;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+  }
+  &__image {
+    width: 460px;
+    height: 565px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .aboutUs {
+    &__content {
+      flex-direction: column;
+      gap: 20px;
+    }
+    &__text {
+      gap: 20px;
+    }
+    &__title {
+      @include mixins.h2Mobile;
+    }
+    &__description {
+      @include mixins.descriptionMobile;
+      &:nth-child(2) {
+        margin-top: 0;
+      }
+    }
+    &__skills {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    &__skillsTitle {
+      @include mixins.h2Mobile;
+    }
+    &__image {
+      width: 100%;
+    }
+    &__list {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    &__item {
+      @include mixins.descriptionMobile;
+    }
+  }
+}

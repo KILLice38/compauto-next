@@ -1,0 +1,151 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.sortIcon {
+  &__iconWrapper {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    inset: 0;
+    opacity: 1;
+    transition: opacity 0.2s ease-in 0.15s;
+    pointer-events: none;
+  }
+  &__icon {
+    color: vars.$color-text-main;
+    width: 28px;
+    height: 23px;
+    transition: transform 0.2s ease-in;
+  }
+  &__labelWrapper {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease-in 0s;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  &__text {
+    @include mixins.h3;
+    color: vars.$color-text-main;
+  }
+
+  &__arrow {
+    width: 18px;
+    height: 10px;
+    margin-top: 4px;
+    color: vars.$color-text-main;
+  }
+
+  &__button {
+    position: relative;
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    transition:
+      width 0.3s ease-in,
+      height 0.3s ease-in,
+      border-radius 0.3s ease-in;
+    &.expanded,
+    &:hover,
+    &.active {
+      width: 214px;
+      height: 68px;
+      border-radius: 8px;
+    }
+
+    &.active .sortIcon__text {
+      font-weight: 500;
+    }
+  }
+
+  &__round {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background-color: vars.$color-background-secondary;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition:
+      width 0.3s ease-in,
+      height 0.3s ease-in,
+      border-radius 0.3s ease-in;
+    .sortIcon__button:hover &,
+    .sortIcon__button.expanded &,
+    .sortIcon__button.active & {
+      width: 214px;
+      height: 68px;
+      border-radius: 8px;
+    }
+
+    &:hover {
+      background-color: vars.$color-background-nonactive;
+      .sortIcon__icon {
+        transform: scale(1.1);
+      }
+    }
+  }
+
+  &__button.expanded {
+    .sortIcon__iconWrapper {
+      opacity: 0;
+      transition-delay: 0s;
+    }
+    .sortIcon__labelWrapper {
+      opacity: 1;
+      transition-delay: 0.1s;
+    }
+  }
+}
+
+@media (max-width: 575px) {
+  .sortIcon {
+    &__button,
+    &__round {
+      width: 75px;
+      height: 50px;
+      border-radius: 6px;
+    }
+    &__icon {
+      width: 21px;
+      height: 16px;
+    }
+    &__round {
+      .sortIcon__button:hover &,
+      .sortIcon__button.expanded &,
+      .sortIcon__button.active & {
+        width: 157px;
+        height: 50px;
+      }
+    }
+    &__button {
+      width: 75px;
+      height: 50px;
+      &.expanded,
+      &:hover,
+      &.active {
+        width: 157px;
+        height: 50px;
+      }
+    }
+    &__text {
+      @include mixins.descriptionMobile;
+      font-weight: 500;
+    }
+    &__arrow {
+      width: 10px;
+      height: 6px;
+    }
+  }
+}

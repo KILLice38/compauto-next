@@ -1,0 +1,72 @@
+@use '../../styles/vars';
+@use '../../styles/mixins';
+
+.button {
+  background-color: vars.$color-background-secondary;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 25px;
+  line-height: 72%;
+  letter-spacing: -6%;
+  color: vars.$color-text-description;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    background-color: vars.$color-background-nonactive;
+    color: vars.$color-text-main;
+    font-weight: 500;
+  }
+  &.link {
+    padding: 25px 30px;
+    width: 100%;
+  }
+  &.filter {
+    padding: 25px;
+    gap: 10px;
+  }
+  &.more {
+    margin: 40px auto 0 auto;
+    padding: 15px 30px;
+    line-height: 120%;
+  }
+  &.active {
+    color: vars.$color-text-main;
+    font-weight: 500;
+  }
+  &.modal {
+    margin-top: 20px;
+    padding: 15px 30px;
+    line-height: 120%;
+  }
+}
+
+@media (max-width: 575px) {
+  .button {
+    padding: 25px 30px;
+    font-size: 20px;
+    white-space: nowrap;
+    &.filter {
+      background-color: transparent;
+      padding: 13px 6px;
+      font-size: 12px;
+      gap: 4px;
+      position: relative;
+      border-radius: 4px;
+    }
+    &.active {
+      background-color: vars.$color-background-secondary;
+      font-weight: 500;
+    }
+    &.fullWidth {
+      width: 100%;
+    }
+    &.link {
+      width: 100%;
+    }
+  }
+}

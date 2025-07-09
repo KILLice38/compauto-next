@@ -1,0 +1,6 @@
+@use '../styles/mixins';
+
+.title {
+  margin-top: 20px;
+  @include mixins.h1;
+}

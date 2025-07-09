@@ -1,0 +1,54 @@
+@use '../../styles/mixins';
+
+.novelty {
+  padding: 20px 0;
+  &__title {
+    @include mixins.h2;
+  }
+  &__slider {
+    margin-top: 40px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    transition: transform 0ms ease;
+  }
+  &__slideItem {
+    flex: 0 0 auto;
+  }
+  &.desktop {
+    flex: 0 0 calc((100% - 3 * 40px) / 4);
+  }
+  &.mobile {
+    flex: 0 0 100%;
+  }
+  &__arrows {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+  }
+  &__button {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 575px) {
+  .novelty {
+    &__title {
+      @include mixins.h2Mobile;
+    }
+    &__slider {
+      margin-top: 20px;
+      gap: 0;
+    }
+    &__arrows {
+      margin-top: 20px;
+      gap: 45px;
+      margin-bottom: 40px;
+    }
+  }
+}
