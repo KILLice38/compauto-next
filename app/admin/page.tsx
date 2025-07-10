@@ -1,6 +1,6 @@
 import '../globals.scss'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '../api/auth/[...nextauth]/route'
+import { authOptions } from '../api/auth/authOptions'
 import AdminPageClient from './adminPageClient'
 
 export default async function AdminPage() {

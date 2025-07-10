@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Button from './components/button'
 import css from './not-found.module.scss'
 import ClientLayout from './clientLayout'
+import Image from 'next/image'
 
 const NotFoundPage = () => {
   return (
@@ -16,7 +17,13 @@ const NotFoundPage = () => {
               <Button type="link">О как, вернуться на главную</Button>
             </Link>
           </div>
-          <img src="/assets/images/girls-error.jpg" alt="Девочки" className={css.notFound__image} />
+          <Image
+            src="/assets/images/girls-error.jpg"
+            alt="Девочки"
+            className={css.notFound__image}
+            width={560}
+            height={567}
+          />
         </div>
       </div>
     </ClientLayout>

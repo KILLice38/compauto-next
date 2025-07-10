@@ -3,10 +3,6 @@ import Burger from '../burger'
 import Logo from '../logo/logo'
 import SvgIcon from '../svgIcon'
 import css from './index.module.scss'
-import SearchPanel from '../searchPanel'
-import { useCatalog } from '../../utils/useCatalog'
-import { productsData } from '../../data/data'
-import { useState } from 'react'
 
 const Header = ({
   setIsNavOpen,
@@ -16,10 +12,6 @@ const Header = ({
   isNavOpen: boolean
 }) => {
   const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
-
-  const { setSearchTerm, resetPage } = useCatalog(productsData, 12)
-
-  const [isSearchPanelVisible, setIsSearchPanelVisible] = useState(false)
 
   const linkToSocial = (link: string) => {
     window.open(link, '_blank')

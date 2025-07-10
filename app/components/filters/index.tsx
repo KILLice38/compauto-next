@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
-import { autoMarkVariants, compressorVariants, engineModelVariants } from '../../data/data'
 import type { ProductType } from '../../types/interfaces'
 import Button from '../button'
 import FilterList from '../filterList'

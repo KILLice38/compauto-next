@@ -21,7 +21,7 @@ const SortIcon = ({ setSort, resetPage }: SortIconProps) => {
 
   const handleToggle = useCallback(() => {
     setIsSortOpen((prev) => !prev)
-  }, [isSortOpen])
+  }, [])
 
   const handleSelect = useCallback(
     (value: SortValue) => {

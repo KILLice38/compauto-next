@@ -20,8 +20,14 @@ export function useAdminProducts() {
         if (!res.ok) throw new Error(`Fetch error: ${res.status}`)
         const data: Product[] = await res.json()
         if (!cancelled) setProducts(data)
-      } catch (err: any) {
-        if (!cancelled) setError(err.message)
+      } catch (err: unknown) {
+        if (!cancelled) {
+          if (err instanceof Error) {
+            setError(err.message)
+          } else {
+            setError('Произошла неизвестная ошибка')
+          }
+        }
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -46,8 +52,12 @@ export function useAdminProducts() {
       try {
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' })
         if (!res.ok) throw new Error(`Delete failed: ${res.status}`)
-      } catch (err: any) {
-        setError(err.message)
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message)
+        } else {
+          setError('Произошла неизвестная ошибка')
+        }
         setProducts(prev)
       }
     },

@@ -1,6 +1,7 @@
 import { useMediaQuery } from 'react-responsive'
 import SvgIcon from '../svgIcon'
 import css from './index.module.scss'
+import Image from 'next/image'
 
 const aboutUsData = {
   title: 'О нас без воды',
@@ -62,7 +63,13 @@ const AboutUs = () => {
               </>
             )}
           </div>
-          <img src="/assets/images/about-us.jpg" alt="about-us" className={css.aboutUs__image} />
+          <Image
+            src="/assets/images/about-us.jpg"
+            alt="about-us"
+            className={css.aboutUs__image}
+            width={460}
+            height={565}
+          />
           {isMobile && (
             <div className={css.aboutUs__skills}>
               <h2 className={css.aboutUs__skillsTitle}>{aboutUsData.preList}</h2>

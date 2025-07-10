@@ -10,6 +10,11 @@ export async function POST(req: NextRequest) {
     const product = await prisma.product.create({ data })
     return NextResponse.json(product)
   } catch (error) {
+    if (error instanceof Error) {
+      console.error('Prisma error:', error.message)
+    } else {
+      console.error('Unknown error:', error)
+    }
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
   }
 }
@@ -27,6 +32,7 @@ export async function GET(req: NextRequest) {
     })
     return NextResponse.json(products)
   } catch (error) {
+    console.error('Failed to fetch products:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
   }
 }

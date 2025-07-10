@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
-import { productsDataNovelty } from '../../data/data'
 import Button from '../button'
 import Product from '../product'
 import SvgIcon from '../svgIcon'
