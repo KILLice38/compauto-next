@@ -64,7 +64,7 @@ const AboutUs = () => {
             )}
           </div>
           <Image
-            src="/assets/images/about-us.jpg"
+            src="/assets/images/about-us/man.png"
             alt="about-us"
             className={css.aboutUs__image}
             width={460}
