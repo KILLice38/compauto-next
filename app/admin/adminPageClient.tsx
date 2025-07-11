@@ -34,16 +34,28 @@ export default function AdminPageClient() {
       <div className="container">
         <h2 className={css.title}>Управление товарами</h2>
 
-        <Button onClickFunction={toggleForm} type="modal">
-          {showForm ? 'Отменить' : 'Добавить продукт'}
-        </Button>
+        <div className={css['manage-buttons']}>
+          <Button onClickFunction={toggleForm} type="modal">
+            {showForm ? 'Отменить' : 'Добавить продукт'}
+          </Button>
+          <Button onClickFunction={() => signOut({ callbackUrl: '/admin/login' })} type="out">
+            Выйти
+          </Button>
+        </div>
 
-        {showForm && <ProductForm editingProduct={editingProduct} onSave={handleSave} onCancel={handleCancel} />}
+        {showForm && (
+          <div className={css.overlay} onClick={handleCancel}>
+            <div className={css.modal} onClick={(e) => e.stopPropagation()}>
+              <button className={css['close-button']} onClick={handleCancel}>
+                ✕
+              </button>
+              <ProductForm editingProduct={editingProduct} onSave={handleSave} onCancel={handleCancel} />
+            </div>
+          </div>
+        )}
 
         <AdminList products={products} onEdit={setEditingProduct} onDelete={handleDelete} />
       </div>
-
-      <button onClick={() => signOut({ callbackUrl: '/admin/login' })}>Выйти</button>
     </div>
   )
 }

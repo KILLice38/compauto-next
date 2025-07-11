@@ -10,12 +10,14 @@
     border-radius: 10px;
     object-fit: cover;
     max-width: 260px;
+    height: auto;
   }
   &__text {
     text-align: center;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    flex: 1;
   }
   &__description {
     @include mixins.description;
@@ -26,6 +28,7 @@
   }
   &__price {
     @include mixins.h3;
+    margin-top: auto;
   }
 }
 
@@ -49,6 +52,10 @@
     }
     &.novelty {
       width: 100%;
+      .product__image {
+        max-width: 340px;
+        margin: 0 auto;
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import 'reset-css/reset.css'
 import './globals.scss'
 import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'

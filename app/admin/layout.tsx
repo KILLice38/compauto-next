@@ -8,7 +8,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <html lang="ru">
       <body>
         <header style={{ padding: '20px', background: '#222', color: '#fff' }}>
-          <h1 style={{ margin: 0 }}>Админка сайта</h1>
+          <div className="container">
+            <h1 style={{ margin: 0, fontSize: '48px', fontWeight: 800 }}>Админка сайта</h1>
+          </div>
         </header>
         <main>{children}</main>
       </body>

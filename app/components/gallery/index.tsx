@@ -12,7 +12,7 @@ const Gallery = () => {
           width={1160}
           height={773}
         ></Image>
-        <div className={css.gallery__wrapper}>
+        {/* <div className={css.gallery__wrapper}>
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
@@ -69,7 +69,7 @@ const Gallery = () => {
             width={110}
             height={113}
           />
-        </div>
+        </div> */}
       </div>
     </section>
   )

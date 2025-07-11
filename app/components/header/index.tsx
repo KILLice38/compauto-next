@@ -23,15 +23,15 @@ const Header = ({
         <Logo color={'#c0392b'} setIsNavOpen={setIsNavOpen} />
         {!isMobile && (
           <div className={css.header__wrapper}>
-            <a href="tel:+7(967)600-60-60" className={css.header__tel}>
-              +7 (967) 600-60-60
+            <a href="tel:+7(910)481-64-16" className={css.header__tel}>
+              +7 (910) 481-64-16
             </a>
             <div className={css.header__socials}>
               <SvgIcon
                 icon="whatsapp"
                 widthIcon="20px"
                 heightIcon="21px"
-                actionFunction={() => linkToSocial('https://api.whatsapp.com/send/?phone=79539530874')}
+                actionFunction={() => linkToSocial('https://api.whatsapp.com/send/?phone=79104816416')}
               />
               <SvgIcon
                 icon="telegram"
@@ -40,9 +40,9 @@ const Header = ({
                 actionFunction={() => linkToSocial('https://t.me/KILLice38')}
               />
             </div>
-            <div className={css.searchPanel}>
+            {/* <div className={css.searchPanel}>
               <SvgIcon icon="loop" widthIcon="24px" heightIcon="24px" />
-            </div>
+            </div> */}
           </div>
         )}
         {isMobile && <Burger setIsNavOpen={setIsNavOpen} isNavOpen={isNavOpen} />}

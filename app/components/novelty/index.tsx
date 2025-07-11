@@ -9,7 +9,7 @@ import css from './index.module.scss'
 import Link from 'next/link'
 import { ProductType } from '../../types/interfaces'
 
-const MAX_SLIDER_ITEMS = 12
+const MAX_SLIDER_ITEMS = 8
 
 const Novelty = () => {
   const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
@@ -50,9 +50,24 @@ const Novelty = () => {
   const startIndex = currentPage * itemsPerPage
   const visibleItems = sliderItems.slice(startIndex, startIndex + itemsPerPage)
 
-  // Если нет новинок / нет продуктов
-  if (loading) return <p>Загрузка новинок...</p>
-  if (!productsDataNovelty.length) return <p>Новинок пока нет.</p>
+  if (loading)
+    return (
+      <section className={css.novelty}>
+        <div className="container">
+          <h2 className={css.novelty__title}>Новинки</h2>
+          <p className={css.novelty__message}>Загрузка новинок...</p>
+        </div>
+      </section>
+    )
+  if (!productsDataNovelty.length)
+    return (
+      <section className={css.novelty}>
+        <div className="container">
+          <h2 className={css.novelty__title}>Новинки</h2>
+          <p className={css.novelty__message}>Новинок пока нет.</p>
+        </div>
+      </section>
+    )
 
   return (
     <section id="novelty" className={css.novelty}>
@@ -64,10 +79,10 @@ const Novelty = () => {
           ))}
         </div>
         <div className={css.novelty__arrows}>
-          <button className={css.novelty__button} onClick={handlePrev}>
+          <button className={css.novelty__button} onClick={handleNext}>
             <SvgIcon icon="left-arrow" widthIcon="24px" heightIcon="21px" widthRound="60px" heightRound="60px" />
           </button>
-          <button className={css.novelty__button} onClick={handleNext}>
+          <button className={css.novelty__button} onClick={handlePrev}>
             <SvgIcon icon="right-arrow" widthIcon="24px" heightIcon="21px" widthRound="60px" heightRound="60px" />
           </button>
         </div>

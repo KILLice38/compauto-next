@@ -2,6 +2,7 @@
 
 .novelty {
   padding: 20px 0;
+  min-height: 649px;
   &__title {
     @include mixins.h2;
   }
@@ -33,6 +34,10 @@
     border: none;
     padding: 0;
     cursor: pointer;
+  }
+  &__message {
+    margin-top: 40px;
+    @include mixins.h3;
   }
 }
 

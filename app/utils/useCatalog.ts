@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import type { ProductType } from '../types/interfaces'
 import { filterByKey, filterBySearch, sortProducts } from './catalogUtils'
 
-const PAGE_SIZE = 4
+const PAGE_SIZE = 12
 
 export function useCatalog() {
   const [allProducts, setAllProducts] = useState<ProductType[]>([])

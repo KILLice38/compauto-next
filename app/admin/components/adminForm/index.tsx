@@ -48,9 +48,8 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         return
       }
 
-      // Загрузка файла
       const formData = new FormData()
-      formData.append('file', data.img[0]) // FileList -> File
+      formData.append('file', data.img[0])
 
       const uploadRes = await fetch('/api/upload', {
         method: 'POST',
@@ -61,13 +60,11 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
 
       const { url: imageUrl } = await uploadRes.json()
 
-      // Формируем объект с URL изображения
       const productPayload = {
         ...data,
         img: imageUrl,
       }
 
-      // Отправка на создание или обновление продукта
       const isEdit = Boolean(editingProduct)
       const url = isEdit ? `/api/products/${editingProduct!.id}` : '/api/products'
       const method = isEdit ? 'PUT' : 'POST'

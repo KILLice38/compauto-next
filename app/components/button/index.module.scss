@@ -25,6 +25,9 @@
     padding: 25px 30px;
     width: 100%;
   }
+  &.out {
+    padding: 25px;
+  }
   &.filter {
     padding: 25px;
     gap: 10px;
@@ -39,7 +42,6 @@
     font-weight: 500;
   }
   &.modal {
-    margin-top: 20px;
     padding: 15px 30px;
     line-height: 120%;
   }

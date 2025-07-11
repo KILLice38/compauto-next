@@ -1,30 +1,84 @@
-.form {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
+@use '../../../styles/vars';
+
+.label {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  background-color: rgba(0, 0, 0, 0.95);
-  padding: 20px;
-  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: vars.$color-text-main;
 }
 
 .input {
-  height: 30px;
-  border-radius: 20px;
-  padding-left: 20px;
-  outline: none;
-  &--file {
-    width: 80px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background-color: vars.$color-background-secondary;
+  border: 1px solid vars.$color-background-nonactive;
+  border-radius: 6px;
+  color: vars.$color-text-main;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: vars.$color-background-blur;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  }
+
+  &::placeholder {
+    color: vars.$color-text-description;
   }
 }
 
-.label {
-  color: white;
+// Сообщения об ошибках
+.form p[style] {
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+// Контейнер кнопок
+.form > div {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+// Стили для кнопок
+.form button {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
+}
+
+// Кнопка отправки
+.form button[type='submit'] {
+  background-color: vars.$color-background-secondary;
+  color: vars.$color-text-main;
+
+  &:hover:not(:disabled) {
+    background-color: vars.$color-background-blur;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Кнопка отмены
+.form button[type='button'] {
+  background-color: transparent;
+  color: vars.$color-text-description;
+  border: 1px solid vars.$color-background-nonactive;
+
+  &:hover {
+    background-color: vars.$color-background-nonactive;
+    color: vars.$color-text-main;
+  }
 }

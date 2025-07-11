@@ -40,25 +40,23 @@ const DownloadIcon = () => {
 
   return (
     <button
-      className={`${css.downloadIcon__button} ${isExpanded ? css.expanded : ''} ${downloadStatus === 'success' ? css.success : ''}`}
+      className={`${css.button} ${isExpanded ? css.expanded : ''} ${downloadStatus === 'success' ? css.success : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
     >
-      <div className={css.downloadIcon__round}>
-        <div className={css.downloadIcon__iconWrapper}>
-          <svg className={css.downloadIcon__icon}>
+      <div className={css.round}>
+        <div className={css['icon-wrapper']}>
+          <svg className={css.icon}>
             <use
               xlinkHref={`/assets/icons/sprites.svg#${downloadStatus === 'loading' ? 'loading' : downloadStatus === 'success' ? 'success' : 'download'}`}
             />
           </svg>
         </div>
-        <div className={css.downloadIcon__labelWrapper}>
-          <p className={css.downloadIcon__text}>Скачать прайс-лист</p>
+        <div className={css.label}>
+          <p className={css.text}>Скачать прайс-лист</p>
           {downloadStatus !== 'idle' && (
-            <svg
-              className={`${css.downloadIcon__statusIcon} ${downloadStatus === 'success' ? css.success : css.loading}`}
-            >
+            <svg className={`${css.status} ${downloadStatus === 'success' ? css.success : css.loading}`}>
               <use xlinkHref={`/assets/icons/sprites.svg#${downloadStatus === 'loading' ? 'loading' : 'success'}`} />
             </svg>
           )}
