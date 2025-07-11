@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import dotenv from 'dotenv'
+dotenv.config()
 import { PrismaClient } from '@prisma/client'
 import fs from 'fs/promises'
 import path from 'path'
