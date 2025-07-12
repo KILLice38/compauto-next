@@ -1,9 +1,7 @@
-// app/api/auth/authOptions.ts
 import { AuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
 const users = [{ id: '1', name: 'Admin', email: 'admin@example.com', password: 'admin123' }]
-
 export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
@@ -20,6 +18,6 @@ export const authOptions: AuthOptions = {
     }),
   ],
   session: { strategy: 'jwt' },
-  jwt: {},
+  jwt: { secret: process.env.NEXTAUTH_SECRET },
   pages: { signIn: '/admin/login' },
 }
