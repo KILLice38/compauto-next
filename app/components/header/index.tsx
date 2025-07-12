@@ -4,6 +4,9 @@ import Logo from '../logo/logo'
 import SvgIcon from '../svgIcon'
 import css from './index.module.scss'
 
+export const linkToSocial = (link: string) => {
+  window.open(link, '_blank')
+}
 const Header = ({
   setIsNavOpen,
   isNavOpen,
@@ -12,10 +15,6 @@ const Header = ({
   isNavOpen: boolean
 }) => {
   const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
-
-  const linkToSocial = (link: string) => {
-    window.open(link, '_blank')
-  }
 
   return (
     <header className={css.header}>

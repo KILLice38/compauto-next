@@ -54,7 +54,7 @@ const CatalogPage = () => {
           {!isMobile ? (
             <>
               <SearchPanel onSearch={(v) => setSearchTerm(v)} />
-              <DownloadIcon />
+              {/* <DownloadIcon /> */}
             </>
           ) : (
             <>

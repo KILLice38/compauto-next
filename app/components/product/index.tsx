@@ -4,6 +4,7 @@ import { useMediaQuery } from 'react-responsive'
 import type { ProductType } from '../../types/interfaces'
 import css from './index.module.scss'
 import Image from 'next/image'
+import imageLoader from '../../lib/imageLoader'
 
 const Product = ({ type, product }: { type: string; product: ProductType }) => {
   const { img, title, description, price } = product
@@ -11,7 +12,15 @@ const Product = ({ type, product }: { type: string; product: ProductType }) => {
 
   return (
     <div className={`${css.product} ${isMobile ? css[type] : ''}`}>
-      <Image src={img} alt="Продукт" className={css.product__image} width={260} height={260} />
+      <Image
+        loader={imageLoader}
+        src={img}
+        alt="Продукт"
+        className={css.product__image}
+        width={260}
+        height={260}
+        unoptimized
+      />
       <div className={css.product__text}>
         <h6 className={css.product__title}>{title}</h6>
         <p className={css.product__description}>{description}</p>
