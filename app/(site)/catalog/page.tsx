@@ -1,7 +1,7 @@
 'use client'
 
 import { useMediaQuery } from 'react-responsive'
-import DownloadIcon from '../../components/downloadIcon'
+// import DownloadIcon from '../../components/downloadIcon'
 import Filters, { TestData } from '../../components/filters'
 import SearchPanel from '../../components/searchPanel'
 import SortIcon from '../../components/sortIcon'
