@@ -11,14 +11,19 @@ const users = [
     password: process.env.ADMIN_PASSWORD!,
   },
   {
-    name: 'Manager',
-    email: 'manager@example.com',
-    password: 'manager123',
+    name: 'process.env.DEVELOPER_NAME!',
+    email: 'process.env.DEVELOPER_EMAIL!',
+    password: 'process.env.DEVELOPER_PASSWORD!',
   },
 ]
 
 async function seed() {
   for (const user of users) {
+    if (!user.email || !user.password) {
+      console.warn(`Skipping user with missing email or password`)
+      continue
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email: user.email } })
 
     if (!existingUser) {
@@ -30,9 +35,9 @@ async function seed() {
           hashedPassword,
         },
       })
-      console.log(`✅ Created user: ${user.email}`)
+      console.log(`Created user: ${user.email}`)
     } else {
-      console.log(`ℹ️ User already exists: ${user.email}`)
+      console.log(`User already exists: ${user.email}`)
     }
   }
 
