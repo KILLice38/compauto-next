@@ -8,43 +8,42 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'CorLab — лаборатория коррозии и антикоррозионных исследований',
+  title: 'Комплектующие для автомобилей | Comp-Auto',
   description:
-    'CorLab — ведущая лаборатория по коррозиологическим исследованиям: стандартные испытания, экспертные заключения и комплексные turn‑key решения.',
+    'Качественные комплектующие для всех типов автомобилей. Широкий ассортимент, быстрая доставка и поддержка.',
   keywords: [
-    'коррозия',
-    'антикоррозионные решения',
-    'испытания на коррозию',
-    'экспертиза коррозии',
-    'corrosionLab',
-    'corlab',
+    'комплектующие для автомобилей',
+    'автозапчасти',
+    'купить запчасти',
+    'комплектующие Comp-Auto',
+    'запчасти для авто',
+    'автокомпрессоры',
+    'аксессуары для автомобилей',
   ],
-  alternates: {
-    canonical: 'https://corrosionlab.ru/',
-  },
   openGraph: {
-    title: 'CorLab — лаборатория коррозии',
-    description: 'Стандартные испытания, экспертиза, проекты под ключ по антикоррозийной защите и анализу коррозии.',
-    url: 'https://corrosionlab.ru/',
-    siteName: 'CorLab',
-    type: 'website',
+    title: 'Комплектующие для автомобилей | Comp-Auto',
+    description: 'Надежные автозапчасти для любых марок и моделей. Выберите лучшее на сайте Comp-Auto.',
+    url: 'https://comp-auto.ru',
+    siteName: 'Comp-Auto',
     images: [
       {
-        url: 'https://corrosionlab.ru/assets/images/seo/og.jpg',
+        url: 'https://comp-auto.ru/assets/images/seo/og.jpg', // замените на актуальное
         width: 1200,
         height: 630,
-        alt: 'Лаборатория Коррозионных Испытаний',
+        alt: 'Comp-Auto - комплектующие для автомобилей',
       },
     ],
+    locale: 'ru_RU',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CorLab — лаборатория коррозии и антикоррозионных исследований',
-    description: 'Стандартные испытания, экспертиза, проекты под ключ по антикоррозийной защите и анализу коррозии.',
-    images: ['https://corrosionlab.ru/assets/images/seo/og.jpg'],
+    title: 'Comp-Auto - Автокомплектующие',
+    description: 'Качественные запчасти и аксессуары для авто.',
+    images: ['https://comp-auto.ru/assets/images/seo/og.jpg'],
   },
-  other: {
-    'yandex-verification': '66aa387bdbb92425',
+  alternates: {
+    canonical: 'https://comp-auto.ru',
   },
 }
 
