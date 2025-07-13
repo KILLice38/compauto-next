@@ -7,6 +7,13 @@
   gap: 40px;
 }
 
+.product-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
 .buttons {
   margin-top: 15px;
   display: flex;
