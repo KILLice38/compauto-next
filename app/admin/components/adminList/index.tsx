@@ -19,17 +19,15 @@ export default function AdminList({ products, onEdit, onDelete }: Props) {
     <div className={css['products-list']}>
       {products.map((product) => (
         <div key={product.id} className={css['product-wrapper']}>
-          <div className={css['product-container']}>
-            <ProductComponent type="admin" product={product} />
-            <div className={css.buttons}>
-              <button className={css['btn-edit']} onClick={() => onEdit(product)}>
-                Изменить
-              </button>
+          <ProductComponent type="admin" product={product} />
+          <div className={css.buttons}>
+            <button className={css['btn-edit']} onClick={() => onEdit(product)}>
+              Изменить
+            </button>
 
-              <button className={css['btn-delete']} onClick={() => onDelete(product.id)}>
-                Удалить
-              </button>
-            </div>
+            <button className={css['btn-delete']} onClick={() => onDelete(product.id)}>
+              Удалить
+            </button>
           </div>
         </div>
       ))}
