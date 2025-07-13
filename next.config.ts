@@ -1,7 +1,18 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    domains: [],
+    loader: 'default',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'killiskadev.ru',
+        port: '',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
 }
 
 export default nextConfig
