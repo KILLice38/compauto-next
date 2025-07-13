@@ -7,6 +7,19 @@
   gap: 40px;
 }
 
+.product-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+}
+
 .buttons {
   margin-top: 15px;
   display: flex;
