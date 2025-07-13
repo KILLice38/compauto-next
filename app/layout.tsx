@@ -8,29 +8,29 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Комплектующие для автомобилей | Comp-Auto',
+  title: 'Комплектующие для автомобилей | Komp-Auto',
   description:
     'Качественные комплектующие для всех типов автомобилей. Широкий ассортимент, быстрая доставка и поддержка.',
   keywords: [
     'комплектующие для автомобилей',
     'автозапчасти',
     'купить запчасти',
-    'комплектующие Comp-Auto',
+    'комплектующие Komp-Auto',
     'запчасти для авто',
     'автокомпрессоры',
     'аксессуары для автомобилей',
   ],
   openGraph: {
-    title: 'Комплектующие для автомобилей | Comp-Auto',
+    title: 'Комплектующие для автомобилей | Komp-Auto',
     description: 'Надежные автозапчасти для любых марок и моделей. Выберите лучшее на сайте Comp-Auto.',
-    url: 'https://comp-auto.ru',
-    siteName: 'Comp-Auto',
+    url: 'https://Komp-auto.ru',
+    siteName: 'Komp-Auto',
     images: [
       {
-        url: 'https://comp-auto.ru/assets/images/seo/og.jpg', // замените на актуальное
+        url: 'https://Komp-auto.ru/assets/images/seo/og.jpg', // замените на актуальное
         width: 1200,
         height: 630,
-        alt: 'Comp-Auto - комплектующие для автомобилей',
+        alt: 'Komp-Auto - комплектующие для автомобилей',
       },
     ],
     locale: 'ru_RU',
@@ -38,12 +38,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Comp-Auto - Автокомплектующие',
+    title: 'Komp-Auto - Автокомплектующие',
     description: 'Качественные запчасти и аксессуары для авто.',
-    images: ['https://comp-auto.ru/assets/images/seo/og.jpg'],
+    images: ['https://Komp-auto.ru/assets/images/seo/og.jpg'],
   },
   alternates: {
-    canonical: 'https://comp-auto.ru',
+    canonical: 'https://Komp-auto.ru',
   },
 }
 
