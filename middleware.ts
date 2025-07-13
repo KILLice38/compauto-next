@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' blob: data:;
+  font-src 'self' data:;
+  connect-src 'self' https://*.vercel.app http://localhost:*;
+  form-action 'self';
+  frame-ancestors 'none';
+  base-uri 'self';
+`
+  .replace(/\s{2,}/g, ' ')
+  .trim()
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -24,7 +38,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  return NextResponse.next()
+  const response = NextResponse.next()
+  response.headers.set('Content-Security-Policy', cspHeader)
+  return response
 }
 
 export const config = {

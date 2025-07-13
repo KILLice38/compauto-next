@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Disallow: /test/
+Disallow: /cgi-bin/
+Allow: /
+
+Sitemap: https://comp-auto.com/sitemap.xml
