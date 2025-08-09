@@ -1,0 +1,129 @@
+.sortIcon__iconWrapper {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  inset: 0;
+  opacity: 1;
+  transition: opacity 0.2s ease-in 0.15s;
+  pointer-events: none;
+}
+.sortIcon__icon {
+  color: #fbfbfb;
+  width: 28px;
+  height: 23px;
+  transition: transform 0.2s ease-in;
+}
+.sortIcon__labelWrapper {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease-in 0s;
+  justify-content: center;
+  pointer-events: none;
+}
+.sortIcon__text {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 120%;
+  letter-spacing: -6%;
+  color: #fbfbfb;
+  color: #fbfbfb;
+}
+.sortIcon__arrow {
+  width: 18px;
+  height: 10px;
+  margin-top: 4px;
+  color: #fbfbfb;
+}
+.sortIcon__button {
+  position: relative;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  transition: width 0.3s ease-in, height 0.3s ease-in, border-radius 0.3s ease-in;
+}
+.sortIcon__button.expanded, .sortIcon__button:hover, .sortIcon__button.active {
+  width: 214px;
+  height: 68px;
+  border-radius: 8px;
+}
+.sortIcon__button.active .sortIcon__text {
+  font-weight: 500;
+}
+.sortIcon__round {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background-color: #c0392b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: width 0.3s ease-in, height 0.3s ease-in, border-radius 0.3s ease-in;
+}
+.sortIcon__button:hover .sortIcon__round, .sortIcon__button.expanded .sortIcon__round, .sortIcon__button.active .sortIcon__round {
+  width: 214px;
+  height: 68px;
+  border-radius: 8px;
+}
+.sortIcon__round:hover {
+  background-color: #d4564a;
+}
+.sortIcon__round:hover .sortIcon__icon {
+  transform: scale(1.1);
+}
+.sortIcon__button.expanded .sortIcon__iconWrapper {
+  opacity: 0;
+  transition-delay: 0s;
+}
+.sortIcon__button.expanded .sortIcon__labelWrapper {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+
+@media (max-width: 575px) {
+  .sortIcon__button, .sortIcon__round {
+    width: 75px;
+    height: 50px;
+    border-radius: 6px;
+  }
+  .sortIcon__icon {
+    width: 21px;
+    height: 16px;
+  }
+  .sortIcon__button:hover .sortIcon__round, .sortIcon__button.expanded .sortIcon__round, .sortIcon__button.active .sortIcon__round {
+    width: 157px;
+    height: 50px;
+  }
+  .sortIcon__button {
+    width: 75px;
+    height: 50px;
+  }
+  .sortIcon__button.expanded, .sortIcon__button:hover, .sortIcon__button.active {
+    width: 157px;
+    height: 50px;
+  }
+  .sortIcon__text {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 120%;
+    letter-spacing: -3%;
+    text-align: left;
+    color: #e0e0e0;
+    font-weight: 500;
+  }
+  .sortIcon__arrow {
+    width: 10px;
+    height: 6px;
+  }
+}/*# sourceMappingURL=index.module.css.map */

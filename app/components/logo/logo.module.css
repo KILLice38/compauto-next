@@ -1,0 +1,67 @@
+.logo {
+  max-height: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  max-width: 272px;
+}
+.logo svg {
+  max-width: 111px;
+  max-height: 53px;
+}
+.logo__text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+.logo__title {
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -6%;
+  line-height: 70%;
+  text-align: left;
+  color: #fbfbfb;
+}
+.logo__slogan {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 70%;
+  letter-spacing: -6%;
+  text-align: left;
+  color: #e0e0e0;
+}
+
+@media (max-width: 575px) {
+  .logo {
+    max-height: 39px;
+  }
+  .logo svg {
+    max-width: 78px;
+    max-height: 35px;
+  }
+  .logo__text {
+    gap: 5px;
+  }
+  .logo__title {
+    font-family: "Inter", sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -6%;
+    line-height: 70%;
+    text-align: left;
+    color: #fbfbfb;
+  }
+  .logo__slogan {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 8px;
+    line-height: 70%;
+    letter-spacing: -6%;
+    text-align: left;
+    color: #e0e0e0;
+  }
+}/*# sourceMappingURL=logo.module.css.map */

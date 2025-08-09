@@ -1,0 +1,20 @@
+.burger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+}
+.burger span {
+  width: 24px;
+  height: 2px;
+  background-color: #fbfbfb;
+  transition: transform 0.2s ease;
+  transform-origin: center;
+}
+.burger.active span:first-child {
+  transform: rotate(45deg) translateY(4.5px);
+}
+.burger.active span:last-child {
+  transform: rotate(-45deg) translateY(-4.5px);
+}/*# sourceMappingURL=index.module.css.map */

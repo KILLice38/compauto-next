@@ -1,0 +1,45 @@
+.filterList {
+  position: absolute;
+  min-width: 200px;
+  padding: 25px;
+  background-color: #c0392b;
+  border-radius: 20px;
+  top: calc(100% + 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  align-items: flex-start;
+  z-index: 100;
+}
+
+.filterItem {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 120%;
+  letter-spacing: -6%;
+  color: #fbfbfb;
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filterItem:hover, .filterItem.active {
+  font-weight: 500;
+}
+
+@media (max-width: 575px) {
+  .filterList {
+    top: calc(100% + 20px);
+  }
+  .filterItem {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 120%;
+    letter-spacing: -3%;
+    text-align: left;
+    color: #e0e0e0;
+    letter-spacing: -6%;
+  }
+}/*# sourceMappingURL=index.module.css.map */

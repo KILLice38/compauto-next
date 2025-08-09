@@ -1,0 +1,18 @@
+.products {
+  margin-top: 15px;
+}
+.products__wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+
+@media (max-width: 575px) {
+  .products {
+    margin-top: 40px;
+  }
+  .products__wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}/*# sourceMappingURL=index.module.css.map */

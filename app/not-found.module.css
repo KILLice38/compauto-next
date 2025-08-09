@@ -1,0 +1,49 @@
+.notFound {
+  padding: 67px 0 166px 0;
+}
+.notFound__container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+}
+.notFound__content {
+  background-color: #40444e;
+  border-radius: 10px;
+  padding: 40px 55px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.notFound__title {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 75px;
+  letter-spacing: -8%;
+  line-height: 100%;
+  color: #fbfbfb;
+  text-align: left;
+  text-transform: uppercase;
+}
+.notFound__description {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 120%;
+  letter-spacing: -3%;
+  text-align: left;
+  color: #e0e0e0;
+}
+.notFound__error {
+  font-family: "Inter", sans-serif;
+  font-size: 222px;
+  font-weight: 500;
+  line-height: 100%;
+  letter-spacing: -8%;
+  color: #484c56;
+  line-height: 72%;
+}
+.notFound__image {
+  width: 560px;
+  height: 567px;
+  border-radius: 10px;
+}/*# sourceMappingURL=not-found.module.css.map */

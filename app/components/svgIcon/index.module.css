@@ -1,0 +1,25 @@
+.svgIcon {
+  color: #fbfbfb;
+}
+.svgIcon__round {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background-color: #c0392b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.svgIcon__round.active {
+  cursor: pointer;
+}
+.svgIcon__round.active:hover {
+  background-color: #d4564a;
+}
+.svgIcon__round.active:hover .svgIcon {
+  transform: scale(1.1);
+}
+.svgIcon__round.active .download {
+  transform: scale(4);
+}/*# sourceMappingURL=index.module.css.map */

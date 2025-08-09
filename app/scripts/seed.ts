@@ -11,9 +11,9 @@ const users = [
     password: process.env.ADMIN_PASSWORD!,
   },
   {
-    name: 'process.env.DEVELOPER_NAME!',
-    email: 'process.env.DEVELOPER_EMAIL!',
-    password: 'process.env.DEVELOPER_PASSWORD!',
+    name: process.env.DEVELOPER_NAME!,
+    email: process.env.DEVELOPER_EMAIL!,
+    password: process.env.DEVELOPER_PASSWORD!,
   },
 ]
 

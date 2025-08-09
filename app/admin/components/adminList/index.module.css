@@ -1,0 +1,45 @@
+.products-list {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+
+.buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+.btn-edit {
+  padding: 8px 16px;
+  background-color: #c0392b;
+  color: #fbfbfb;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.btn-edit:hover {
+  background-color: #2c2f36;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  padding: 8px 16px;
+  background-color: #d4564a;
+  color: #fbfbfb;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.btn-delete:hover {
+  background-color: #d4564a, 8%;
+  transform: translateY(-1px);
+}/*# sourceMappingURL=index.module.css.map */
