@@ -3,16 +3,14 @@
 
 .button {
   background-color: vars.$color-background-secondary;
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-  font-size: 25px;
-  line-height: 72%;
-  letter-spacing: -6%;
-  color: vars.$color-text-description;
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
+  @include mixins.h3;
+  line-height: 72%;
+  color: vars.$color-text-description;
+  font-weight: 400;
   border-radius: 8px;
   border: none;
   cursor: pointer;

@@ -23,12 +23,13 @@
   &__description {
     @include mixins.description;
     text-align: center;
+    font-size: 18px;
   }
   &__title {
-    @include mixins.h3;
+    @include mixins.h6;
   }
   &__price {
-    @include mixins.h3;
+    @include mixins.h6;
     margin-top: auto;
   }
 }

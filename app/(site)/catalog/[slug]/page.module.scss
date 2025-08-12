@@ -1,9 +1,8 @@
-.page {
-  padding: 40px 0 100px 0;
-}
+@use '../../../styles/mixins';
+@use '../../../styles/vars';
 
-.content {
-  margin-top: 40px;
+.page {
+  padding: 20px 0 100px 0;
 }
 
 .mainInfo {
@@ -21,20 +20,17 @@
 }
 
 .title {
-  font-size: 75px;
-  font-weight: 500;
-  color: white;
-  overflow-wrap: anywhere; /* современно */
-  word-wrap: break-word; /* алиас для старых браузеров */
-  word-break: break-word; /* подстраховка */
+  @include mixins.h1;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+  word-break: break-word;
   hyphens: auto;
 }
 
 .description {
+  @include mixins.description;
   margin-top: 40px;
   font-size: 18px;
-  font-weight: 400;
-  line-height: 120%;
   letter-spacing: -0.06em;
   color: white;
   display: flex;
@@ -47,11 +43,7 @@
 }
 
 .subtitle {
-  font-weight: 500;
-  font-size: 25px;
-  line-height: 120%;
-  color: white;
-  letter-spacing: -6%;
+  @include mixins.h3;
 }
 
 .list {
@@ -64,10 +56,8 @@
 .item {
   display: flex;
   gap: 10px;
-  font-size: 18px;
-  letter-spacing: -6%;
-  font-weight: 500;
-  color: white;
+  @include mixins.description;
+  color: vars.$color-text-main;
 }
 
 .itemWrapper {
@@ -84,6 +74,6 @@
 .underline {
   height: 1px;
   width: 100%;
-  background-color: #ffffff;
+  background-color: vars.$color-text-main;
   opacity: 20%;
 }

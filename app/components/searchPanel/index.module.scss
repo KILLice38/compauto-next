@@ -6,17 +6,19 @@
   &__input {
     caret-color: vars.$color-background-secondary;
     outline: none;
-    width: 560px;
+    width: 583px;
 
     border: 2px solid vars.$color-background-secondary;
     border-radius: 8px;
     padding: 25px;
     @include mixins.description;
+    letter-spacing: -0.06em;
     color: #1f1f1f;
     font-size: 25px;
     height: 68px;
     &::placeholder {
       @include mixins.description;
+      letter-spacing: -0.06em;
       font-size: 25px;
     }
   }
