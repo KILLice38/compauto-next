@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Product } from '@prisma/client'
+import type { ProductType } from '../types/types'
 
 export function useAdminProducts() {
-  const [products, setProducts] = useState<Product[] | null>(null)
+  const [products, setProducts] = useState<ProductType[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editingProduct, setEditingProduct] = useState<ProductType | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -18,7 +18,7 @@ export function useAdminProducts() {
       try {
         const res = await fetch('/api/products')
         if (!res.ok) throw new Error(`Fetch error: ${res.status}`)
-        const data: Product[] = await res.json()
+        const data: ProductType[] = await res.json()
         if (!cancelled) setProducts(data)
       } catch (err: unknown) {
         if (!cancelled) {

@@ -1,13 +1,13 @@
 'use client'
 
 import React from 'react'
-import type { Product } from '@prisma/client'
+import type { ProductType } from '../../types/types'
 import ProductComponent from '../../../components/product'
 import css from './index.module.scss'
 
 interface Props {
-  products: Product[] | null
-  onEdit: (product: Product) => void
+  products: ProductType[] | null
+  onEdit: (product: ProductType) => void
   onDelete: (id: number) => void
 }
 
@@ -25,7 +25,6 @@ export default function AdminList({ products, onEdit, onDelete }: Props) {
               <button className={css['btn-edit']} onClick={() => onEdit(product)}>
                 Изменить
               </button>
-
               <button className={css['btn-delete']} onClick={() => onDelete(product.id)}>
                 Удалить
               </button>

@@ -1,15 +1,45 @@
 @use '../../../styles/vars';
 
+.form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100svh - 120px);
+  max-height: calc(100vh - 120px);
+  overflow: hidden; /* скролл только у .formScroll */
+  gap: 12px;
+}
+
+.formScroll {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 50vh;
+}
+
+.formActions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 0 0;
+  border-top: 1px solid vars.$color-background-nonactive;
+}
+
 .label {
   display: flex;
   flex-direction: column;
   font-size: 0.95rem;
   font-weight: 500;
   color: vars.$color-text-main;
+  gap: 8px;
+  /* ВАЖНО: БЕЗ max-height/overflow, иначе режет поля */
 }
 
 .input {
-  margin-top: 8px;
+  margin-top: 4px;
   padding: 10px 12px;
   background-color: vars.$color-background-secondary;
   border: 1px solid vars.$color-background-nonactive;
@@ -21,7 +51,7 @@
   &:focus {
     outline: none;
     border-color: vars.$color-background-blur;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
   }
 
   &::placeholder {
@@ -29,56 +59,109 @@
   }
 }
 
-// Сообщения об ошибках
-.form p[style] {
+.error {
   margin-top: 4px;
   font-size: 0.85rem;
+  color: #e15b64;
 }
 
-// Контейнер кнопок
-.form > div {
+.row {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 8px;
+  align-items: flex-start;
 }
 
-// Стили для кнопок
-.form button {
-  padding: 10px 20px;
+.galleryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spacer {
+  flex: 1;
+}
+.muted {
+  opacity: 0.7;
+}
+
+.imagesGrid {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+.imageItem {
+  border: 1px solid vars.$color-background-nonactive;
+  padding: 8px;
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+.thumb {
+  display: block;
+  width: 106px;
+  height: 69px;
+  object-fit: cover;
+}
+
+/* Кнопки */
+.btn {
+  padding: 10px 16px;
   font-size: 0.95rem;
   font-weight: 600;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  color: vars.$color-text-main;
+  background-color: vars.$color-background-secondary;
   transition:
     background-color 0.2s,
     opacity 0.2s;
-}
-
-// Кнопка отправки
-.form button[type='submit'] {
-  background-color: vars.$color-background-secondary;
-  color: vars.$color-text-main;
 
   &:hover:not(:disabled) {
     background-color: vars.$color-background-blur;
   }
-
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
 }
 
-// Кнопка отмены
-.form button[type='button'] {
-  background-color: transparent;
-  color: vars.$color-text-description;
+.btnGhost {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 6px;
   border: 1px solid vars.$color-background-nonactive;
+  background: transparent;
+  color: vars.$color-text-description;
+  cursor: pointer;
 
   &:hover {
     background-color: vars.$color-background-nonactive;
     color: vars.$color-text-main;
+  }
+}
+
+.btnGhostSmall {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid vars.$color-background-nonactive;
+  background: transparent;
+  color: vars.$color-text-description;
+  cursor: pointer;
+
+  &:hover {
+    background-color: vars.$color-background-nonactive;
+    color: vars.$color-text-main;
+  }
+}
+
+/* Мобилка — больше доступной высоты формы */
+@media (max-width: 575px) {
+  .form {
+    max-height: calc(100svh - 80px);
+    max-height: calc(100vh - 80px);
   }
 }

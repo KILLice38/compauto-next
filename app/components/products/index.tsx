@@ -15,8 +15,8 @@ export const Products = ({
   return (
     <section className={css.products}>
       <div className={css.products__wrapper}>
-        {products.map((product, index) => (
-          <Product key={index} type="catalog" product={product} />
+        {products.map((product) => (
+          <Product key={product.slug} type="catalog" product={product} />
         ))}
       </div>
       {hasMore && (

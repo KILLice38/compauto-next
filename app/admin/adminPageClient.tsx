@@ -6,13 +6,13 @@ import ProductForm from './components/adminForm'
 import AdminList from './components/adminList'
 import { useAdminProducts } from './hooks/useAdminProducts'
 import css from './page.module.scss'
-import { Product } from '@prisma/client'
+import type { ProductType } from './types/types'
 
 export default function AdminPageClient() {
   const { products, showForm, editingProduct, setProducts, setShowForm, setEditingProduct, handleDelete, toggleForm } =
     useAdminProducts()
 
-  const handleSave = (savedProduct: Product) => {
+  const handleSave = (savedProduct: ProductType) => {
     setProducts((cur) => {
       const exists = cur?.some((p) => p.id === savedProduct.id)
       if (exists) {
