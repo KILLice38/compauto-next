@@ -1,3 +1,4 @@
+// app/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../lib/prisma'
 import fs from 'fs/promises'
@@ -5,8 +6,10 @@ import path from 'path'
 
 export const runtime = 'nodejs'
 
-// ---------- FS helpers ----------
+// ---------- types for Next 15 route context ----------
+type RouteParams = Promise<{ id: string }>
 
+// ---------- FS helpers ----------
 const VARIANT_SUFFIXES = ['source', 'card', 'detail', 'thumb'] as const
 const IGNORABLE_FILES = new Set(['.DS_Store', 'Thumbs.db'])
 
@@ -135,28 +138,32 @@ async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<
   return { url: finalUrl, tmpToken: token }
 }
 
-// ---------- Handlers ----------
+// ---------- Handlers (Next 15: params is Promise) ----------
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number(params.id)
-  if (Number.isNaN(id)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
+export async function GET(_req: NextRequest, ctx: { params: RouteParams }) {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (Number.isNaN(numId)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
 
-  const product = await prisma.product.findUnique({ where: { id } })
+  const product = await prisma.product.findUnique({ where: { id: numId } })
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   return NextResponse.json(product)
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number(params.id)
-  if (Number.isNaN(id)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
+export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (Number.isNaN(numId)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
 
   try {
-    const current = await prisma.product.findUnique({ where: { id } })
+    const current = await prisma.product.findUnique({ where: { id: numId } })
     if (!current) return NextResponse.json({ error: 'Продукт не найден' }, { status: 404 })
 
-    const body = await req.json()
-    const { id: _ignoreId, slug: _ignoreSlug, ...data } = body ?? {}
+    const body = (await req.json()) as Record<string, unknown> | null
+    const { id: _omitId, slug: _omitSlug, ...data } = body ?? {}
+    void _omitId
+    void _omitSlug
 
     // Сначала переносим возможные tmp-файлы → products/<slug>
     const usedTmpTokens = new Set<string>()
@@ -216,7 +223,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     // Обновляем запись
     const updated = await prisma.product.update({
-      where: { id },
+      where: { id: numId },
       data: {
         ...data,
         img: finalImg ?? current.img,
@@ -244,12 +251,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number(params.id)
-  if (Number.isNaN(id)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
+export async function DELETE(_req: NextRequest, ctx: { params: RouteParams }) {
+  const { id } = await ctx.params
+  const numId = Number(id)
+  if (Number.isNaN(numId)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
 
   try {
-    const product = await prisma.product.findUnique({ where: { id } })
+    const product = await prisma.product.findUnique({ where: { id: numId } })
     if (!product) return NextResponse.json({ error: 'Продукт не найден' }, { status: 404 })
 
     // 1) удаляем главную и галерею (включая все варианты имён)
@@ -257,7 +265,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     await Promise.all((product.gallery ?? []).map((u) => unlinkWithVariants(u)))
 
     // 2) удаляем запись из БД
-    await prisma.product.delete({ where: { id } })
+    await prisma.product.delete({ where: { id: numId } })
 
     // 3) удаляем папку товара рекурсивно
     if (product.slug) {

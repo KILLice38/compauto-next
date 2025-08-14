@@ -1,11 +1,12 @@
 'use client'
 
 import css from './index.module.scss'
-import { useForm, useFieldArray, type SubmitHandler } from 'react-hook-form'
+import { useForm, useFieldArray, type SubmitHandler, FieldError } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef, useState } from 'react'
 import type { ProductType } from '../../types/types'
 import { AdminProductFormSchema, type AdminProductForm } from '../../types/types'
+import Image from 'next/image'
 
 interface Props {
   editingProduct: ProductType | null
@@ -202,7 +203,12 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           <button type="button" onClick={() => append('')} className={css.btnGhost}>
             + Абзац
           </button>
-          {errors.details && <p className={css.error}>{String((errors.details as any)?.message ?? '')}</p>}
+          {/* {errors.details && <p className={css.error}>{String((errors.details as any)?.message ?? '')}</p>} */}
+          {(() => {
+            const d = errors.details
+            const msg = d && typeof d === 'object' && 'message' in d ? String((d as FieldError).message ?? '') : ''
+            return msg ? <p className={css.error}>{msg}</p> : null
+          })()}
         </div>
 
         <label className={css.label}>
@@ -258,7 +264,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           <div className={css.imagesGrid}>
             {galleryUrls.map((u, i) => (
               <div key={i} className={css.imageItem}>
-                <img src={makeThumb(u)} alt="" width={106} height={69} className={css.thumb} />
+                <Image src={makeThumb(u)} alt="" width={106} height={69} className={css.thumb} />
                 <button type="button" onClick={() => removeGalleryItem(i)} className={css.btnGhostSmall}>
                   Удалить
                 </button>

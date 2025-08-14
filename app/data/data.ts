@@ -1,5 +1,3 @@
-import type { ProductType } from '../types/interfaces'
-
 // export const productsDataNovelty: ProductType[] = [
 //   {
 //     img: '/assets/images/products/1.jpg',

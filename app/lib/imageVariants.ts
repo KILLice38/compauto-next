@@ -18,13 +18,13 @@ function baseNoVariantNoExt(u: string) {
 }
 
 export function sourceUrl(originalUrl: string) {
-  const [_, qs] = splitQuery(originalUrl)
+  const [, qs] = splitQuery(originalUrl)
   const base = baseNoVariantNoExt(originalUrl)
   return `${base}__source.webp${qs}`
 }
 
 export function variantUrl(originalUrl: string, variant: Variant) {
-  const [_, qs] = splitQuery(originalUrl)
+  const [, qs] = splitQuery(originalUrl)
   const base = baseNoVariantNoExt(originalUrl)
   return `${base}__${variant}.webp${qs}`
 }

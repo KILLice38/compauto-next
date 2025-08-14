@@ -18,9 +18,6 @@ function absFromPublic(u: string) {
 function tmpFolderAbs(token: string) {
   return path.join(process.cwd(), 'public', 'uploads', 'tmp', token)
 }
-function productDir(slug: string) {
-  return path.join(process.cwd(), 'public', 'uploads', 'products', slug)
-}
 function isTmp(u: string | null | undefined) {
   return !!u && /\/uploads\/tmp\//.test(u)
 }
@@ -132,7 +129,7 @@ export async function POST(req: Request) {
   const toPublicUrl = (abs: string) => abs.replace(path.join(process.cwd(), 'public'), '').replace(/\\/g, '/')
 
   if (one) {
-    const { abs, fileName, buffer } = await saveTemp(basePublic, one)
+    const { abs, buffer } = await saveTemp(basePublic, one)
     const absSource = await makeSource(abs, buffer)
     await makeVariantsFromSource(absSource)
     return NextResponse.json({ url: toPublicUrl(absSource) })

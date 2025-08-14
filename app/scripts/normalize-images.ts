@@ -7,7 +7,6 @@ import sharp from 'sharp'
 
 const prisma = new PrismaClient()
 
-const VARS = ['source', 'card', 'detail', 'thumb'] as const
 const SIZES: Record<string, { w: number; h: number; quality: number; fit: 'contain' }> = {
   card: { w: 260, h: 260, quality: 82, fit: 'contain' },
   detail: { w: 460, h: 299, quality: 82, fit: 'contain' },
@@ -17,13 +16,6 @@ const BG = { r: 255, g: 255, b: 255, alpha: 1 }
 
 function absFromPublic(u: string) {
   return path.join(process.cwd(), 'public', u.startsWith('/') ? u.slice(1) : u)
-}
-function withSuffixPublic(u: string, suf: (typeof VARS)[number]) {
-  const clean = u.split('?')[0]
-  const dot = clean.lastIndexOf('.')
-  const base = dot >= 0 ? clean.slice(0, dot) : clean
-  if (suf === 'source') return `${base}__source.webp`
-  return `${base.replace(/__source$/, '')}__${suf}.webp`
 }
 function webpSourcePublic(u: string) {
   const clean = u.split('?')[0]
@@ -93,7 +85,7 @@ async function main() {
 
   for (const p of items) {
     let img = p.img
-    let gal = p.gallery ?? []
+    const gal = p.gallery ?? []
 
     if (img) {
       const newImg = await normalizeOne(img)

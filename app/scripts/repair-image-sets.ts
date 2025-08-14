@@ -10,12 +10,6 @@ const BG = { r: 255, g: 255, b: 255, alpha: 1 }
 function abs(u: string) {
   return path.join(process.cwd(), 'public', u.startsWith('/') ? u.slice(1) : u)
 }
-function dir(u: string) {
-  return path.dirname(abs(u))
-}
-function file(u: string) {
-  return path.basename(abs(u))
-}
 function stripQuery(u: string) {
   const i = u.indexOf('?')
   return i >= 0 ? u.slice(0, i) : u
@@ -64,16 +58,6 @@ async function ensureVariantsFromSource(absSource: string) {
     { suf: 'thumb', w: 106, h: 69 },
   ] as const
   for (const t of targets) {
-    const out = absFromPub(
-      pubVariant(
-        noExt(absSource)
-          .replace(/\\/g, '/')
-          .replace(/^.*public/, '')
-          .replace(/^/, '')
-          .replace(/^/, '/') /*unused*/,
-        t.suf
-      )
-    )
     // проще:
     const outAbs = absSource.replace('__source.webp', `__${t.suf}.webp`)
     if (!(await exists(outAbs))) {
@@ -84,10 +68,6 @@ async function ensureVariantsFromSource(absSource: string) {
       console.log('created', outAbs)
     }
   }
-}
-
-function isRaster(p: string) {
-  return /\.(png|jpg|jpeg)$/i.test(p)
 }
 
 async function normalizeOnePublicUrl(pubUrl: string) {
@@ -159,7 +139,7 @@ async function main() {
   for (const p of items) {
     let changed = false
     let img = p.img
-    let gal = p.gallery ?? []
+    const gal = p.gallery ?? []
 
     if (img) {
       const canonical = await normalizeOnePublicUrl(img)
