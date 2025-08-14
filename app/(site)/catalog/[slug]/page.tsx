@@ -32,7 +32,7 @@ export default async function ProductPage({ params }: Props) {
 
   const detailParas = (product.details ?? [])
     .map((p: string | null | undefined) => (p ?? '').trim())
-    .filter((s) => s.length > 0)
+    .filter((s: string) => s.length > 0)
   const hasDetails = detailParas.length > 0
   const hasShort = !!product.description?.trim()
 
