@@ -15,11 +15,15 @@ async function main(token: string) {
     select: { id: true, slug: true, img: true, gallery: true },
   })
 
-  const imgRefs = rows.filter((r) => hasTmpToken(r.img, token))
+  const imgRefs = rows.filter((r: { img: string | null }) => hasTmpToken(r.img, token))
   const galRefs = rows
-    .map((r) => ({ id: r.id, slug: r.slug, used: (r.gallery ?? []).some((g) => hasTmpToken(g, token)) }))
-    .filter((r) => r.used)
-    .map(({ id, slug }) => ({ id, slug }))
+    .map((r: { id: number; slug: string; gallery: string[] | null }) => ({
+      id: r.id,
+      slug: r.slug,
+      used: (r.gallery ?? []).some((g: string) => hasTmpToken(g, token)),
+    }))
+    .filter((r: { used: boolean }) => r.used)
+    .map(({ id, slug }: { id: number; slug: string }) => ({ id, slug }))
 
   console.log('IMG refs:', imgRefs)
   console.log('GALLERY refs:', galRefs)

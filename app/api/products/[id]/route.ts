@@ -217,8 +217,8 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
     }
     if (nextGallery) {
       const prev = current.gallery ?? []
-      const removed = prev.filter((x) => !nextGallery!.includes(x))
-      await Promise.all(removed.map((u) => unlinkWithVariants(u)))
+      const removed = prev.filter((x: string) => !nextGallery!.includes(x))
+      await Promise.all(removed.map(unlinkWithVariants))
     }
 
     // Обновляем запись
@@ -262,7 +262,7 @@ export async function DELETE(_req: NextRequest, ctx: { params: RouteParams }) {
 
     // 1) удаляем главную и галерею (включая все варианты имён)
     await unlinkWithVariants(product.img)
-    await Promise.all((product.gallery ?? []).map((u) => unlinkWithVariants(u)))
+    await Promise.all((product.gallery ?? []).map(unlinkWithVariants))
 
     // 2) удаляем запись из БД
     await prisma.product.delete({ where: { id: numId } })

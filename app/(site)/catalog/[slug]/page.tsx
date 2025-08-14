@@ -30,9 +30,7 @@ export default async function ProductPage({ params }: Props) {
 
   const images = [product.img, ...(product.gallery ?? [])]
 
-  const detailParas = (product.details ?? [])
-    .map((p: string | null | undefined) => (p ?? '').trim())
-    .filter((s: string) => s.length > 0)
+  const detailParas = (product.details ?? []).map<string>((p) => (p ?? '').trim()).filter((s: string) => s.length > 0)
   const hasDetails = detailParas.length > 0
   const hasShort = !!product.description?.trim()
 
@@ -46,7 +44,7 @@ export default async function ProductPage({ params }: Props) {
               <h1 className={css.title}>{product.title}</h1>
               <div className={css.description}>
                 {hasDetails ? (
-                  detailParas.map((p, i) => <p key={i}>{p}</p>)
+                  detailParas.map((p: string, i: number) => <p key={i}>{p}</p>)
                 ) : hasShort ? (
                   <p>{product.description}</p>
                 ) : (
