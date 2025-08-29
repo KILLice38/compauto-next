@@ -9,7 +9,7 @@ import Nav from './components/nav'
 import Footer from './components/footer'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
   const [isNavOpen, setIsNavOpen] = useState(false)
 
   useEffect(() => {

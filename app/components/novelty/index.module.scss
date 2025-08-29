@@ -3,57 +3,68 @@
 .novelty {
   padding: 20px 0;
   min-height: 649px;
-  &__title {
-    @include mixins.h2;
+}
+.title {
+  @include mixins.h2;
+}
+.slider {
+  margin-top: 40px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  transition: transform 0ms ease;
+}
+.slideItem {
+  flex: 0 0 auto;
+}
+.arrows {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+.button {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.message {
+  margin-top: 40px;
+  @include mixins.h3;
+}
+
+@media (max-width: 992px) {
+  .title {
+    @include mixins.h2-992;
   }
-  &__slider {
-    margin-top: 40px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    transition: transform 0ms ease;
+  .slider {
+    gap: 24px;
   }
-  &__slideItem {
-    flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+  .title {
+    @include mixins.h2-768;
   }
-  &.desktop {
-    flex: 0 0 calc((100% - 3 * 40px) / 4);
+  .slider {
+    margin-top: 20px;
+    gap: 20px;
   }
-  &.mobile {
-    flex: 0 0 100%;
-  }
-  &__arrows {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-  }
-  &__button {
-    background-color: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-  }
-  &__message {
-    margin-top: 40px;
-    @include mixins.h3;
+  .arrows {
+    margin-top: 20px;
+    gap: 45px;
   }
 }
 
 @media (max-width: 575px) {
-  .novelty {
-    &__title {
-      @include mixins.h2Mobile;
-    }
-    &__slider {
-      margin-top: 20px;
-      gap: 0;
-    }
-    &__arrows {
-      margin-top: 20px;
-      gap: 45px;
-      margin-bottom: 40px;
-    }
+  .slider {
+    gap: 0;
+  }
+  .arrows {
+    margin-top: 20px;
+    gap: 45px;
+    margin-bottom: 40px;
   }
 }

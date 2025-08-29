@@ -3,15 +3,15 @@
 
 .nav {
   padding: 16px 0 20px 0;
-  &__container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 15px;
-  }
+}
+.container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
 }
 
-@media (max-width: 575px) {
+@media (max-width: 768px) {
   .nav {
     overflow: hidden;
     background-color: vars.$color-background-main;
@@ -20,35 +20,36 @@
     position: fixed;
     padding: 104px 0 0 0;
     z-index: 1000;
-    &__container {
-      display: block;
-    }
-    &__links {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      width: 70%;
-      margin: 0 auto;
-    }
-    &__link {
-      @include mixins.h3Mobile;
-      font-weight: 400;
-      text-align: center;
-    }
-    &__icons {
-      margin-top: 40px;
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      align-items: center;
-    }
-    &__button {
-      padding: 0;
-      border: none;
-      border-radius: 100%;
-      background-color: transparent;
-    }
+  }
+  .container {
+    display: block;
+  }
+  .links {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 70%;
+    margin: 0 auto;
+  }
+  .link {
+    @include mixins.h3-992;
+    font-weight: 400;
+    text-align: center;
+    color: vars.$color-text-main;
+  }
+  .icons {
+    margin-top: 40px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+  }
+  .button {
+    padding: 0;
+    border: none;
+    border-radius: 100%;
+    background-color: transparent;
   }
 }

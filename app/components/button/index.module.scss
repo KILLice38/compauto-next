@@ -45,6 +45,35 @@
   }
 }
 
+@media (max-width: 992px) {
+  .button {
+    @include mixins.h3-992;
+    &.link {
+      padding: 20px 25px;
+    }
+    &.filter {
+      font-size: clamp(18px, 2.1vw, 20px);
+      padding: 20px 25px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .button {
+    &.filter {
+      padding-top: clamp(15px, 2.6vw, 19px);
+      padding-bottom: clamp(15px, 2.6vw, 19px);
+      padding-left: clamp(20px, 2.6vw, 25px);
+      padding-right: clamp(20px, 2.6vw, 25px);
+      font-size: clamp(12px, 2.1vw, 16px);
+    }
+    &.link {
+      margin: 45px auto 0 auto;
+      width: 345px;
+    }
+  }
+}
+
 @media (max-width: 575px) {
   .button {
     padding: 25px 30px;

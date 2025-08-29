@@ -1,27 +1,57 @@
 @use '../../styles/vars';
 
+.round {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 100%;
+  background-color: vars.$color-background-secondary;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &.arrow {
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    &:hover {
+      background-color: vars.$color-background-nonactive;
+      .svgIcon {
+        transform: scale(1.1);
+      }
+    }
+    .download {
+      transform: scale(4);
+    }
+  }
+}
 .svgIcon {
   color: vars.$color-text-main;
-  &__round {
-    flex-shrink: 0;
+}
+
+@media (max-width: 992px) {
+  .round {
     width: 50px;
     height: 50px;
-    border-radius: 100%;
-    background-color: vars.$color-background-secondary;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    &.active {
-      cursor: pointer;
-      &:hover {
-        background-color: vars.$color-background-nonactive;
-        .svgIcon {
-          transform: scale(1.1);
-        }
-      }
-      .download {
-        transform: scale(4);
-      }
+  }
+  .social {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .round {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 575px) {
+  .round {
+    &.arrow {
+      width: clamp(40px, 16vw, 60px);
+      height: clamp(40px, 16vw, 60px);
+      aspect-ratio: 1 / 1;
     }
   }
 }

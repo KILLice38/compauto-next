@@ -1,0 +1,83 @@
+@use '../../../../../styles/vars';
+@use '../../../../../styles/mixins';
+
+.characteristics {
+  margin-top: 60px;
+}
+
+.subtitle {
+  @include mixins.h3;
+}
+
+.list {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.item {
+  display: flex;
+  gap: 10px;
+  @include mixins.description;
+  color: vars.$color-text-main;
+  font-size: 18px;
+}
+
+.itemWrapper {
+  width: 590px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.itemName {
+  flex-shrink: 0;
+}
+
+.underline {
+  height: 1px;
+  width: 100%;
+  background-color: vars.$color-text-main;
+  opacity: 20%;
+}
+
+.price {
+  margin-top: 40px;
+  @include mixins.h3;
+  font-size: 35px;
+}
+
+@media (max-width: 992px) {
+  .characteristics {
+    margin-top: 56px;
+  }
+}
+
+@media (max-width: 768px) {
+  .characteristics {
+    margin-top: 106px;
+  }
+  .subtitle {
+    font-size: 20px;
+  }
+  .list {
+    margin-top: 28px;
+    gap: 21px;
+  }
+  .item {
+    font-size: 16px;
+  }
+  .price {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 575px) {
+  .characteristics {
+    margin-top: 40px;
+  }
+  .list {
+    margin-top: 20px;
+  }
+}

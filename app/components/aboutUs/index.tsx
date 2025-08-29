@@ -33,24 +33,26 @@ const aboutUsData = {
 }
 
 const AboutUs = () => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
+  const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
+  const isLess575 = useMediaQuery({ query: '(max-width: 575px)' })
 
   return (
     <section id="aboutUs" className={css.aboutUs}>
       <div className="container">
-        <div className={css.aboutUs__content}>
-          <div className={css.aboutUs__text}>
-            <h1 className={css.aboutUs__title}>{aboutUsData.title}</h1>
-            <p className={css.aboutUs__description}>{aboutUsData.description}</p>
-            {!isMobile && (
+        <div className={css.content}>
+          <div className={css.text}>
+            <h1 className={css.title}>{aboutUsData.title}</h1>
+            <p className={css.description}>{aboutUsData.description}</p>
+            {!isLess768 && (
               <>
-                <p className={css.aboutUs__description}>{aboutUsData.preList}</p>
-                <ul className={css.aboutUs__list}>
+                <p className={css.description}>{aboutUsData.preList}</p>
+                <ul className={css.list}>
                   {aboutUsData.items.map((item, index) => {
                     return (
-                      <li key={index} className={css.aboutUs__item}>
+                      <li key={index} className={css.item}>
                         <SvgIcon
-                          type="nonactive"
+                          type="default"
                           icon={item.icon}
                           widthIcon={item.widthIcon}
                           heightIcon={item.heightIcon}
@@ -63,22 +65,25 @@ const AboutUs = () => {
               </>
             )}
           </div>
-          <Image
-            src="/assets/images/about-us/man.png"
-            alt="about-us"
-            className={css.aboutUs__image}
-            width={460}
-            height={565}
-          />
-          {isMobile && (
-            <div className={css.aboutUs__skills}>
-              <h2 className={css.aboutUs__skillsTitle}>{aboutUsData.preList}</h2>
-              <ul className={css.aboutUs__list}>
+          {!(isLess992 && !isLess768) && (
+            <Image
+              src="/assets/images/about-us/man.png"
+              alt="about-us"
+              className={css.image}
+              width={460}
+              height={565}
+            />
+          )}
+
+          {isLess768 && (
+            <div className={css.skills}>
+              <h2 className={css.skillsTitle}>{aboutUsData.preList}</h2>
+              <ul className={css.list}>
                 {aboutUsData.items.map((item, index) => {
                   return (
-                    <li key={index} className={css.aboutUs__item}>
+                    <li key={index} className={css.item}>
                       <SvgIcon
-                        type="nonactive"
+                        type="default"
                         icon={item.icon}
                         widthIcon={item.widthIcon}
                         heightIcon={item.heightIcon}

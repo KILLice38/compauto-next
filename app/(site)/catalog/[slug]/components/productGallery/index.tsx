@@ -4,8 +4,8 @@
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
 import css from './index.module.scss'
-import SvgIcon from '../svgIcon'
-import { variantUrl } from '../../lib/imageVariants'
+import SvgIcon from '../../../../../components/svgIcon'
+import { variantUrl } from '../../../../../lib/imageVariants'
 
 type Props = {
   images: string[]
@@ -41,7 +41,6 @@ export default function ProductGallery({
   const goPrev = () => setIdx(prevIndex)
   const goNext = () => setIdx(nextIndex)
 
-  // если всего один слайд — рисуем только main
   if (n === 1) {
     return (
       <div className={css.slider}>
@@ -64,10 +63,10 @@ export default function ProductGallery({
         </button>
         <div className={css.buttons}>
           <button type="button" className={`${css.button} ${css.buttonPrev}`} onClick={goPrev} aria-label="Назад">
-            <SvgIcon icon="left-arrow" widthIcon="24px" heightIcon="21px" widthRound="60px" heightRound="60px" />
+            <SvgIcon icon="left-arrow" widthIcon="24px" heightIcon="21px" type="arrow" />
           </button>
           <button type="button" className={`${css.button} ${css.buttonNext}`} onClick={goNext} aria-label="Вперёд">
-            <SvgIcon icon="right-arrow" widthIcon="24px" heightIcon="21px" widthRound="60px" heightRound="60px" />
+            <SvgIcon icon="right-arrow" widthIcon="24px" heightIcon="21px" type="arrow" />
           </button>
         </div>
         <button

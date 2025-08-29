@@ -26,12 +26,21 @@
   }
 }
 
+@media (max-width: 992px) {
+  .filterItem {
+    @include mixins.description-992;
+    letter-spacing: -0.06em;
+  }
+}
+
+@media (max-width: 768px) {
+  .filterItem {
+    @include mixins.description-768;
+  }
+}
+
 @media (max-width: 575px) {
   .filterList {
     top: calc(100% + 20px);
-  }
-  .filterItem {
-    @include mixins.descriptionMobile;
-    letter-spacing: -6%;
   }
 }

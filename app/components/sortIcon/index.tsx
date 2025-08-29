@@ -1,64 +1,93 @@
-import { useCallback, useState } from 'react'
-import { useMediaQuery } from 'react-responsive'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import SortList from '../sortList'
-import css from './index.module.scss'
+import s from './index.module.scss'
 
 type SortValue = 'recent' | 'az' | 'za' | 'priceAsc' | 'priceDesc' | null
 
-type SortIconProps = {
+type Props = {
   setSort: (value: SortValue) => void
   resetPage: () => void
+  setIsSortExpanded: (value: boolean) => void
 }
 
-const SortIcon = ({ setSort, resetPage }: SortIconProps) => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+const Sort = ({ setSort, resetPage, setIsSortExpanded }: Props) => {
+  const [hovered, setHovered] = useState(false)
+  const [active, setActive] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const [isHovered, setIsHovered] = useState(false)
-  const [isSortActive, setIsSortActive] = useState(false)
-  const [isSortOpen, setIsSortOpen] = useState(false)
+  const btnRef = useRef<HTMLButtonElement>(null)
 
-  const isExpanded = isHovered || isSortOpen || isSortActive
+  const expanded = hovered || open || active
 
-  const handleToggle = useCallback(() => {
-    setIsSortOpen((prev) => !prev)
-  }, [])
+  const toggle = useCallback(() => setOpen((v) => !v), [])
 
-  const handleSelect = useCallback(
+  const onSelect = useCallback(
     (value: SortValue) => {
       setSort(value)
-      setIsSortActive(value !== 'recent')
-      setIsSortOpen(false)
-      if (value === 'recent') {
-        setIsHovered(false)
-      }
+      setActive(value !== 'recent')
+      setOpen(false)
       resetPage()
     },
     [setSort, resetPage]
   )
 
+  useEffect(() => {
+    setIsSortExpanded(expanded)
+  }, [expanded, setIsSortExpanded])
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (btnRef.current && !btnRef.current.contains(e.target as Node)) {
+        setOpen(false)
+        setHovered(false)
+      }
+    }
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDocClick)
+    document.addEventListener('keydown', onEsc)
+    return () => {
+      document.removeEventListener('mousedown', onDocClick)
+      document.removeEventListener('keydown', onEsc)
+    }
+  }, [])
+
+  const onPointerEnter = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') setHovered(true)
+  }
+  const onPointerLeave = (e: React.PointerEvent) => {
+    if (e.pointerType === 'mouse') setHovered(false)
+  }
+
   return (
     <button
-      className={`${css.sortIcon__button} ${isExpanded ? css.expanded : ''} ${isSortActive ? css.active : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      ref={btnRef}
+      type="button"
+      className={[s.button, expanded ? s.expanded : '', active ? s.active : ''].join(' ')}
+      aria-expanded={open}
+      aria-haspopup="listbox"
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
+      onClick={toggle}
     >
-      <div className={css.sortIcon__round} onClick={handleToggle}>
-        <div className={css.sortIcon__iconWrapper}>
-          <svg className={css.sortIcon__icon} width={isMobile ? 21 : 28} height={isMobile ? 16 : 23}>
-            <use xlinkHref={`/assets/icons/sprites.svg#sort`} />
+      <div className={s.round}>
+        <div className={s.iconWrap} aria-hidden="true">
+          <svg className={s.icon}>
+            <use href="/assets/icons/sprites.svg#sort" />
           </svg>
         </div>
-        <div className={css.sortIcon__labelWrapper}>
-          <p className={css.sortIcon__text}>Сортировка</p>
-          <svg className={css.sortIcon__arrow} width={isMobile ? 10 : 18} height={isMobile ? 6 : 10}>
-            <use xlinkHref={`/assets/icons/sprites.svg#down-arrow`} />
+        <div className={s.label} aria-hidden="true">
+          <p className={s.text}>Сортировка</p>
+          <svg className={s.arrow}>
+            <use href="/assets/icons/sprites.svg#down-arrow" />
           </svg>
         </div>
       </div>
 
-      {isSortOpen && <SortList setIsSortActive={setIsSortActive} onSelect={handleSelect} />}
+      {open && <SortList setIsSortActive={setActive} onSelect={onSelect} />}
     </button>
   )
 }
 
-export default SortIcon
+export default Sort

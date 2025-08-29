@@ -12,81 +12,100 @@ import { ProductType } from '../../types/interfaces'
 const MAX_SLIDER_ITEMS = 8
 
 const Novelty = () => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
+  const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
+  const isLess575 = useMediaQuery({ query: '(max-width: 575px)' })
 
-  const [productsDataNovelty, setProductsDataNovelty] = useState<ProductType[]>([])
+  const [products, setProducts] = useState<ProductType[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products')
-      .then((res) => res.json())
-      .then((data: ProductType[]) => {
-        setProductsDataNovelty(data.slice(0, MAX_SLIDER_ITEMS))
+    const ctrl = new AbortController()
+    ;(async () => {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/products', { signal: ctrl.signal })
+        if (!res.ok) throw new Error('Network error')
+        const data: ProductType[] = await res.json()
+        setProducts(data)
+      } catch {
+      } finally {
         setLoading(false)
-      })
-      .catch(() => setLoading(false))
+      }
+    })()
+    return () => ctrl.abort()
   }, [])
 
-  const itemsPerPage = isMobile ? 1 : 4
+  const itemsPerPage = isLess575 ? 1 : isLess768 ? 2 : isLess992 ? 3 : 4
 
   const sliderItems = useMemo(() => {
-    const len = productsDataNovelty.length
-    const sliceStart = Math.max(len - MAX_SLIDER_ITEMS, 0)
-    const lastItems = productsDataNovelty.slice(sliceStart, len)
-    return lastItems.reverse()
-  }, [productsDataNovelty])
+    const last = products.slice(-MAX_SLIDER_ITEMS)
+    return [...last].reverse()
+  }, [products])
 
-  const totalPages = Math.ceil(sliderItems.length / itemsPerPage)
-
+  const totalPages = Math.max(Math.ceil(sliderItems.length / itemsPerPage), 1)
   const [currentPage, setCurrentPage] = useState(0)
 
-  const handlePrev = () => {
-    setCurrentPage((prev) => (prev + 1) % totalPages)
-  }
-  const handleNext = () => {
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
-  }
+  useEffect(() => {
+    setCurrentPage((prev) => {
+      const maxPage = Math.max(totalPages - 1, 0)
+      return Math.min(prev, maxPage)
+    })
+  }, [itemsPerPage, sliderItems.length, totalPages])
+
+  const goPrev = () => setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages)
+  const goNext = () => setCurrentPage((prev) => (prev + 1) % totalPages)
 
   const startIndex = currentPage * itemsPerPage
   const visibleItems = sliderItems.slice(startIndex, startIndex + itemsPerPage)
 
   if (loading)
     return (
-      <section className={css.novelty}>
+      <section className={css.novelty} aria-busy="true" aria-live="polite">
         <div className="container">
-          <h2 className={css.novelty__title}>Новинки</h2>
-          <p className={css.novelty__message}>Загрузка новинок...</p>
-        </div>
-      </section>
-    )
-  if (!productsDataNovelty.length)
-    return (
-      <section className={css.novelty}>
-        <div className="container">
-          <h2 className={css.novelty__title}>Новинки</h2>
-          <p className={css.novelty__message}>Новинок пока нет.</p>
+          <h2 className={css.title}>Новинки</h2>
+          <p className={css.message}>Загрузка новинок...</p>
         </div>
       </section>
     )
 
+  if (!sliderItems.length)
+    return (
+      <section className={css.novelty} aria-live="polite">
+        <div className="container">
+          <h2 className={css.title}>Новинки</h2>
+          <p className={css.message}>Новинок пока нет.</p>
+        </div>
+      </section>
+    )
+
+  const navDisabled = totalPages <= 1
+
   return (
     <section id="novelty" className={css.novelty}>
       <div className="container">
-        <h2 className={css.novelty__title}>Новинки</h2>
-        <div className={css.novelty__slider}>
-          {visibleItems.map((product, index) => (
-            <Product key={index} type="novelty" product={product} />
+        <h2 className={css.title}>Новинки</h2>
+
+        <div className={css.slider}>
+          {visibleItems.map((product) => (
+            <Product
+              key={(product as any).id ?? (product as any).slug ?? JSON.stringify(product)}
+              type="novelty"
+              product={product}
+            />
           ))}
         </div>
-        <div className={css.novelty__arrows}>
-          <button className={css.novelty__button} onClick={handleNext}>
-            <SvgIcon icon="left-arrow" widthIcon="24px" heightIcon="21px" widthRound="60px" heightRound="60px" />
+
+        <div className={css.arrows}>
+          <button className={css.button} onClick={goPrev} aria-label="Предыдущие новинки" disabled={navDisabled}>
+            <SvgIcon icon="left-arrow" widthIcon="24px" heightIcon="21px" type="arrow" />
           </button>
-          <button className={css.novelty__button} onClick={handlePrev}>
-            <SvgIcon icon="right-arrow" widthIcon="24px" heightIcon="21px" widthRound="60px" heightRound="60px" />
+          <button className={css.button} onClick={goNext} aria-label="Следующие новинки" disabled={navDisabled}>
+            <SvgIcon icon="right-arrow" widthIcon="24px" heightIcon="21px" type="arrow" />
           </button>
         </div>
-        {isMobile && (
+
+        {isLess768 && (
           <Link href="/catalog">
             <Button type="link">Перейти в каталог продукции</Button>
           </Link>

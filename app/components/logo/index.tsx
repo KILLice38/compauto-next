@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import css from './logo.module.scss'
+import css from './index.module.scss'
 
 const Logo = ({
   color,
@@ -11,12 +11,12 @@ const Logo = ({
   return (
     <Link href={'/'} onClick={() => setIsNavOpen?.(false)}>
       <div className={css.logo}>
-        <svg className={css.logo__icon} style={{ color }}>
+        <svg className={css.icon} style={{ color }}>
           <use xlinkHref="/assets/icons/sprites.svg#logo" />
         </svg>
-        <div className={css.logo__text}>
-          <p className={css.logo__title}>КомпАвто</p>
-          <p className={css.logo__slogan}>Решаем быстро – делаем красиво</p>
+        <div className={css.text}>
+          <p className={css.title}>КомпАвто</p>
+          <p className={css.slogan}>Решаем быстро – делаем красиво</p>
         </div>
       </div>
     </Link>

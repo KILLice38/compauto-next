@@ -4,73 +4,98 @@
 .footer {
   background-color: vars.$color-background-secondary;
   padding: 60px 0 100px;
-  &__container {
-    display: flex;
-    justify-content: space-between;
+}
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+.left {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 102px;
+}
+.tel {
+  @include mixins.h3;
+  color: vars.$color-text-main;
+  text-decoration: none;
+  font-size: 35px;
+}
+.workTime {
+  @include mixins.description;
+  font-size: 15px;
+  margin-top: 5px;
+}
+.nav {
+  max-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  @include mixins.description;
+  &Link {
+    color: vars.$color-text-main;
+    font-size: 25px;
+    letter-spacing: -6%;
+    text-decoration: none;
   }
-  &__left {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 102px;
-  }
-  &__tel {
-    @include mixins.h3;
+  &File {
+    font-size: 16px;
     color: vars.$color-text-main;
     text-decoration: none;
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .footer {
+    padding: 60px 0 104px 0;
+  }
+  .nav {
+    @include mixins.description-992;
+  }
+  .tel {
+    font-size: 30px;
+  }
+  .workTime {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 69px 0 139px 0;
+  }
+  .nav {
+    @include mixins.description-768;
+  }
+  .left {
+    align-items: flex-start;
+  }
+  .tel {
     font-size: 35px;
-  }
-  &__workTime {
-    @include mixins.description;
-    font-size: 15px;
-    margin-top: 5px;
-  }
-  &__nav {
-    max-width: 180px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    @include mixins.description;
-    &Link {
-      color: vars.$color-text-main;
-      font-size: 25px;
-      letter-spacing: -6%;
-      text-decoration: none;
-    }
-    &File {
-      font-size: 16px;
-      color: vars.$color-text-main;
-      text-decoration: none;
-      letter-spacing: 0;
-    }
   }
 }
 
 @media (max-width: 575px) {
   .footer {
     padding: 60px 0 60px 0;
-    &__container {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 40px;
+  }
+  .container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
+  }
+  .nav {
+    &Link {
+      font-size: 20px;
+      color: vars.$color-text-main;
     }
-    &__nav {
-      @include mixins.descriptionMobile;
-      &Link {
-        font-size: 20px;
-        color: vars.$color-text-main;
-      }
-      &File {
-        font-size: 16px;
-        color: vars.$color-text-main;
-      }
+    &File {
+      font-size: 16px;
+      color: vars.$color-text-main;
     }
-    &__tel {
-      @include mixins.h3;
-      font-size: 35px;
-    }
-    &__workTime {
-      margin-top: 10px;
-    }
+  }
+  .workTime {
+    margin-top: 10px;
   }
 }

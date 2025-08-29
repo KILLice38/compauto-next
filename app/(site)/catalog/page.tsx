@@ -10,9 +10,11 @@ import css from './page.module.scss'
 import Products from '../../components/products'
 import { getUniqueValues } from '../../utils/getUniqueValues'
 import { ProductType } from '../../types/interfaces'
+import { useState } from 'react'
 
 const CatalogPage = () => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isLess1200 = useMediaQuery({ query: '(max-width: 1200px)' })
+  const [isSortExpanded, setIsSortExpanded] = useState(false)
 
   const { visibleProducts, hasMore, loading, filters, setSearchTerm, setFilters, setSort, loadMore, allProducts } =
     useCatalog()
@@ -49,23 +51,23 @@ const CatalogPage = () => {
   return (
     <section className={css.catalog}>
       <div className="container">
-        <h1 className={css.catalog__title}>Каталог продукции</h1>
-        <div className={css.catalog__actions}>
-          {!isMobile ? (
+        <h1 className={css.title}>Каталог продукции</h1>
+        <div className={css.actions}>
+          {!isLess1200 ? (
             <>
-              <SearchPanel onSearch={(v) => setSearchTerm(v)} />
+              <SearchPanel onSearch={(v) => setSearchTerm(v)} isSortExpanded={isSortExpanded} />
               {/* <DownloadIcon /> */}
             </>
           ) : (
             <>
-              <SortIcon setSort={setSort} resetPage={() => {}} />
-              <SearchPanel onSearch={(v) => setSearchTerm(v)} />
+              <SortIcon setSort={setSort} resetPage={() => {}} setIsSortExpanded={setIsSortExpanded} />
+              <SearchPanel onSearch={(v) => setSearchTerm(v)} isSortExpanded={isSortExpanded} />
             </>
           )}
         </div>
-        <div className={css.catalog__buttons}>
+        <div className={css.buttons}>
           <Filters filterData={dynamicFilterData} currentFilters={filters} onFilterChange={handleFilterChange} />
-          {!isMobile && <SortIcon setSort={setSort} resetPage={() => {}} />}
+          {!isLess1200 && <SortIcon setSort={setSort} resetPage={() => {}} setIsSortExpanded={setIsSortExpanded} />}
         </div>
         {loading && visibleProducts.length === 0 ? (
           <p>Загрузка продуктов...</p>

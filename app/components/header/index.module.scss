@@ -2,31 +2,69 @@
 @use '../../styles/mixins';
 
 .header {
-  padding: 23px 0 23px 0;
-  &__container {
-    padding: 0 25px 0 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 23px 0 24px 0;
+}
+
+.container {
+  padding: 0 25px 0 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.tel {
+  @include mixins.h3;
+  color: vars.$color-text-main;
+  text-decoration: none;
+}
+.socials {
+  display: flex;
+  gap: 15px;
+}
+
+@media (max-width: 1200px) {
+  .container {
+    max-width: 960px;
+    padding: 0;
   }
-  &__wrapper {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+}
+
+@media (max-width: 992px) {
+  .container {
+    padding: 0 60px;
   }
-  &__tel {
-    @include mixins.h3;
-    color: vars.$color-text-main;
-    text-decoration: none;
+  .wrapper {
+    gap: 10px;
   }
-  &__socials {
-    display: flex;
-    gap: 15px;
+  .socials {
+    gap: 10px;
+  }
+  .tel {
+    @include mixins.h3-992;
+  }
+}
+
+@media (max-width: 992px) {
+  .container {
+    padding: 0 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 42px 0 20px 0;
   }
 }
 
 @media (max-width: 575px) {
   .header {
     padding: 40px 0 20px 0;
+    .container {
+      padding: 0 15px;
+    }
   }
 }

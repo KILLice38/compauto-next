@@ -5,67 +5,61 @@ const Gallery = () => {
   return (
     <section className={css.gallery}>
       <div className="container">
-        <Image
-          src="/assets/images/girls.jpg"
-          alt="Девочки"
-          className={css.gallery__mainImage}
-          width={1160}
-          height={773}
-        ></Image>
-        {/* <div className={css.gallery__wrapper}>
+        <Image src="/assets/images/girls.jpg" alt="Девочки" className={css.mainImage} width={1160} height={773}></Image>
+        {/* <div className={css.wrapper}>
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />
           <Image
             src="/assets/images/galleryItem.jpg"
             alt="Картинка"
-            className={css.gallery__image}
+            className={css.image}
             width={110}
             height={113}
           />

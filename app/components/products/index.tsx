@@ -14,7 +14,7 @@ export const Products = ({
 }) => {
   return (
     <section className={css.products}>
-      <div className={css.products__wrapper}>
+      <div className={css.wrapper}>
         {products.map((product) => (
           <Product key={product.slug} type="catalog" product={product} />
         ))}

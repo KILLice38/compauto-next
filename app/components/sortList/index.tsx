@@ -20,12 +20,14 @@ const SortList = ({
   onSelect: (value: SortType['value']) => void
   setIsSortActive: (value: boolean) => void
 }) => {
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation()
+
   return (
-    <ul className={css.sortList}>
+    <ul className={css.sortList} onMouseDown={stop} onClick={stop}>
       {options.map((option, index) => (
         <li
           key={index}
-          className={css.sortList__item}
+          className={css.item}
           onClick={() => {
             onSelect(option.value)
             if (option.value !== 'recent') {

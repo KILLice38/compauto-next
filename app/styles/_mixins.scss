@@ -10,14 +10,12 @@
   text-align: left;
 }
 
-@mixin h1Mobile {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
+@mixin h1-992 {
+  font-size: 60px;
+}
+
+@mixin h1-768 {
   font-size: 45px;
-  letter-spacing: -0.08em;
-  line-height: 100%;
-  color: vars.$color-text-main;
-  text-align: left;
 }
 
 @mixin h2 {
@@ -30,26 +28,15 @@
   text-align: left;
 }
 
-@mixin h2Mobile {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
+@mixin h2-992 {
+  font-size: 60px;
+}
+
+@mixin h2-768 {
   font-size: 45px;
-  letter-spacing: -0.08em;
-  line-height: 100%;
-  color: vars.$color-text-main;
-  text-align: left;
 }
 
 @mixin h3 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 25px;
-  line-height: 120%;
-  letter-spacing: -0.06em;
-  color: vars.$color-text-main;
-}
-
-@mixin h6 {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-size: 25px;
@@ -58,13 +45,8 @@
   color: vars.$color-text-main;
 }
 
-@mixin h3Mobile {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
+@mixin h3-992 {
   font-size: 20px;
-  line-height: 100%;
-  letter-spacing: -0.06em;
-  color: vars.$color-text-main;
 }
 
 @mixin description {
@@ -77,14 +59,26 @@
   color: vars.$color-text-description;
 }
 
-@mixin descriptionMobile {
+@mixin description-992 {
+  font-size: 18px;
+}
+
+@mixin description-768 {
+  font-size: 16px;
+}
+
+@mixin productDescription {
   font-family: 'Inter', sans-serif;
   font-weight: 400;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 120%;
-  letter-spacing: -0.03em;
-  text-align: left;
+  letter-spacing: -0.06em;
+  text-align: center;
   color: vars.$color-text-description;
+}
+
+@mixin productDescription-992 {
+  font-size: 16px;
 }
 
 @mixin logoTitle {

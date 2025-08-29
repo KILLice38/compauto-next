@@ -2,41 +2,49 @@
 
 .catalog {
   padding: 20px 0 40px 0;
-  &__title {
-    @include mixins.h1;
-  }
-  &__actions {
-    margin-top: 40px;
-    display: flex;
-    justify-content: space-between;
-  }
+}
+.title {
+  @include mixins.h1;
+}
+.actions {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+}
+.buttons {
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  &__buttons {
-    padding-top: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+@media (max-width: 1200px) {
+  .actions {
+    justify-content: flex-start;
+    gap: 20px;
   }
-  &__button {
-    border-radius: 100%;
-    width: 68px;
-    height: 68px;
-    background-color: transparent;
-    border: none;
-    padding: 0;
+}
+
+@media (max-width: 992px) {
+  .title {
+    @include mixins.h1-992;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    @include mixins.h1-768;
   }
 }
 
 @media (max-width: 575px) {
-  .catalog {
-    &__actions {
-      gap: 15px;
-    }
-    &__title {
-      @include mixins.h1Mobile;
-    }
-    &__buttons {
-      padding-top: 20px;
-    }
+  .actions {
+    gap: 15px;
+  }
+  .title {
+    @include mixins.h1-768;
+  }
+  .buttons {
+    padding-top: 20px;
   }
 }

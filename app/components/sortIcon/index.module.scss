@@ -1,151 +1,197 @@
 @use '../../styles/vars';
 @use '../../styles/mixins';
 
-.sortIcon {
-  &__iconWrapper {
-    position: absolute;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    inset: 0;
-    opacity: 1;
-    transition: opacity 0.2s ease-in 0.15s;
-    pointer-events: none;
+.button {
+  position: relative;
+  display: inline-block;
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  transition:
+    width 0.3s ease-in,
+    height 0.3s ease-in,
+    border-radius 0.3s ease-in;
+
+  &:focus {
+    outline: none;
   }
-  &__icon {
-    color: vars.$color-text-main;
-    width: 28px;
-    height: 23px;
-    transition: transform 0.2s ease-in;
-  }
-  &__labelWrapper {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    inset: 0;
-    opacity: 0;
-    transition: opacity 0.2s ease-in 0s;
-    justify-content: center;
-    pointer-events: none;
+  &:focus-visible {
+    box-shadow:
+      0 0 0 2px rgba(0, 0, 0, 0.12),
+      0 0 0 4px rgba(0, 0, 0, 0.06);
   }
 
-  &__text {
-    @include mixins.h3;
-    color: vars.$color-text-main;
-  }
-
-  &__arrow {
-    width: 18px;
-    height: 10px;
-    margin-top: 4px;
-    color: vars.$color-text-main;
-  }
-
-  &__button {
-    position: relative;
-    border: none;
-    background-color: transparent;
-    padding: 0;
-    width: 68px;
+  &.expanded,
+  &:hover,
+  &.active {
+    width: 214px;
     height: 68px;
-    border-radius: 50%;
-    transition:
-      width 0.3s ease-in,
-      height 0.3s ease-in,
-      border-radius 0.3s ease-in;
-    &.expanded,
-    &:hover,
-    &.active {
-      width: 214px;
-      height: 68px;
-      border-radius: 8px;
-    }
-
-    &.active .sortIcon__text {
-      font-weight: 500;
-    }
+    border-radius: 8px;
   }
 
-  &__round {
-    position: relative;
-    width: 68px;
+  &.active .text {
+    font-weight: 500;
+  }
+}
+
+.round {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background-color: vars.$color-background-secondary;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition:
+    width 0.3s ease-in,
+    height 0.3s ease-in,
+    border-radius 0.3s ease-in,
+    background-color 0.2s ease-in;
+
+  .button:hover &,
+  .button.expanded &,
+  .button.active & {
+    width: 214px;
     height: 68px;
-    border-radius: 50%;
-    background-color: vars.$color-background-secondary;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition:
-      width 0.3s ease-in,
-      height 0.3s ease-in,
-      border-radius 0.3s ease-in;
-    .sortIcon__button:hover &,
-    .sortIcon__button.expanded &,
-    .sortIcon__button.active & {
-      width: 214px;
-      height: 68px;
-      border-radius: 8px;
-    }
-
-    &:hover {
-      background-color: vars.$color-background-nonactive;
-      .sortIcon__icon {
-        transform: scale(1.1);
-      }
-    }
+    border-radius: 8px;
   }
 
-  &__button.expanded {
-    .sortIcon__iconWrapper {
-      opacity: 0;
-      transition-delay: 0s;
-    }
-    .sortIcon__labelWrapper {
-      opacity: 1;
-      transition-delay: 0.1s;
+  .button:hover & {
+    background-color: vars.$color-background-nonactive;
+
+    .icon {
+      transform: scale(1.06);
     }
   }
 }
 
-@media (max-width: 575px) {
-  .sortIcon {
-    &__button,
-    &__round {
-      width: 75px;
-      height: 50px;
-      border-radius: 6px;
-    }
-    &__icon {
-      width: 21px;
-      height: 16px;
-    }
-    &__round {
-      .sortIcon__button:hover &,
-      .sortIcon__button.expanded &,
-      .sortIcon__button.active & {
-        width: 157px;
-        height: 50px;
-      }
-    }
-    &__button {
-      width: 75px;
-      height: 50px;
-      &.expanded,
-      &:hover,
-      &.active {
-        width: 157px;
-        height: 50px;
-      }
-    }
-    &__text {
-      @include mixins.descriptionMobile;
+.iconWrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transition: opacity 0.2s ease-in 0.15s;
+  pointer-events: none;
+}
+
+.icon {
+  color: vars.$color-text-main;
+  width: 28px;
+  height: 23px;
+  transition: transform 0.2s ease-in;
+}
+
+.label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in 0s;
+  pointer-events: none;
+}
+
+.text {
+  @include mixins.h3;
+  color: vars.$color-text-main;
+}
+
+.arrow {
+  width: 18px;
+  height: 10px;
+  margin-top: 4px;
+  color: vars.$color-text-main;
+}
+
+.button.expanded {
+  .iconWrap {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+  .label {
+    opacity: 1;
+    transition-delay: 0.1s;
+  }
+}
+
+@media (max-width: 992px) {
+  .button {
+    width: 80px;
+    height: 55px;
+    border-radius: 6px;
+    .text {
+      @include mixins.description-992;
       font-weight: 500;
     }
-    &__arrow {
-      width: 10px;
-      height: 6px;
+    &.expanded,
+    &:hover,
+    &.active {
+      width: 162px;
+      height: 55px;
     }
+  }
+  .round {
+    width: 80px;
+    height: 55px;
+    border-radius: 6px;
+    .button:hover &,
+    .button.expanded &,
+    .button.active & {
+      width: 162px;
+      height: 55px;
+      border-radius: 6px;
+    }
+  }
+
+  .icon {
+    width: 21px;
+    height: 16px;
+  }
+  .arrow {
+    margin-top: 2px;
+    width: 18px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .button {
+    width: 75px;
+    height: 50px;
+    .text {
+      @include mixins.description-768;
+    }
+    &.expanded,
+    &:hover,
+    &.active {
+      width: 157px;
+      height: 50px;
+    }
+  }
+  .round {
+    width: 75px;
+    height: 50px;
+    .button:hover &,
+    .button.expanded &,
+    .button.active & {
+      width: 157px;
+      height: 50px;
+    }
+  }
+  .arrow {
+    margin-top: clamp(2px, 0.3vw, 4px);
+    width: clamp(10px, 2vw, 18px);
+    height: clamp(6px, 1.2vw, 10px);
   }
 }

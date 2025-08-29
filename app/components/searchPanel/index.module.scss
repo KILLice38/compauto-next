@@ -3,49 +3,74 @@
 
 .searchPanel {
   position: relative;
-  &__input {
-    caret-color: vars.$color-background-secondary;
-    outline: none;
-    width: 583px;
-
-    border: 2px solid vars.$color-background-secondary;
-    border-radius: 8px;
-    padding: 25px;
+  width: 583px;
+  height: 68px;
+}
+.input {
+  caret-color: vars.$color-background-secondary;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  border: 2px solid vars.$color-background-secondary;
+  border-radius: 8px;
+  padding: 23px;
+  @include mixins.description;
+  letter-spacing: -0.06em;
+  color: #1f1f1f;
+  font-size: 25px;
+  &::placeholder {
     @include mixins.description;
     letter-spacing: -0.06em;
-    color: #1f1f1f;
     font-size: 25px;
-    height: 68px;
+  }
+}
+.icon {
+  position: absolute;
+  right: 25px;
+  top: 25px;
+  color: #e0e0e0;
+}
+
+@media (max-width: 992px) {
+  .searchPanel {
+    width: 360px;
+    height: 55px;
+  }
+  .input {
+    padding: 21px;
+    @include mixins.description-992;
     &::placeholder {
-      @include mixins.description;
-      letter-spacing: -0.06em;
-      font-size: 25px;
+      @include mixins.description-992;
+      font-size: 16px;
     }
   }
-  &__icon {
-    position: absolute;
-    right: 25px;
-    top: 25px;
-    color: #e0e0e0;
+  .icon {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .searchPanel {
+    width: 255px;
+    height: 50px;
+  }
+  .input {
+    padding: 0 25px;
   }
 }
 
 @media (max-width: 575px) {
-  .searchPanel {
-    &__input {
-      padding: 17px 23px;
-      height: 50px;
-      width: 100%;
-      @include mixins.descriptionMobile;
-      font-weight: 500;
-      color: #1f1f1f;
-      &::placeholder {
-        @include mixins.descriptionMobile;
-        font-size: 16px;
-      }
-    }
-    &__icon {
-      top: 15px;
+  .input {
+    padding: 17px 23px;
+    height: 50px;
+    width: 100%;
+    @include mixins.description-768;
+    font-weight: 500;
+    color: #1f1f1f;
+    &::placeholder {
+      @include mixins.description-768;
+      font-size: 16px;
     }
   }
 }

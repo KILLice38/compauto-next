@@ -8,6 +8,7 @@
   background-color: vars.$color-background-secondary;
   border-radius: 20px;
   top: calc(100% + 28px);
+  right: 0;
   display: flex;
   text-align: left;
   flex-direction: column;
@@ -16,7 +17,7 @@
   align-items: flex-start;
   z-index: 100;
 }
-.sortList__item {
+.item {
   @include mixins.h3;
   font-weight: 400;
   cursor: pointer;
@@ -27,12 +28,28 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .sortList {
+    left: 0;
+    right: unset;
+  }
+}
+
+@media (max-width: 992px) {
+  .item {
+    @include mixins.description-992;
+    letter-spacing: -0.06em;
+  }
+}
+
+@media (max-width: 768px) {
+  .item {
+    @include mixins.description-768;
+  }
+}
+
 @media (max-width: 575px) {
   .sortList {
     top: calc(100% + 20px);
-    &__item {
-      @include mixins.descriptionMobile;
-      letter-spacing: -6%;
-    }
   }
 }

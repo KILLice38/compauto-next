@@ -18,15 +18,15 @@ const Product = ({ type, product }: { type: string; product: ProductType }) => {
         loader={imageLoader}
         src={variantUrl(img, 'card')}
         alt={title}
-        className={css.product__image}
+        className={css.image}
         width={260}
         height={260}
         unoptimized
       />
-      <div className={css.product__text}>
-        <h6 className={css.product__title}>{title}</h6>
-        <p className={css.product__description}>{description}</p>
-        <p className={css.product__price}>от {price.toLocaleString('ru-RU')} ₽</p>
+      <div className={css.text}>
+        <h3 className={css.title}>{title}</h3>
+        <p className={css.description}>{description}</p>
+        <p className={css.price}>от {price.toLocaleString('ru-RU')} ₽</p>
       </div>
     </Link>
   )
