@@ -12,6 +12,7 @@ type Props = {
   placeholder?: string
   minSlides?: number
   maxSlides?: number
+  fillWithPlaceholder?: boolean
 }
 
 export default function ProductGallery({
@@ -19,6 +20,7 @@ export default function ProductGallery({
   placeholder = '/assets/images/no-image.png',
   minSlides = 3,
   maxSlides = 5,
+  fillWithPlaceholder = true,
 }: Props) {
   const prepared = useMemo(() => {
     const base = images.filter(Boolean).map((u) => ({
@@ -26,14 +28,18 @@ export default function ProductGallery({
       thumb: variantUrl(u, 'thumb'),
     }))
     const capped = base.slice(0, maxSlides)
-    while (capped.length < Math.max(minSlides, 1)) {
-      capped.push({ main: placeholder, thumb: placeholder })
+    if (fillWithPlaceholder) {
+      while (capped.length < Math.max(minSlides, 1)) {
+        capped.push({ main: placeholder, thumb: placeholder })
+      }
     }
     return capped
-  }, [images, placeholder, minSlides, maxSlides])
+  }, [images, placeholder, minSlides, maxSlides, fillWithPlaceholder])
 
   const [idx, setIdx] = useState(0)
   const n = prepared.length
+
+  if (n === 0) return null
 
   const prevIndex = (idx - 1 + n) % n
   const nextIndex = (idx + 1) % n

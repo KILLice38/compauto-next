@@ -23,7 +23,6 @@ const Filters = ({ filterData, currentFilters, onFilterChange }: FilterProps) =>
   const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
   const [openDropdown, setOpenDropdown] = useState<null | keyof ProductType>(null)
 
-  // >>> добавляем
   const rootRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
@@ -42,7 +41,6 @@ const Filters = ({ filterData, currentFilters, onFilterChange }: FilterProps) =>
       document.removeEventListener('keydown', onEsc)
     }
   }, [openDropdown])
-  // <<< добавляем
 
   return (
     <div ref={rootRef} className={css.filters}>

@@ -12,6 +12,9 @@ const Footer = () => {
           <div className={css.left}>
             <Logo color="#FBFBFB" />
             <div className={css.info}>
+              <a href="emailto:@example.com" className={css.mail}>
+                9104816416@mail.ru
+              </a>
               <a href="tel:+7(910)481-64-16" className={css.tel}>
                 +7 (910) 481-64-16
               </a>
@@ -22,6 +25,9 @@ const Footer = () => {
         {isMobile && <Logo color="#FBFBFB" />}
         {isMobile && (
           <div className={css.info}>
+            <a href="emailto:@example.com" className={css.mail}>
+              9104816416@mail.ru
+            </a>
             <a href="tel:+7(910)481-64-16" className={css.tel}>
               +7 (910) 481-64-16
             </a>

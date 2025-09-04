@@ -2,9 +2,11 @@
 
 import { useMediaQuery } from 'react-responsive'
 import Characteristics from '../characteristics'
-import ProductGallery from '../productGallery'
 import css from './index.module.scss'
 import { Product } from '@prisma/client'
+import dynamic from 'next/dynamic'
+
+const ProductGallery = dynamic(() => import('../productGallery'), { ssr: false })
 
 const ProductContent = ({
   images,
@@ -21,13 +23,14 @@ const ProductContent = ({
 }) => {
   const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
   const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
+  const hasImages = images.length > 0
 
   if (isLess768) {
     return (
       <div className={css.content}>
         <h1 className={css.title}>{product.title}</h1>
         <div className={css.mainInfo}>
-          <ProductGallery images={images} minSlides={3} maxSlides={5} />
+          {hasImages && <ProductGallery images={images} minSlides={3} maxSlides={5} fillWithPlaceholder={false} />}
           <div className={css.description}>
             {hasDetails ? (
               detailParams.map((p: string, i: number) => <p key={i}>{p}</p>)
@@ -46,7 +49,7 @@ const ProductContent = ({
       <div className={css.content}>
         <h1 className={css.title}>{product.title}</h1>
         <div className={css.mainInfo}>
-          <ProductGallery images={images} minSlides={3} maxSlides={5} />
+          {hasImages && <ProductGallery images={images} minSlides={3} maxSlides={5} fillWithPlaceholder={false} />}
           <div className={css.description}>
             {hasDetails ? (
               detailParams.map((p: string, i: number) => <p key={i}>{p}</p>)
@@ -64,7 +67,7 @@ const ProductContent = ({
     return (
       <div className={css.content}>
         <div className={css.mainInfo}>
-          <ProductGallery images={images} minSlides={3} maxSlides={5} />
+          {hasImages && <ProductGallery images={images} minSlides={3} maxSlides={5} fillWithPlaceholder={false} />}
           <div className={css.mainText}>
             <h1 className={css.title}>{product.title}</h1>
             <div className={css.description}>

@@ -54,7 +54,6 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
     }
   }, [editingProduct, reset])
 
-  // ===== управляемая галерея =====
   const [galleryUrls, setGalleryUrls] = useState<string[]>([])
 
   const [uploadFolder] = useState(() => {
@@ -74,7 +73,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
     const res = await fetch('/api/upload', { method: 'POST', body: fd })
     if (!res.ok) throw new Error('Ошибка загрузки файла')
     const { url } = await res.json()
-    return url as string // вернётся __source.webp в tmp/<uuid>
+    return url as string
   }
 
   const isTmpUrl = (u: string) => u.includes('/uploads/tmp/')
@@ -96,7 +95,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   const onPickGalleryFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const f = e.target.files?.[0]
-      e.target.value = '' // сброс, чтобы можно было выбрать тот же файл ещё раз
+      e.target.value = ''
       if (!f) return
       if (freeSlots <= 0) {
         alert('Достигнут лимит: максимум 4 фото')
@@ -116,13 +115,11 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   }
 
   const makeThumb = (u: string) => u.replace('__source.webp', '__thumb.webp')
-  // ===== /управляемая галерея =====
 
   const onSubmit: SubmitHandler<AdminProductForm> = async (data) => {
     try {
       const isEdit = Boolean(editingProduct)
 
-      // главная фотка
       let mainImgUrl = editingProduct?.img ?? ''
       const mainFile = (data.img as FileList | undefined)?.[0]
       if (!isEdit && !mainFile) {
@@ -145,7 +142,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         autoMark: data.autoMark || null,
         compressor: data.compressor || null,
         img: mainImgUrl,
-        gallery: galleryUrls, // tmp/* и products/* — бэк разрулит
+        gallery: galleryUrls,
       }
 
       const url = isEdit ? `/api/products/${editingProduct!.id}` : '/api/products'
@@ -168,7 +165,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   }
 
   const handleCancel = async () => {
-    await cleanupTmp(galleryUrls) // <-- подчистили всё, что успели загрузить
+    await cleanupTmp(galleryUrls)
     reset()
     setGalleryUrls([])
     onCancel()
@@ -176,7 +173,6 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={css.form}>
-      {/* скроллируемая область */}
       <div className={css.formScroll}>
         <label className={css.label}>
           Название

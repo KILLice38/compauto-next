@@ -15,7 +15,13 @@
   justify-content: space-between;
   gap: 102px;
 }
-.tel {
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tel,
+.mail {
   @include mixins.h3;
   color: vars.$color-text-main;
   text-decoration: none;
@@ -53,7 +59,8 @@
   .nav {
     @include mixins.description-992;
   }
-  .tel {
+  .tel,
+  .mail {
     font-size: 30px;
   }
   .workTime {
@@ -71,7 +78,8 @@
   .left {
     align-items: flex-start;
   }
-  .tel {
+  .tel,
+  .mail {
     font-size: 35px;
   }
 }
