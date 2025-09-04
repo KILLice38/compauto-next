@@ -88,11 +88,7 @@ const Novelty = () => {
 
         <div className={css.slider}>
           {visibleItems.map((product) => (
-            <Product
-              key={(product as any).id ?? (product as any).slug ?? JSON.stringify(product)}
-              type="novelty"
-              product={product}
-            />
+            <Product key={product.slug} type="novelty" product={product} />
           ))}
         </div>
 

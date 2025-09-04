@@ -35,7 +35,6 @@ const aboutUsData = {
 const AboutUs = () => {
   const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
   const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
-  const isLess575 = useMediaQuery({ query: '(max-width: 575px)' })
 
   return (
     <section id="aboutUs" className={css.aboutUs}>
