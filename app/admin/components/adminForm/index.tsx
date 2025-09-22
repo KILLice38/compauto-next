@@ -260,7 +260,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           <div className={css.imagesGrid}>
             {galleryUrls.map((u, i) => (
               <div key={i} className={css.imageItem}>
-                <Image src={makeThumb(u)} alt="" width={106} height={69} className={css.thumb} />
+                <Image src={makeThumb(u)} alt="" width={106} height={69} className={css.thumb} unoptimized />
                 <button type="button" onClick={() => removeGalleryItem(i)} className={css.btnGhostSmall}>
                   Удалить
                 </button>
