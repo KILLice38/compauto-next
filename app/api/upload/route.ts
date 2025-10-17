@@ -55,8 +55,8 @@ async function pruneFolderIfEmpty(dir: string) {
 // Допустимые MIME типы для изображений
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 
-// Максимальный размер файла: 10 MB
-const MAX_FILE_SIZE = 10 * 1024 * 1024
+// Максимальный размер файла: 2 MB
+const MAX_FILE_SIZE = 2 * 1024 * 1024
 
 // Магические байты для проверки типа файла
 const IMAGE_SIGNATURES = {
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
       // Валидация размера файла
       if (!isValidFileSize(one)) {
         return NextResponse.json(
-          { error: `File size ${one.size} bytes exceeds maximum allowed size of ${MAX_FILE_SIZE} bytes (10 MB)` },
+          { error: `File size ${one.size} bytes exceeds maximum allowed size of ${MAX_FILE_SIZE} bytes (2 MB)` },
           { status: 400 }
         )
       }
@@ -262,7 +262,7 @@ export async function POST(req: NextRequest) {
 
         // Валидация размера файла
         if (!isValidFileSize(f)) {
-          errors.push(`File ${i + 1} (${f.name}): File size ${f.size} bytes exceeds 10 MB limit`)
+          errors.push(`File ${i + 1} (${f.name}): File size ${f.size} bytes exceeds 2 MB limit`)
           continue
         }
 
