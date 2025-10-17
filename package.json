@@ -11,7 +11,8 @@
     "start-server": "next start -p 3000 --hostname 0.0.0.0",
     "prettify": "prettify",
     "types": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
