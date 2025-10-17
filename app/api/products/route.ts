@@ -173,11 +173,55 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url)
     const skip = Number(url.searchParams.get('skip')) || 0
     const take = Number(url.searchParams.get('take')) || 12
+
+    // Filtering parameters
+    const search = url.searchParams.get('search')
+    const autoMark = url.searchParams.get('autoMark')
+    const engineModel = url.searchParams.get('engineModel')
+    const compressor = url.searchParams.get('compressor')
+
+    // Sorting parameter
+    const sort = url.searchParams.get('sort') // 'recent' | 'az' | 'za' | 'priceAsc' | 'priceDesc'
+
+    // Build where clause for filtering
+    const where: any = {}
+
+    if (search) {
+      where.title = { contains: search, mode: 'insensitive' }
+    }
+
+    if (autoMark) {
+      where.autoMark = autoMark
+    }
+
+    if (engineModel) {
+      where.engineModel = engineModel
+    }
+
+    if (compressor) {
+      where.compressor = compressor
+    }
+
+    // Build orderBy clause for sorting
+    let orderBy: any = { createdAt: 'desc' } // default
+
+    if (sort === 'az') {
+      orderBy = { title: 'asc' }
+    } else if (sort === 'za') {
+      orderBy = { title: 'desc' }
+    } else if (sort === 'priceAsc') {
+      orderBy = { price: 'asc' }
+    } else if (sort === 'priceDesc') {
+      orderBy = { price: 'desc' }
+    }
+
     const products = await prisma.product.findMany({
+      where,
       skip,
       take,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
     })
+
     return NextResponse.json(products)
   } catch (error) {
     console.error('Failed to fetch products:', error)
