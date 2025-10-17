@@ -52,6 +52,13 @@ async function pruneFolderIfEmpty(dir: string) {
 
 /* ---------- генерация картинок (POST) ---------- */
 
+// Допустимые MIME типы для изображений
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+
+function isValidImageType(file: File): boolean {
+  return ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())
+}
+
 function sourcePath(filePath: string, ext = 'webp') {
   const extOld = path.extname(filePath)
   const base = filePath.slice(0, -extOld.length)
@@ -69,13 +76,26 @@ async function saveTemp(baseDir: string, file: File) {
 }
 async function makeSource(absOriginal: string, buffer: Buffer) {
   const absSource = sourcePath(absOriginal)
-  await sharp(buffer)
-    .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-    .toFormat('webp', { quality: 90 })
-    .toFile(absSource)
+
+  try {
+    await sharp(buffer)
+      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+      .toFormat('webp', { quality: 90 })
+      .toFile(absSource)
+  } catch (error) {
+    console.error('Sharp error in makeSource:', error)
+    // Удаляем оригинальный файл при ошибке
+    try {
+      await fs.unlink(absOriginal)
+    } catch {}
+    throw new Error('Failed to process image. The file may be corrupted or in an unsupported format.')
+  }
+
+  // Удаляем оригинал после успешной обработки
   try {
     await fs.unlink(absOriginal)
   } catch {}
+
   return absSource
 }
 function baseWithoutExt(p: string) {
@@ -97,12 +117,30 @@ async function makeVariantsFromSource(absSource: string) {
     { suf: 'thumb', w: 106, h: 69 },
   ] as const
   const bg = { r: 255, g: 255, b: 255, alpha: 1 }
-  await Promise.all(
-    targets.map(async ({ suf, w, h }) => {
-      const out = variantAbsFromSource(absSource, suf)
-      await sharp(buf).resize(w, h, { fit: 'contain', background: bg }).toFormat('webp', { quality: 82 }).toFile(out)
-    })
-  )
+
+  try {
+    await Promise.all(
+      targets.map(async ({ suf, w, h }) => {
+        const out = variantAbsFromSource(absSource, suf)
+        try {
+          await sharp(buf)
+            .resize(w, h, { fit: 'contain', background: bg })
+            .toFormat('webp', { quality: 82 })
+            .toFile(out)
+        } catch (error) {
+          console.error(`Sharp error creating variant ${suf}:`, error)
+          throw error
+        }
+      })
+    )
+  } catch (error) {
+    console.error('Sharp error in makeVariantsFromSource:', error)
+    // Удаляем source файл при ошибке создания вариантов
+    try {
+      await fs.unlink(absSource)
+    } catch {}
+    throw new Error('Failed to create image variants. The source image may be corrupted.')
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -110,33 +148,76 @@ export async function POST(req: NextRequest) {
   const authError = await requireAuth(req)
   if (authError) return authError
 
-  const formData = await req.formData()
-  const folder = (formData.get('folder') as string) || '' // e.g. "tmp/<uuid>" или "products/<slug>"
-  const one = formData.get('file') as File | null
-  const many = formData.getAll('files') as File[]
+  try {
+    const formData = await req.formData()
+    const folder = (formData.get('folder') as string) || '' // e.g. "tmp/<uuid>" или "products/<slug>"
+    const one = formData.get('file') as File | null
+    const many = formData.getAll('files') as File[]
 
-  const basePublic = path.join(UPLOADS_DIR, folder)
-  await ensureDir(basePublic)
+    const basePublic = path.join(UPLOADS_DIR, folder)
+    await ensureDir(basePublic)
 
-  if (one) {
-    const { abs, buffer } = await saveTemp(basePublic, one)
-    const absSource = await makeSource(abs, buffer)
-    await makeVariantsFromSource(absSource)
-    return NextResponse.json({ url: absToPublicUrl(absSource) })
-  }
+    // Обработка одного файла
+    if (one) {
+      // Валидация типа файла
+      if (!isValidImageType(one)) {
+        return NextResponse.json(
+          { error: `Invalid file type: ${one.type}. Allowed types: JPEG, PNG, WebP, GIF` },
+          { status: 400 }
+        )
+      }
 
-  if (many.length > 0) {
-    const urls: string[] = []
-    for (const f of many) {
-      const { abs, buffer } = await saveTemp(basePublic, f)
-      const absSource = await makeSource(abs, buffer)
-      await makeVariantsFromSource(absSource)
-      urls.push(absToPublicUrl(absSource))
+      try {
+        const { abs, buffer } = await saveTemp(basePublic, one)
+        const absSource = await makeSource(abs, buffer)
+        await makeVariantsFromSource(absSource)
+        return NextResponse.json({ url: absToPublicUrl(absSource) })
+      } catch (error) {
+        console.error('Error processing single file:', error)
+        return NextResponse.json(
+          { error: error instanceof Error ? error.message : 'Failed to process image' },
+          { status: 500 }
+        )
+      }
     }
-    return NextResponse.json({ urls })
-  }
 
-  return NextResponse.json({ error: 'No file(s) provided' }, { status: 400 })
+    // Обработка нескольких файлов
+    if (many.length > 0) {
+      const urls: string[] = []
+      const errors: string[] = []
+
+      for (let i = 0; i < many.length; i++) {
+        const f = many[i]
+
+        // Валидация типа файла
+        if (!isValidImageType(f)) {
+          errors.push(`File ${i + 1} (${f.name}): Invalid type ${f.type}`)
+          continue
+        }
+
+        try {
+          const { abs, buffer } = await saveTemp(basePublic, f)
+          const absSource = await makeSource(abs, buffer)
+          await makeVariantsFromSource(absSource)
+          urls.push(absToPublicUrl(absSource))
+        } catch (error) {
+          console.error(`Error processing file ${i + 1} (${f.name}):`, error)
+          errors.push(`File ${i + 1} (${f.name}): ${error instanceof Error ? error.message : 'Processing failed'}`)
+        }
+      }
+
+      if (urls.length === 0 && errors.length > 0) {
+        return NextResponse.json({ error: 'All files failed to process', details: errors }, { status: 500 })
+      }
+
+      return NextResponse.json({ urls, errors: errors.length > 0 ? errors : undefined })
+    }
+
+    return NextResponse.json({ error: 'No file(s) provided' }, { status: 400 })
+  } catch (error) {
+    console.error('Unexpected error in POST /api/upload:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 /* ---------- удаление tmp-файлов (DELETE) ---------- */
