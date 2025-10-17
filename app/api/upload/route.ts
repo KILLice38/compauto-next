@@ -55,8 +55,52 @@ async function pruneFolderIfEmpty(dir: string) {
 // Допустимые MIME типы для изображений
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
 
+// Максимальный размер файла: 10 MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024
+
+// Магические байты для проверки типа файла
+const IMAGE_SIGNATURES = {
+  jpeg: [0xff, 0xd8, 0xff],
+  png: [0x89, 0x50, 0x4e, 0x47],
+  gif: [0x47, 0x49, 0x46],
+  webp: [0x52, 0x49, 0x46, 0x46], // RIFF (WebP)
+}
+
 function isValidImageType(file: File): boolean {
   return ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())
+}
+
+function isValidFileSize(file: File): boolean {
+  return file.size > 0 && file.size <= MAX_FILE_SIZE
+}
+
+function checkImageSignature(buffer: Buffer): boolean {
+  // Проверяем JPEG
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return true
+  }
+  // Проверяем PNG
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+    return true
+  }
+  // Проверяем GIF
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) {
+    return true
+  }
+  // Проверяем WebP (RIFF...WEBP)
+  if (
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
+  ) {
+    return true
+  }
+  return false
 }
 
 function sourcePath(filePath: string, ext = 'webp') {
@@ -167,8 +211,29 @@ export async function POST(req: NextRequest) {
         )
       }
 
+      // Валидация размера файла
+      if (!isValidFileSize(one)) {
+        return NextResponse.json(
+          { error: `File size ${one.size} bytes exceeds maximum allowed size of ${MAX_FILE_SIZE} bytes (10 MB)` },
+          { status: 400 }
+        )
+      }
+
       try {
         const { abs, buffer } = await saveTemp(basePublic, one)
+
+        // Проверка магических байтов
+        if (!checkImageSignature(buffer)) {
+          // Удаляем временный файл
+          try {
+            await fs.unlink(abs)
+          } catch {}
+          return NextResponse.json(
+            { error: 'Invalid image file. The file signature does not match allowed image types.' },
+            { status: 400 }
+          )
+        }
+
         const absSource = await makeSource(abs, buffer)
         await makeVariantsFromSource(absSource)
         return NextResponse.json({ url: absToPublicUrl(absSource) })
@@ -195,8 +260,25 @@ export async function POST(req: NextRequest) {
           continue
         }
 
+        // Валидация размера файла
+        if (!isValidFileSize(f)) {
+          errors.push(`File ${i + 1} (${f.name}): File size ${f.size} bytes exceeds 10 MB limit`)
+          continue
+        }
+
         try {
           const { abs, buffer } = await saveTemp(basePublic, f)
+
+          // Проверка магических байтов
+          if (!checkImageSignature(buffer)) {
+            // Удаляем временный файл
+            try {
+              await fs.unlink(abs)
+            } catch {}
+            errors.push(`File ${i + 1} (${f.name}): Invalid image signature`)
+            continue
+          }
+
           const absSource = await makeSource(abs, buffer)
           await makeVariantsFromSource(absSource)
           urls.push(absToPublicUrl(absSource))
