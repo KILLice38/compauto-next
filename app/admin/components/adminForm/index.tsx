@@ -55,6 +55,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   }, [editingProduct, reset])
 
   const [galleryUrls, setGalleryUrls] = useState<string[]>([])
+  const [isUploading, setIsUploading] = useState(false)
 
   const [uploadFolder] = useState(() => {
     const id =
@@ -65,6 +66,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const uploadInProgressRef = useRef(false)
 
   const uploadOne = async (file: File) => {
     const fd = new FormData()
@@ -93,18 +95,34 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   const freeSlots = Math.max(0, 4 - galleryUrls.length)
 
   const onPickGalleryFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Защита от race conditions
+    if (uploadInProgressRef.current) {
+      console.warn('Upload already in progress, ignoring click')
+      return
+    }
+
     try {
       const f = e.target.files?.[0]
       e.target.value = ''
       if (!f) return
+
       if (freeSlots <= 0) {
         alert('Достигнут лимит: максимум 4 фото')
         return
       }
+
+      // Устанавливаем флаг загрузки
+      uploadInProgressRef.current = true
+      setIsUploading(true)
+
       const url = await uploadOne(f)
       setGalleryUrls((prev) => [...prev, url])
     } catch (err) {
       alert('Ошибка загрузки: ' + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      // Снимаем флаг загрузки
+      uploadInProgressRef.current = false
+      setIsUploading(false)
     }
   }
 
@@ -241,13 +259,21 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={freeSlots <= 0}
-              title={freeSlots <= 0 ? 'Лимит исчерпан' : 'Добавить фото'}
+              disabled={freeSlots <= 0 || isUploading}
+              title={
+                isUploading
+                  ? 'Загрузка...'
+                  : freeSlots <= 0
+                    ? 'Лимит исчерпан'
+                    : 'Добавить фото'
+              }
               className={css.btn}
             >
-              + Фото
+              {isUploading ? 'Загрузка...' : '+ Фото'}
             </button>
-            <small className={css.muted}>Свободно: {freeSlots}</small>
+            <small className={css.muted}>
+              {isUploading ? 'Загрузка...' : `Свободно: ${freeSlots}`}
+            </small>
             <input
               ref={fileInputRef}
               type="file"
