@@ -59,25 +59,9 @@ const Novelty = () => {
   const startIndex = currentPage * itemsPerPage
   const visibleItems = sliderItems.slice(startIndex, startIndex + itemsPerPage)
 
-  if (loading)
-    return (
-      <section className={css.novelty} aria-busy="true" aria-live="polite">
-        <div className="container">
-          <h2 className={css.title}>Новинки</h2>
-          <p className={css.message}>Загрузка новинок...</p>
-        </div>
-      </section>
-    )
+  if (loading) return null
 
-  if (!sliderItems.length)
-    return (
-      <section className={css.novelty} aria-live="polite">
-        <div className="container">
-          <h2 className={css.title}>Новинки</h2>
-          <p className={css.message}>Новинок пока нет.</p>
-        </div>
-      </section>
-    )
+  if (!sliderItems.length) return null
 
   const navDisabled = totalPages <= 1
 

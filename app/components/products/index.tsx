@@ -19,7 +19,7 @@ export const Products = ({
           <Product key={product.slug} type="catalog" product={product} />
         ))}
       </div>
-      {hasMore && (
+      {hasMore && products.length > 0 && (
         <Button type="more" onClickFunction={onLoadMore}>
           Загрузить еще
         </Button>
