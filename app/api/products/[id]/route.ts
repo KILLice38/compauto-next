@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../lib/prisma'
 import fs from 'fs/promises'
 import path from 'path'
+import { requireAuth } from '../../lib/auth'
 
 export const runtime = 'nodejs'
 
@@ -152,6 +153,10 @@ export async function GET(_req: NextRequest, ctx: { params: RouteParams }) {
 }
 
 export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
+  // Проверка авторизации
+  const authError = await requireAuth(req)
+  if (authError) return authError
+
   const { id } = await ctx.params
   const numId = Number(id)
   if (Number.isNaN(numId)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
@@ -251,7 +256,11 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
   }
 }
 
-export async function DELETE(_req: NextRequest, ctx: { params: RouteParams }) {
+export async function DELETE(req: NextRequest, ctx: { params: RouteParams }) {
+  // Проверка авторизации
+  const authError = await requireAuth(req)
+  if (authError) return authError
+
   const { id } = await ctx.params
   const numId = Number(id)
   if (Number.isNaN(numId)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })

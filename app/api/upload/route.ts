@@ -1,8 +1,9 @@
 // app/api/upload/route.ts
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import { promises as fs } from 'fs'
 import sharp from 'sharp'
+import { requireAuth } from '../lib/auth'
 
 export const runtime = 'nodejs'
 
@@ -117,7 +118,11 @@ async function makeVariantsFromSource(absSource: string) {
   )
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Проверка авторизации
+  const authError = await requireAuth(req)
+  if (authError) return authError
+
   const formData = await req.formData()
   const folder = (formData.get('folder') as string) || '' // e.g. "tmp/<uuid>" или "products/<slug>"
   const one = formData.get('file') as File | null
@@ -151,7 +156,11 @@ export async function POST(req: Request) {
 
 /* ---------- удаление tmp-файлов (DELETE) ---------- */
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
+  // Проверка авторизации
+  const authError = await requireAuth(req)
+  if (authError) return authError
+
   try {
     const body = await req.json().catch(() => ({}))
     const urls = Array.isArray(body?.urls) ? (body.urls as string[]) : []

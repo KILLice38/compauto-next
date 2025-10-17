@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../lib/prisma'
 import path from 'path'
 import { promises as fs } from 'fs'
+import { requireAuth } from '../lib/auth'
 
 /** --- helpers --- */
 function isTmp(u: string) {
@@ -113,6 +114,10 @@ function randomSuffix(len = 6) {
 
 /** --- handlers --- */
 export async function POST(req: NextRequest) {
+  // Проверка авторизации
+  const authError = await requireAuth(req)
+  if (authError) return authError
+
   try {
     const raw = await req.json()
     if (!raw.title) return NextResponse.json({ error: 'Title required' }, { status: 400 })
