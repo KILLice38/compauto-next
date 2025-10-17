@@ -5,50 +5,9 @@ import { promises as fs } from 'fs'
 import sharp from 'sharp'
 import { requireAuth } from '../lib/auth'
 import { UPLOADS_DIR, getTmpDir, publicUrlToAbs, absToPublicUrl, isTmpUrl, extractTmpToken } from '../lib/paths'
+import { ensureDir, allVariantPublicsFromAny, pruneFolderIfEmpty } from '../lib/fileUtils'
 
 export const runtime = 'nodejs'
-
-/* ---------- общие FS-хелперы ---------- */
-
-async function ensureDir(dir: string) {
-  await fs.mkdir(dir, { recursive: true })
-}
-function stripQuery(u: string) {
-  const i = u.indexOf('?')
-  return i >= 0 ? u.slice(0, i) : u
-}
-// base без __source/__card/__detail/__thumb и без расширения
-function baseNoVariantNoExt(pub: string) {
-  const clean = stripQuery(pub)
-  const dot = clean.lastIndexOf('.')
-  const noExt = dot >= 0 ? clean.slice(0, dot) : clean
-  return noExt.replace(/__(source|card|detail|thumb)$/i, '')
-}
-function allVariantPublicsFromAny(pub: string) {
-  const base = baseNoVariantNoExt(pub)
-  return [`${base}__source.webp`, `${base}__card.webp`, `${base}__detail.webp`, `${base}__thumb.webp`]
-}
-async function isDirEffectivelyEmpty(dir: string): Promise<boolean> {
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
-    for (const e of entries) {
-      if (e.isFile()) return false
-      if (e.isDirectory()) {
-        if (!(await isDirEffectivelyEmpty(path.join(dir, e.name)))) return false
-      }
-    }
-    return true
-  } catch {
-    return true
-  }
-}
-async function pruneFolderIfEmpty(dir: string) {
-  try {
-    if (await isDirEffectivelyEmpty(dir)) {
-      await fs.rm(dir, { recursive: true, force: true })
-    }
-  } catch {}
-}
 
 /* ---------- генерация картинок (POST) ---------- */
 

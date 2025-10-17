@@ -5,6 +5,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { requireAuth } from '../../lib/auth'
 import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../../lib/paths'
+import { stripQuery, baseNoVariantNoExt, allVariantPublicsFromAny, pruneFolderIfEmpty } from '../../lib/fileUtils'
 
 export const runtime = 'nodejs'
 
@@ -15,24 +16,8 @@ type RouteParams = Promise<{ id: string }>
 const VARIANT_SUFFIXES = ['source', 'card', 'detail', 'thumb'] as const
 const IGNORABLE_FILES = new Set(['.DS_Store', 'Thumbs.db'])
 
-function stripQuery(u: string) {
-  const i = u.indexOf('?')
-  return i >= 0 ? u.slice(0, i) : u
-}
 function isHttpUrl(str: string | null | undefined) {
   return !!str && /^https?:\/\//i.test(str)
-}
-
-// базовый путь без __source/__card/__detail/__thumb и без расширения
-function baseNoVariantNoExt(pub: string) {
-  const clean = stripQuery(pub)
-  const dot = clean.lastIndexOf('.')
-  const noExt = dot >= 0 ? clean.slice(0, dot) : clean
-  return noExt.replace(/__(source|card|detail|thumb)$/i, '')
-}
-function allVariantPublicsFromAny(pub: string) {
-  const base = baseNoVariantNoExt(pub)
-  return [`${base}__source.webp`, `${base}__card.webp`, `${base}__detail.webp`, `${base}__thumb.webp`]
 }
 
 // поддерживаем и старые __source__card.webp, и нормальные __card.webp
@@ -60,29 +45,6 @@ async function unlinkWithVariants(publicUrl: string | null | undefined) {
       } catch {}
     })
   )
-}
-
-async function isDirEffectivelyEmpty(dir: string): Promise<boolean> {
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true })
-    for (const e of entries) {
-      if (e.isFile()) {
-        if (!IGNORABLE_FILES.has(e.name)) return false
-      } else if (e.isDirectory()) {
-        if (!(await isDirEffectivelyEmpty(path.join(dir, e.name)))) return false
-      }
-    }
-    return true
-  } catch {
-    return true
-  }
-}
-async function pruneFolderIfEmpty(dir: string) {
-  try {
-    if (await isDirEffectivelyEmpty(dir)) {
-      await fs.rm(dir, { recursive: true, force: true })
-    }
-  } catch {}
 }
 
 // Перенос сета (__source/__card/__detail/__thumb) из tmp → products/<slug>
