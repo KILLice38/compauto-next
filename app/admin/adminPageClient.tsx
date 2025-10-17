@@ -9,8 +9,19 @@ import css from './page.module.scss'
 import type { ProductType } from './types/types'
 
 export default function AdminPageClient() {
-  const { products, showForm, editingProduct, setProducts, setShowForm, setEditingProduct, handleDelete, toggleForm } =
-    useAdminProducts()
+  const {
+    products,
+    showForm,
+    editingProduct,
+    loadingMore,
+    hasMore,
+    setProducts,
+    setShowForm,
+    setEditingProduct,
+    handleDelete,
+    toggleForm,
+    loadMore,
+  } = useAdminProducts()
 
   const handleSave = (savedProduct: ProductType) => {
     setProducts((cur) => {
@@ -54,7 +65,14 @@ export default function AdminPageClient() {
           </div>
         )}
 
-        <AdminList products={products} onEdit={setEditingProduct} onDelete={handleDelete} />
+        <AdminList
+          products={products}
+          onEdit={setEditingProduct}
+          onDelete={handleDelete}
+          onLoadMore={loadMore}
+          loadingMore={loadingMore}
+          hasMore={hasMore}
+        />
       </div>
     </div>
   )
