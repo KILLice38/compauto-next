@@ -14,16 +14,23 @@ export default function LoginPage() {
     e.preventDefault()
     setError('')
 
+    console.log('🔐 Attempting login for:', email)
+
     const res = await signIn('credentials', {
       redirect: false,
       email,
       password,
     })
 
+    console.log('📊 SignIn response:', res)
+
     if (res?.error) {
+      console.error('❌ Login error:', res.error)
       setError('Неверный логин или пароль')
-    } else {
+    } else if (res?.ok) {
+      console.log('✅ Login successful, redirecting to /admin')
       router.push('/admin')
+      router.refresh()
     }
   }
 
