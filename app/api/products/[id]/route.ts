@@ -4,6 +4,7 @@ import prisma from '../../../lib/prisma'
 import fs from 'fs/promises'
 import path from 'path'
 import { requireAuth } from '../../lib/auth'
+import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../../lib/paths'
 
 export const runtime = 'nodejs'
 
@@ -20,23 +21,6 @@ function stripQuery(u: string) {
 }
 function isHttpUrl(str: string | null | undefined) {
   return !!str && /^https?:\/\//i.test(str)
-}
-function publicUrlToAbs(u: string) {
-  const rel = stripQuery(u).replace(/^\//, '')
-  return path.join(process.cwd(), 'public', rel)
-}
-function productFolderAbs(slug: string) {
-  return path.join(process.cwd(), 'public', 'uploads', 'products', slug)
-}
-function tmpFolderAbs(token: string) {
-  return path.join(process.cwd(), 'public', 'uploads', 'tmp', token)
-}
-function isTmpUrl(u: string | null | undefined) {
-  return !!u && /\/uploads\/tmp\//.test(u)
-}
-function extractTmpToken(u: string): string | null {
-  const m = stripQuery(u).match(/\/uploads\/tmp\/([^/]+)/)
-  return m?.[1] ?? null
 }
 
 // базовый путь без __source/__card/__detail/__thumb и без расширения
@@ -111,7 +95,7 @@ async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<
 
   const token = extractTmpToken(publicUrl) ?? undefined
   const variantsPub = allVariantPublicsFromAny(publicUrl)
-  const destDir = productFolderAbs(slug)
+  const destDir = getProductDir(slug)
   await fs.mkdir(destDir, { recursive: true })
 
   let finalUrl = ''
@@ -122,7 +106,7 @@ async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<
     try {
       await fs.rename(absOld, absNew) // переносим если есть
       if (fileName.endsWith('__source.webp')) {
-        finalUrl = `/uploads/products/${slug}/${fileName}`
+        finalUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
       }
     } catch {
       // варианта могло не быть — ок
@@ -133,7 +117,7 @@ async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<
   if (!finalUrl) {
     const base = baseNoVariantNoExt(publicUrl)
     const fileName = `${path.basename(base)}__source.webp`
-    finalUrl = `/uploads/products/${slug}/${fileName}`
+    finalUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
   }
 
   return { url: finalUrl, tmpToken: token }
@@ -213,7 +197,7 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
           if (t) tokens.add(t)
         })
       )
-      await Promise.all(Array.from(tokens).map((t) => pruneFolderIfEmpty(tmpFolderAbs(t))))
+      await Promise.all(Array.from(tokens).map((t) => pruneFolderIfEmpty(getTmpDir(t))))
     }
 
     // Теперь чистим старые файлы, только если они реально заменяются
@@ -240,13 +224,13 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
     // Чистим пустые tmp/<token> (после переноса всех файлов этого токена)
     await Promise.all(
       Array.from(usedTmpTokens).map(async (t) => {
-        await pruneFolderIfEmpty(tmpFolderAbs(t))
+        await pruneFolderIfEmpty(getTmpDir(t))
       })
     )
 
     // Если вдруг все локальные файлы удалили/заменили на внешние URL — подчистим пустую папку товара
     if (current.slug) {
-      await pruneFolderIfEmpty(productFolderAbs(current.slug))
+      await pruneFolderIfEmpty(getProductDir(current.slug))
     }
 
     return NextResponse.json(updated)
@@ -278,7 +262,7 @@ export async function DELETE(req: NextRequest, ctx: { params: RouteParams }) {
 
     // 3) удаляем папку товара рекурсивно
     if (product.slug) {
-      const dir = productFolderAbs(product.slug)
+      const dir = getProductDir(product.slug)
       try {
         await fs.rm(dir, { recursive: true, force: true })
       } catch (e) {

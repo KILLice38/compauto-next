@@ -4,6 +4,7 @@ import path from 'path'
 import { promises as fs } from 'fs'
 import sharp from 'sharp'
 import { requireAuth } from '../lib/auth'
+import { UPLOADS_DIR, getTmpDir, publicUrlToAbs, absToPublicUrl, isTmpUrl, extractTmpToken } from '../lib/paths'
 
 export const runtime = 'nodejs'
 
@@ -11,20 +12,6 @@ export const runtime = 'nodejs'
 
 async function ensureDir(dir: string) {
   await fs.mkdir(dir, { recursive: true })
-}
-function absFromPublic(u: string) {
-  const rel = u.startsWith('/') ? u.slice(1) : u
-  return path.join(process.cwd(), 'public', rel)
-}
-function tmpFolderAbs(token: string) {
-  return path.join(process.cwd(), 'public', 'uploads', 'tmp', token)
-}
-function isTmp(u: string | null | undefined) {
-  return !!u && /\/uploads\/tmp\//.test(u)
-}
-function tokenFromUrl(u: string): string | null {
-  const m = u.match(/\/uploads\/tmp\/([^/]+)/)
-  return m?.[1] ?? null
 }
 function stripQuery(u: string) {
   const i = u.indexOf('?')
@@ -128,16 +115,14 @@ export async function POST(req: NextRequest) {
   const one = formData.get('file') as File | null
   const many = formData.getAll('files') as File[]
 
-  const basePublic = path.join(process.cwd(), 'public', 'uploads', folder)
+  const basePublic = path.join(UPLOADS_DIR, folder)
   await ensureDir(basePublic)
-
-  const toPublicUrl = (abs: string) => abs.replace(path.join(process.cwd(), 'public'), '').replace(/\\/g, '/')
 
   if (one) {
     const { abs, buffer } = await saveTemp(basePublic, one)
     const absSource = await makeSource(abs, buffer)
     await makeVariantsFromSource(absSource)
-    return NextResponse.json({ url: toPublicUrl(absSource) })
+    return NextResponse.json({ url: absToPublicUrl(absSource) })
   }
 
   if (many.length > 0) {
@@ -146,7 +131,7 @@ export async function POST(req: NextRequest) {
       const { abs, buffer } = await saveTemp(basePublic, f)
       const absSource = await makeSource(abs, buffer)
       await makeVariantsFromSource(absSource)
-      urls.push(toPublicUrl(absSource))
+      urls.push(absToPublicUrl(absSource))
     }
     return NextResponse.json({ urls })
   }
@@ -170,21 +155,21 @@ export async function DELETE(req: NextRequest) {
     const tokens = new Set<string>()
 
     for (const u of urls) {
-      if (!isTmp(u)) continue
+      if (!isTmpUrl(u)) continue
       const variants = allVariantPublicsFromAny(u)
       for (const v of variants) {
-        const abs = absFromPublic(v)
+        const abs = publicUrlToAbs(v)
         try {
           await fs.unlink(abs)
           deleted++
         } catch {}
       }
-      const t = tokenFromUrl(u)
+      const t = extractTmpToken(u)
       if (t) tokens.add(t)
     }
 
     // подчистим пустые tmp/<token>
-    await Promise.all(Array.from(tokens).map((t) => pruneFolderIfEmpty(tmpFolderAbs(t))))
+    await Promise.all(Array.from(tokens).map((t) => pruneFolderIfEmpty(getTmpDir(t))))
 
     return NextResponse.json({ deleted })
   } catch (e) {

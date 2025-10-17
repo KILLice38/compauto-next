@@ -4,25 +4,9 @@ import prisma from '../../lib/prisma'
 import path from 'path'
 import { promises as fs } from 'fs'
 import { requireAuth } from '../lib/auth'
+import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../lib/paths'
 
 /** --- helpers --- */
-function isTmp(u: string) {
-  return /\/uploads\/tmp\//.test(u)
-}
-function absFromPublic(u: string) {
-  const rel = u.startsWith('/') ? u.slice(1) : u
-  return path.join(process.cwd(), 'public', rel)
-}
-function productDir(slug: string) {
-  return path.join(process.cwd(), 'public', 'uploads', 'products', slug)
-}
-function tmpFolderAbs(token: string) {
-  return path.join(process.cwd(), 'public', 'uploads', 'tmp', token)
-}
-function tokenFromUrl(u: string): string | null {
-  const m = u.match(/\/uploads\/tmp\/([^/]+)/)
-  return m?.[1] ?? null
-}
 function stripQuery(u: string) {
   const i = u.indexOf('?')
   return i >= 0 ? u.slice(0, i) : u
@@ -64,24 +48,24 @@ async function pruneFolderIfEmpty(dir: string) {
  * Возвращает: { url: publicUrlНа__source.webp, token?: tmpTokenIfAny }
  */
 async function finalizeAsset(sourceUrl: string, slug: string): Promise<{ url: string; token?: string }> {
-  if (!isTmp(sourceUrl)) {
+  if (!isTmpUrl(sourceUrl)) {
     return { url: sourceUrl } // уже в products или внешний URL
   }
 
-  const token = tokenFromUrl(sourceUrl) ?? undefined
-  const targetDir = productDir(slug)
+  const token = extractTmpToken(sourceUrl) ?? undefined
+  const targetDir = getProductDir(slug)
   await fs.mkdir(targetDir, { recursive: true })
 
   const publics = allVariantPublicsFromAny(sourceUrl)
   let finalSourceUrl = ''
   for (const pub of publics) {
-    const absOld = absFromPublic(pub)
+    const absOld = publicUrlToAbs(pub)
     const fileName = path.basename(absOld)
     const absNew = path.join(targetDir, fileName)
     try {
       await fs.rename(absOld, absNew) // move если файл есть
       if (fileName.endsWith('__source.webp')) {
-        finalSourceUrl = `/uploads/products/${slug}/${fileName}`
+        finalSourceUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
       }
     } catch {
       // варианта могло не быть — ок
@@ -92,7 +76,7 @@ async function finalizeAsset(sourceUrl: string, slug: string): Promise<{ url: st
     // подстраховка, если __source.webp не перенесли (но исходный base известен)
     const base = baseNoVariantNoExt(sourceUrl)
     const fileName = `${path.basename(base)}__source.webp`
-    finalSourceUrl = `/uploads/products/${slug}/${fileName}`
+    finalSourceUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
   }
 
   return { url: finalSourceUrl, token }
@@ -162,7 +146,7 @@ export async function POST(req: NextRequest) {
     // 4) чистим пустые tmp/<token>
     await Promise.all(
       Array.from(usedTokens).map(async (t) => {
-        await pruneFolderIfEmpty(tmpFolderAbs(t))
+        await pruneFolderIfEmpty(getTmpDir(t))
       })
     )
 
