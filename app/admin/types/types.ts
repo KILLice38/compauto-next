@@ -1,6 +1,9 @@
 // types/index.ts
 import { z } from 'zod'
 
+// Re-export ProductType from the shared types (Prisma-generated)
+export type { ProductType, ProductDTO } from '../../types/interfaces'
+
 export const AdminProductFormSchema = z.object({
   title: z.string().min(1, 'Название обязательно'),
   description: z.string().min(1, 'Короткое описание обязательно'),
@@ -19,20 +22,3 @@ export type AdminProductForm = z.input<typeof AdminProductFormSchema>
 
 // (если используешь где-то ещё)
 export type ProductFormValues = AdminProductForm
-
-// Клиентский тип товара оставь как был
-export interface ProductType {
-  id: number
-  slug: string
-  img: string
-  gallery?: string[]
-  title: string
-  description: string
-  details?: string[]
-  price: number
-  engineModel?: string | null
-  autoMark?: string | null
-  compressor?: string | null
-  createdAt?: string
-  updatedAt?: string
-}
