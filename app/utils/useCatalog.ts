@@ -15,6 +15,7 @@ export function useCatalog() {
   const prevSearch = useRef(searchTerm)
   const prevFilters = useRef(filters)
   const prevSort = useRef(sort)
+  const initialLoadDone = useRef(false)
 
   const loadingRef = useRef(false)
 
@@ -74,7 +75,18 @@ export function useCatalog() {
     [buildQueryString, visibleProducts.length]
   )
 
+  // Initial load on mount
   useEffect(() => {
+    if (!initialLoadDone.current) {
+      initialLoadDone.current = true
+      loadFromServer(true)
+    }
+  }, [loadFromServer])
+
+  // Reload on search/filter/sort changes
+  useEffect(() => {
+    if (!initialLoadDone.current) return // Skip initial load, handled above
+
     const searchChanged = prevSearch.current !== searchTerm
     const filtersChanged = JSON.stringify(prevFilters.current) !== JSON.stringify(filters)
     const sortChanged = prevSort.current !== sort
