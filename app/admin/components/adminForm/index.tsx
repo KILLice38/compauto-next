@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ProductType } from '../../types/types'
 import { AdminProductFormSchema, type AdminProductForm } from '../../types/types'
 import Image from 'next/image'
+import { useToast } from '../../../contexts/ToastContext'
 
 interface Props {
   editingProduct: ProductType | null
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export default function ProductForm({ editingProduct, onSave, onCancel }: Props) {
+  const toast = useToast()
+
   const {
     register,
     handleSubmit,
@@ -107,7 +110,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
       if (!f) return
 
       if (freeSlots <= 0) {
-        alert('Достигнут лимит: максимум 4 фото')
+        toast.warning('Достигнут лимит: максимум 4 фото')
         return
       }
 
@@ -117,8 +120,9 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
 
       const url = await uploadOne(f)
       setGalleryUrls((prev) => [...prev, url])
+      toast.success('Фото успешно загружено')
     } catch (err) {
-      alert('Ошибка загрузки: ' + (err instanceof Error ? err.message : String(err)))
+      toast.error('Ошибка загрузки: ' + (err instanceof Error ? err.message : String(err)))
     } finally {
       // Снимаем флаг загрузки
       uploadInProgressRef.current = false
@@ -141,13 +145,13 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
       let mainImgUrl = editingProduct?.img ?? ''
       const mainFile = (data.img as FileList | undefined)?.[0]
       if (!isEdit && !mainFile) {
-        alert('Выберите главную фотографию')
+        toast.error('Выберите главную фотографию')
         return
       }
       if (mainFile) mainImgUrl = await uploadOne(mainFile) // в tmp/<uuid>
 
       if (galleryUrls.length > 4) {
-        alert('Максимум 4 фото в галерее')
+        toast.warning('Максимум 4 фото в галерее')
         return
       }
 
@@ -174,11 +178,12 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
       if (!res.ok) throw new Error(`${method} failed: ${res.status}`)
 
       const saved: ProductType = await res.json()
+      toast.success(`Товар "${saved.title}" успешно ${isEdit ? 'обновлён' : 'создан'}`)
       onSave(saved)
       reset()
       setGalleryUrls([])
     } catch (err) {
-      alert('Ошибка при сохранении: ' + (err instanceof Error ? err.message : String(err)))
+      toast.error('Ошибка при сохранении: ' + (err instanceof Error ? err.message : String(err)))
     }
   }
 
