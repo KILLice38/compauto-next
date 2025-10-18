@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getProductBySlug } from '../../../lib/products'
+import { generateProductSchema, generateBreadcrumbSchema } from '../../../lib/structuredData'
 import css from './page.module.scss'
 import ProductContent from './components/productContent'
 
@@ -36,17 +37,33 @@ export default async function ProductPage({ params }: Props) {
   const hasDetails = detailParas.length > 0
   const hasShort = !!product.description?.trim()
 
+  // Генерируем Schema.org разметку для SEO
+  const productSchema = generateProductSchema(product)
+  const breadcrumbSchema = generateBreadcrumbSchema(product)
+
   return (
-    <section className={css.page}>
-      <div className="container">
-        <ProductContent
-          images={images}
-          product={product}
-          detailParams={detailParas}
-          hasDetails={hasDetails}
-          hasShort={hasShort}
-        />
-      </div>
-    </section>
+    <>
+      {/* Schema.org JSON-LD разметка для Google Rich Snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      <section className={css.page}>
+        <div className="container">
+          <ProductContent
+            images={images}
+            product={product}
+            detailParams={detailParas}
+            hasDetails={hasDetails}
+            hasShort={hasShort}
+          />
+        </div>
+      </section>
+    </>
   )
 }

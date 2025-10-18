@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ToastProvider } from './contexts/ToastContext'
+import { generateOrganizationSchema, generateWebSiteSchema } from './lib/structuredData'
+import ClientErrorBoundary from './components/clientErrorBoundary'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -49,10 +51,27 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Генерируем Schema.org разметку для сайта
+  const organizationSchema = generateOrganizationSchema()
+  const webSiteSchema = generateWebSiteSchema()
+
   return (
     <html lang="ru" className={inter.variable}>
+      <head>
+        {/* Schema.org JSON-LD разметка для всего сайта */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+        />
+      </head>
       <body>
-        <ToastProvider>{children}</ToastProvider>
+        <ClientErrorBoundary>
+          <ToastProvider>{children}</ToastProvider>
+        </ClientErrorBoundary>
       </body>
     </html>
   )

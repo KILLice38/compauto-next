@@ -182,6 +182,30 @@ Components in `app/components/`:
 - Key components: `header`, `footer`, `nav`, `products`, `product`, `filters`, `gallery`, `burger`, `toast`
 - Admin components in `app/admin/components/`: `adminList`, `adminForm`
 
+### Error Handling
+
+**Error Boundary** (`app/components/errorBoundary/`):
+- Prevents entire app crash when individual components fail
+- Two-level protection:
+  - `ClientErrorBoundary` wraps entire app in `app/layout.tsx`
+  - `AdminErrorBoundary` wraps admin panel in `app/admin/layout.tsx`
+- Features:
+  - Fallback UI with recovery options
+  - Error logging (development) and tracking hooks (production)
+  - "Try again" and "Reload page" actions
+  - Custom fallback support via props
+- See `ERROR_BOUNDARY_GUIDE.md` for detailed usage
+
+**What Error Boundary catches:**
+- Rendering errors in child components
+- Lifecycle method errors
+- Constructor errors
+
+**What it doesn't catch (use try-catch):**
+- Event handler errors
+- Async errors (setTimeout, fetch)
+- Server-side errors
+
 ### Styling
 
 - SCSS modules for component styles
