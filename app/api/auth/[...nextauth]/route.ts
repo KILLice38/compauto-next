@@ -9,12 +9,12 @@ const handler = NextAuth(authOptions)
 export { handler as GET }
 
 // POST запросы (signin, signout, callback) - с rate limiting
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, context: { params: { nextauth: string[] } }) {
   // Применяем строгий rate limit для auth endpoints
   const rateLimitError = checkRateLimit(req, 'auth', RateLimitPresets.AUTH_STRICT)
   if (rateLimitError) {
     return rateLimitError
   }
 
-  return handler(req)
+  return handler(req, context)
 }
