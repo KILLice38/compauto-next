@@ -8,17 +8,13 @@ const prisma = new PrismaClient()
 
 // Константы для путей
 const PUBLIC_DIR = path.join(process.cwd(), 'public')
-const SEED_IMAGES_DIR = path.join(PUBLIC_DIR, 'uploads', 'seed')
+const PRODUCTS_IMAGES_DIR = path.join(PUBLIC_DIR, 'uploads', 'products')
 
 /**
  * Генерирует простое цветное изображение-заглушку
  */
-async function generatePlaceholderImage(
-  slug: string,
-  color: { r: number; g: number; b: number },
-  index: number
-): Promise<string> {
-  const dir = path.join(SEED_IMAGES_DIR, slug)
+async function generatePlaceholderImage(slug: string, color: { r: number; g: number; b: number }): Promise<string> {
+  const dir = path.join(PRODUCTS_IMAGES_DIR, slug)
   await fs.mkdir(dir, { recursive: true })
 
   // Генерируем варианты изображений
@@ -29,7 +25,8 @@ async function generatePlaceholderImage(
     { suffix: 'thumb', width: 106, height: 69 },
   ]
 
-  const baseName = `product-${index}`
+  // Используем slug в качестве базового имени файла
+  const baseName = slug
   let sourceUrl = ''
 
   for (const variant of variants) {
@@ -49,7 +46,7 @@ async function generatePlaceholderImage(
       .toFile(filePath)
 
     if (variant.suffix === 'source') {
-      sourceUrl = `/uploads/seed/${slug}/${fileName}`
+      sourceUrl = `/uploads/products/${slug}/${fileName}`
     }
   }
 
@@ -62,10 +59,10 @@ async function generatePlaceholderImage(
 async function generateGallery(
   slug: string,
   baseColor: { r: number; g: number; b: number },
-  startIndex: number,
   count: number
 ): Promise<string[]> {
   const gallery: string[] = []
+  const dir = path.join(PRODUCTS_IMAGES_DIR, slug)
 
   for (let i = 0; i < count; i++) {
     // Немного варьируем цвет для каждого изображения в галерее
@@ -74,8 +71,39 @@ async function generateGallery(
       g: Math.min(255, baseColor.g + i * 15),
       b: Math.min(255, baseColor.b + i * 10),
     }
-    const url = await generatePlaceholderImage(slug, color, startIndex + i + 1)
-    gallery.push(url)
+
+    // Генерируем варианты для галереи с суффиксом -gallery-{i}
+    const baseName = `${slug}-gallery-${i + 1}`
+
+    const variants = [
+      { suffix: 'source', width: 2000, height: 2000 },
+      { suffix: 'card', width: 260, height: 260 },
+      { suffix: 'detail', width: 460, height: 299 },
+      { suffix: 'thumb', width: 106, height: 69 },
+    ]
+
+    let sourceUrl = ''
+    for (const variant of variants) {
+      const fileName = `${baseName}__${variant.suffix}.webp`
+      const filePath = path.join(dir, fileName)
+
+      await sharp({
+        create: {
+          width: variant.width,
+          height: variant.height,
+          channels: 4,
+          background: color,
+        },
+      })
+        .webp({ quality: 85 })
+        .toFile(filePath)
+
+      if (variant.suffix === 'source') {
+        sourceUrl = `/uploads/products/${slug}/${fileName}`
+      }
+    }
+
+    gallery.push(sourceUrl)
   }
 
   return gallery
@@ -218,18 +246,17 @@ async function main() {
   console.log('Cleaning existing products...')
   await prisma.product.deleteMany()
 
-  // Очистка директории с seed изображениями
-  console.log('Cleaning seed images directory...')
+  // Очистка директории с products изображениями (для чистого seed)
+  console.log('Cleaning products images directory...')
   try {
-    await fs.rm(SEED_IMAGES_DIR, { recursive: true, force: true })
+    await fs.rm(PRODUCTS_IMAGES_DIR, { recursive: true, force: true })
   } catch (error) {
     // Директория может не существовать
   }
-  await fs.mkdir(SEED_IMAGES_DIR, { recursive: true })
+  await fs.mkdir(PRODUCTS_IMAGES_DIR, { recursive: true })
 
   // Создание товаров
   console.log('Creating products with images...')
-  let imageIndex = 0
 
   for (const data of productsData) {
     // Генерируем slug
@@ -241,13 +268,11 @@ async function main() {
     console.log(`Creating product: ${data.title}`)
 
     // Генерируем главное изображение
-    const img = await generatePlaceholderImage(slug, data.color, imageIndex)
-    imageIndex++
+    const img = await generatePlaceholderImage(slug, data.color)
 
     // Генерируем галерею (2-4 изображения)
     const galleryCount = Math.floor(Math.random() * 3) + 2 // 2-4 изображений
-    const gallery = await generateGallery(slug, data.color, imageIndex, galleryCount)
-    imageIndex += galleryCount
+    const gallery = await generateGallery(slug, data.color, galleryCount)
 
     // Создаем товар в БД
     await prisma.product.create({
