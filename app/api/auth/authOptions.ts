@@ -12,10 +12,14 @@ export const authOptions: AuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        console.log('🔐 Attempting authorization for:', credentials?.email)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[AUTH] Authorization attempt')
+        }
 
         if (!credentials?.email || !credentials?.password) {
-          console.log('❌ Missing credentials')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[AUTH] Missing credentials')
+          }
           return null
         }
 
@@ -24,21 +28,28 @@ export const authOptions: AuthOptions = {
         })
 
         if (!user) {
-          console.log('❌ User not found:', credentials.email)
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[AUTH] User not found')
+          }
           return null
         }
 
-        console.log('✅ User found:', user.email)
-        console.log('🔑 Comparing password...')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[AUTH] User found, verifying password')
+        }
 
         const isValid = await bcrypt.compare(credentials.password, user.hashedPassword)
 
         if (!isValid) {
-          console.log('❌ Password mismatch')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[AUTH] Invalid password')
+          }
           return null
         }
 
-        console.log('✅ Password valid, authorization successful')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[AUTH] Authorization successful')
+        }
 
         return {
           id: user.id,

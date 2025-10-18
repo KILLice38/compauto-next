@@ -1,0 +1,1512 @@
+# TODO - Compauto-Next Improvement Checklist
+
+> Последнее обновление: 2025-10-18
+> Общая оценка проекта: **7.2/10**
+
+## 📊 Сводка по категориям
+
+| Категория | Оценка | Статус |
+|-----------|--------|--------|
+| Безопасность | 8.5/10 | ✅ Хорошо, требуется доработка |
+| Доступность (a11y) | 4/10 | ⚠️ Требует внимания |
+| SEO | 7.5/10 | ✅ Хорошо, требуется доработка |
+| UI/UX | 7/10 | ✅ Хорошо |
+| Архитектура | 8.5/10 | ✅ Отлично |
+| Тестирование | 4/10 | ⚠️ Требует внимания |
+| Производительность | 7.5/10 | ✅ Хорошо |
+
+---
+
+## 🔴 КРИТИЧЕСКИЕ ЗАДАЧИ (выполнить первыми)
+
+### 🔒 SECURITY-001: Убрать логирование чувствительных данных
+**Файл:** `app/api/auth/authOptions.ts:15-41`
+**Приоритет:** 🔴 КРИТИЧЕСКИЙ
+**Время:** 30 мин
+**Описание:** Console.log раскрывает email пользователей при попытках входа, что позволяет проводить user enumeration атаки.
+
+**Проблемные строки:**
+```typescript
+// Строка 15
+console.log('🔐 Attempting authorization for:', credentials?.email)
+// Строка 27
+console.log('❌ User not found:', credentials.email)
+```
+
+**Решение:**
+```typescript
+if (process.env.NODE_ENV === 'development') {
+  console.log('[DEBUG] Authorization attempt')
+}
+// ИЛИ использовать полноценный logger
+```
+
+**Риски если не исправить:** Утечка информации о зарегистрированных пользователях, упрощение brute-force атак
+
+---
+
+### 🔍 SEO-001: Динамическая генерация sitemap с продуктами
+**Файл:** Создать `app/sitemap.ts`
+**Приоритет:** 🔴 КРИТИЧЕСКИЙ
+**Время:** 1-2 часа
+**Описание:** Текущий sitemap содержит только 2 URL (главная + каталог). Все страницы продуктов не индексируются поисковиками.
+
+**Решение:**
+```typescript
+// app/sitemap.ts
+import { MetadataRoute } from 'next'
+import prisma from './lib/prisma'
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await prisma.product.findMany({
+    select: { slug: true, updatedAt: true }
+  })
+
+  return [
+    {
+      url: 'https://comp-auto.ru/',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1,
+    },
+    {
+      url: 'https://comp-auto.ru/catalog',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    ...products.map(product => ({
+      url: `https://comp-auto.ru/catalog/${product.slug}`,
+      lastModified: product.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }))
+  ]
+}
+```
+
+**Влияние:** Резкий рост видимости в поисковых системах, индексация всех товаров
+
+---
+
+### ♿ A11Y-001: Добавить labels к полям формы входа
+**Файл:** `app/admin/login/page.tsx:40-54`
+**Приоритет:** 🔴 КРИТИЧЕСКИЙ (требование WCAG 2.1)
+**Время:** 30 мин
+**Описание:** Поля ввода email и пароля не связаны с label элементами, что делает форму недоступной для screen readers.
+
+**Текущий код:**
+```tsx
+<input
+  type="email"
+  placeholder="Email"
+  {...register('email')}
+/>
+```
+
+**Решение:**
+```tsx
+<div>
+  <label htmlFor="email" className={styles.label}>
+    Email
+  </label>
+  <input
+    id="email"
+    type="email"
+    placeholder="Введите email"
+    aria-required="true"
+    aria-invalid={!!errors.email}
+    {...register('email')}
+  />
+  {errors.email && (
+    <span role="alert" className={styles.error}>
+      {errors.email.message}
+    </span>
+  )}
+</div>
+```
+
+**Влияние:** Соответствие стандартам доступности, улучшение UX для пользователей со скрин-ридерами
+
+---
+
+### 🔍 SEO-002: Добавить Schema.org разметку для товаров
+**Файл:** `app/(site)/catalog/[slug]/page.tsx`
+**Приоритет:** 🔴 КРИТИЧЕСКИЙ
+**Время:** 1-2 часа
+**Описание:** Отсутствует JSON-LD разметка Schema.org, что не позволяет Google показывать rich snippets (карточки товаров) в результатах поиска.
+
+**Решение:**
+```tsx
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getProduct(params.slug)
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.title,
+    description: product.description,
+    image: `https://comp-auto.ru${product.img}`,
+    brand: {
+      '@type': 'Brand',
+      name: product.autoMark
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://comp-auto.ru/catalog/${product.slug}`,
+      priceCurrency: 'RUB',
+      price: product.price,
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Komp-Auto'
+      }
+    },
+    sku: product.slug,
+    category: 'Турбокомпрессоры'
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* остальной контент */}
+    </>
+  )
+}
+```
+
+**Влияние:** Rich snippets в Google, повышение CTR на 20-30%
+
+---
+
+## 🟠 ВЫСОКИЙ ПРИОРИТЕТ
+
+### 🔒 SECURITY-002: Rate limiting на форме входа (client-side)
+**Файл:** `app/admin/login/page.tsx`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 1 час
+**Описание:** Клиентская защита от автоматизированных атак на форму входа.
+
+**Решение:**
+```typescript
+const [attempts, setAttempts] = useState(0)
+const [blockUntil, setBlockUntil] = useState<number | null>(null)
+
+const onSubmit = async (data: FormData) => {
+  if (blockUntil && Date.now() < blockUntil) {
+    const seconds = Math.ceil((blockUntil - Date.now()) / 1000)
+    toast.error(`Слишком много попыток. Попробуйте через ${seconds} сек`)
+    return
+  }
+
+  try {
+    // ... существующая логика
+  } catch (error) {
+    const newAttempts = attempts + 1
+    setAttempts(newAttempts)
+
+    if (newAttempts >= 3) {
+      const blockTime = Date.now() + 60000 // 1 минута
+      setBlockUntil(blockTime)
+      toast.error('Слишком много неудачных попыток. Блокировка на 1 минуту.')
+    }
+  }
+}
+```
+
+---
+
+### 🔒 SECURITY-003: Валидация query параметров через Zod
+**Файл:** `app/api/products/route.ts:140-156`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 1 час
+**Описание:** Query параметры напрямую используются в Prisma where условиях без валидации.
+
+**Решение:**
+```typescript
+import { z } from 'zod'
+
+const productFilterSchema = z.object({
+  autoMark: z.string().max(100).optional(),
+  engineModel: z.string().max(100).optional(),
+  compressor: z.string().max(100).optional(),
+  search: z.string().max(200).optional(),
+  skip: z.coerce.number().min(0).max(10000).default(0),
+  take: z.coerce.number().min(1).max(100).default(12),
+})
+
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url)
+
+    const validatedParams = productFilterSchema.parse({
+      autoMark: url.searchParams.get('autoMark'),
+      engineModel: url.searchParams.get('engineModel'),
+      compressor: url.searchParams.get('compressor'),
+      search: url.searchParams.get('search'),
+      skip: url.searchParams.get('skip'),
+      take: url.searchParams.get('take'),
+    })
+
+    // использовать validatedParams вместо прямого доступа
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid query parameters', details: error.errors },
+        { status: 400 }
+      )
+    }
+  }
+}
+```
+
+---
+
+### ⚛️ ARCH-001: Создать Error Boundary компонент
+**Файл:** Создать `app/components/errorBoundary/index.tsx`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 1 час
+**Описание:** React ошибки приводят к краху всего приложения вместо изоляции проблемного компонента.
+
+**Решение:**
+```tsx
+'use client'
+
+import { Component, ReactNode } from 'react'
+import styles from './errorBoundary.module.scss'
+
+interface Props {
+  children: ReactNode
+  fallback?: ReactNode
+}
+
+interface State {
+  hasError: boolean
+  error?: Error
+}
+
+export default class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo)
+
+    // Отправить в error tracking (Sentry, etc.)
+    // sendToErrorTracking(error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        <div className={styles.errorContainer}>
+          <h2>Что-то пошло не так</h2>
+          <p>Мы уже работаем над исправлением проблемы.</p>
+          <button onClick={() => window.location.reload()}>
+            Обновить страницу
+          </button>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+```
+
+**Использование в layout.tsx:**
+```tsx
+import ErrorBoundary from './components/errorBoundary'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+      </body>
+    </html>
+  )
+}
+```
+
+---
+
+### ♿ A11Y-002: Исправить alt текст у изображений галереи
+**Файл:** `app/(site)/catalog/[slug]/components/productGallery/index.tsx:53,60,68,84`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 30 мин
+**Описание:** Все изображения в галерее имеют пустой alt="", что нарушает WCAG 2.1 Level A.
+
+**Текущий код:**
+```tsx
+<Image src={mainImage} alt="" />
+```
+
+**Решение:**
+```tsx
+<Image
+  src={mainImage}
+  alt={`${title} - основное изображение`}
+/>
+
+{gallery.map((img, index) => (
+  <Image
+    key={index}
+    src={img}
+    alt={`${title} - фото ${index + 1}`}
+  />
+))}
+```
+
+---
+
+### ♿ A11Y-003: Keyboard navigation для фильтров
+**Файл:** `app/components/filterList/index.tsx:14-37`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 1 час
+**Описание:** Элементы фильтров имеют onClick, но недоступны с клавиатуры.
+
+**Текущий код:**
+```tsx
+<li onClick={() => onSelect(item.value)}>
+  {item.label}
+</li>
+```
+
+**Решение:**
+```tsx
+<li
+  role="button"
+  tabIndex={0}
+  onClick={() => onSelect(item.value)}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onSelect(item.value)
+    }
+  }}
+  aria-label={`Выбрать фильтр: ${item.label}`}
+>
+  {item.label}
+</li>
+```
+
+---
+
+### 🎨 UX-001: Debouncing для поиска
+**Файл:** `app/utils/useCatalog.ts:23-52`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 45 мин
+**Описание:** Каждое нажатие клавиши вызывает обновление URL и запрос к API.
+
+**Решение:**
+```typescript
+import { useState, useEffect, useCallback } from 'react'
+import { debounce } from 'lodash' // или собственная реализация
+
+export default function useCatalog() {
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  // Debounce на 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
+  // Обновлять URL только после debounce
+  useEffect(() => {
+    if (debouncedSearch !== searchParams.get('search')) {
+      const params = new URLSearchParams(searchParams)
+      if (debouncedSearch) {
+        params.set('search', debouncedSearch)
+      } else {
+        params.delete('search')
+      }
+      router.push(`?${params.toString()}`)
+    }
+  }, [debouncedSearch])
+
+  return {
+    searchInput,
+    setSearchInput,
+    // ...
+  }
+}
+```
+
+---
+
+### 🔒 SECURITY-004: Timing-safe сравнение для CRON_SECRET
+**Файл:** `app/api/cron/cleanup/route.ts:16-30`
+**Приоритет:** 🟠 ВЫСОКИЙ
+**Время:** 15 мин
+**Описание:** Строковое сравнение `!==` подвержено timing attacks.
+
+**Текущий код:**
+```typescript
+if (providedToken !== expectedToken) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
+```
+
+**Решение:**
+```typescript
+import { timingSafeEqual } from 'crypto'
+
+function constantTimeCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a, 'utf8')
+    const bufB = Buffer.from(b, 'utf8')
+
+    if (bufA.length !== bufB.length) {
+      return false
+    }
+
+    return timingSafeEqual(bufA, bufB)
+  } catch {
+    return false
+  }
+}
+
+// Использование
+if (!constantTimeCompare(providedToken || '', expectedToken)) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+}
+```
+
+---
+
+## 🟡 СРЕДНИЙ ПРИОРИТЕТ
+
+### 🔒 SECURITY-005: Session timeout для NextAuth
+**Файл:** `app/api/auth/authOptions.ts:51`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 15 мин
+**Описание:** Сессии живут бесконечно, что повышает риск при краже токена.
+
+**Решение:**
+```typescript
+export const authOptions: AuthOptions = {
+  // ...
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, // 24 часа
+    updateAge: 60 * 60, // Обновлять токен каждый час
+  },
+  // ...
+}
+```
+
+---
+
+### ⚛️ ARCH-002: Централизовать магические числа
+**Файлы:** Множество
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 1-2 часа
+**Описание:** Hardcoded значения разбросаны по всему коду.
+
+**Создать:** `app/constants/index.ts`
+```typescript
+export const BREAKPOINTS = {
+  mobile: 768,
+  tablet: 1024,
+  desktop: 1200,
+} as const
+
+export const PAGINATION = {
+  itemsPerPage: 12,
+  maxItems: 1000,
+} as const
+
+export const SLIDER = {
+  maxItems: 8,
+  autoplayDelay: 3000,
+} as const
+
+export const FILE_UPLOAD = {
+  maxSizeMB: 2,
+  maxSizeBytes: 2 * 1024 * 1024,
+  allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'] as const,
+} as const
+
+export const RATE_LIMIT = {
+  authAttempts: 5,
+  authWindowMs: 60 * 1000,
+  authBlockMs: 15 * 60 * 1000,
+} as const
+```
+
+**Использование:**
+```typescript
+import { PAGINATION } from '@/constants'
+
+const ITEMS_PER_PAGE = PAGINATION.itemsPerPage
+```
+
+---
+
+### 📊 OBSERVABILITY-001: Структурированное логирование
+**Файл:** Создать `app/lib/logger.ts`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 2 часа
+**Описание:** Console.log без контекста затрудняет отладку в production.
+
+**Решение:**
+```typescript
+// app/lib/logger.ts
+type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+
+interface LogContext {
+  [key: string]: unknown
+}
+
+class Logger {
+  private isDevelopment = process.env.NODE_ENV === 'development'
+
+  private log(level: LogLevel, message: string, context?: LogContext) {
+    const timestamp = new Date().toISOString()
+    const logEntry = {
+      timestamp,
+      level,
+      message,
+      ...context,
+    }
+
+    if (this.isDevelopment) {
+      console.log(`[${timestamp}] [${level.toUpperCase()}] ${message}`, context || '')
+    } else {
+      // В production отправлять в сервис логирования
+      console.log(JSON.stringify(logEntry))
+    }
+  }
+
+  debug(message: string, context?: LogContext) {
+    if (this.isDevelopment) {
+      this.log('debug', message, context)
+    }
+  }
+
+  info(message: string, context?: LogContext) {
+    this.log('info', message, context)
+  }
+
+  warn(message: string, context?: LogContext) {
+    this.log('warn', message, context)
+  }
+
+  error(message: string, error?: Error, context?: LogContext) {
+    this.log('error', message, {
+      ...context,
+      error: error?.message,
+      stack: error?.stack,
+    })
+  }
+}
+
+export const logger = new Logger()
+```
+
+**Использование:**
+```typescript
+import { logger } from '@/lib/logger'
+
+// Вместо console.log
+logger.info('Product created', { productId: product.id, userId: user.id })
+logger.error('Failed to upload image', error, { filename: file.name })
+```
+
+---
+
+### 🎨 UX-002: Loading skeleton для изображений
+**Файл:** `app/components/product/index.tsx:17-24`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 1 час
+**Описание:** Изображения показываются без placeholder, что создает плохое восприятие производительности.
+
+**Решение:**
+```tsx
+import { useState } from 'react'
+import styles from './product.module.scss'
+
+export default function Product({ product }) {
+  const [imageLoaded, setImageLoaded] = useState(false)
+
+  return (
+    <div className={styles.imageWrapper}>
+      {!imageLoaded && (
+        <div className={styles.skeleton} />
+      )}
+      <Image
+        src={product.img}
+        alt={product.title}
+        onLoad={() => setImageLoaded(true)}
+        className={imageLoaded ? styles.loaded : styles.loading}
+      />
+    </div>
+  )
+}
+```
+
+```scss
+// product.module.scss
+.imageWrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.loading {
+  opacity: 0;
+}
+
+.loaded {
+  opacity: 1;
+  transition: opacity 0.3s;
+}
+```
+
+---
+
+### ⚛️ ARCH-003: AbortController для fetch запросов
+**Файл:** `app/utils/useCatalog.ts`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 1 час
+**Описание:** Fetch запросы не отменяются при размонтировании компонента, что приводит к утечкам памяти.
+
+**Решение:**
+```typescript
+useEffect(() => {
+  const abortController = new AbortController()
+
+  async function fetchProducts() {
+    try {
+      const response = await fetch('/api/products', {
+        signal: abortController.signal
+      })
+      const data = await response.json()
+      setProducts(data)
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('Fetch aborted')
+      } else {
+        console.error('Fetch error:', error)
+      }
+    }
+  }
+
+  fetchProducts()
+
+  return () => {
+    abortController.abort()
+  }
+}, [/* dependencies */])
+```
+
+---
+
+### 🎨 UX-003: Позиционирование dropdown на мобильных
+**Файл:** `app/components/filters/index.tsx:23`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 1 час
+**Описание:** Dropdown может выходить за границы viewport на мобильных устройствах.
+
+**Решение:**
+```typescript
+import { useEffect, useRef, useState } from 'react'
+
+export default function Filters() {
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
+
+  useEffect(() => {
+    if (!isOpen || !dropdownRef.current) return
+
+    const rect = dropdownRef.current.getBoundingClientRect()
+    const viewportHeight = window.innerHeight
+
+    // Если dropdown не помещается снизу, показываем сверху
+    if (rect.bottom > viewportHeight) {
+      setDropdownPosition('top')
+    } else {
+      setDropdownPosition('bottom')
+    }
+  }, [isOpen])
+
+  return (
+    <div
+      ref={dropdownRef}
+      className={`${styles.dropdown} ${styles[dropdownPosition]}`}
+    >
+      {/* содержимое */}
+    </div>
+  )
+}
+```
+
+---
+
+### 📊 OBSERVABILITY-002: Web Vitals tracking
+**Файл:** `app/layout.tsx`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 30 мин
+**Описание:** Отсутствует мониторинг Core Web Vitals (LCP, FID, CLS).
+
+**Решение:**
+```tsx
+// app/components/webVitals.tsx
+'use client'
+
+import { useReportWebVitals } from 'next/web-vitals'
+
+export function WebVitals() {
+  useReportWebVitals((metric) => {
+    // Отправлять метрики в аналитику
+    if (window.gtag) {
+      window.gtag('event', metric.name, {
+        value: Math.round(metric.value),
+        metric_id: metric.id,
+        metric_delta: metric.delta,
+      })
+    }
+
+    // Или в собственную систему мониторинга
+    console.log(metric)
+  })
+
+  return null
+}
+```
+
+```tsx
+// app/layout.tsx
+import { WebVitals } from './components/webVitals'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <WebVitals />
+        {children}
+      </body>
+    </html>
+  )
+}
+```
+
+---
+
+### 🔍 SEO-003: Breadcrumb Schema.org разметка
+**Файл:** `app/(site)/catalog/[slug]/page.tsx`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 30 мин
+**Описание:** Отсутствует breadcrumb разметка для отображения в поисковой выдаче.
+
+**Решение:**
+```tsx
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Главная',
+      item: 'https://comp-auto.ru/'
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Каталог',
+      item: 'https://comp-auto.ru/catalog'
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: product.title,
+      item: `https://comp-auto.ru/catalog/${product.slug}`
+    }
+  ]
+}
+
+return (
+  <>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+    />
+  </>
+)
+```
+
+---
+
+## 🟢 НИЗКИЙ ПРИОРИТЕТ
+
+### ♿ A11Y-004: Focus indicators в CSS
+**Файлы:** Все SCSS модули
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 2 часа
+**Описание:** Отсутствуют явные focus стили для keyboard navigation.
+
+**Решение:**
+```scss
+// app/globals.scss
+*:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+}
+```
+
+---
+
+### 🔒 SECURITY-006: CORS headers конфигурация
+**Файл:** `middleware.ts`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 30 мин
+**Описание:** Отсутствует явная настройка CORS.
+
+**Решение:**
+```typescript
+// middleware.ts
+const response = NextResponse.next()
+
+// Если нужен CORS для API
+if (pathname.startsWith('/api/')) {
+  response.headers.set('Access-Control-Allow-Origin', 'https://comp-auto.ru')
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  response.headers.set('Access-Control-Max-Age', '86400')
+}
+```
+
+---
+
+### 🎨 UX-004: Оптимизация изображений - убрать unoptimized
+**Файл:** `app/components/product/index.tsx:24`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 1 час
+**Описание:** Prop `unoptimized` отключает оптимизацию Next.js Image.
+
+**Решение:**
+```tsx
+// BEFORE
+<Image
+  src={img}
+  alt={title}
+  width={400}
+  height={300}
+  unoptimized  // ← УДАЛИТЬ
+/>
+
+// AFTER
+<Image
+  src={img}
+  alt={title}
+  width={400}
+  height={300}
+  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+  loading="lazy"
+/>
+```
+
+---
+
+### ⚛️ ARCH-004: Вынести общую логику fetching в shared hook
+**Файлы:** `app/admin/hooks/useAdminProducts.ts`, `app/utils/useCatalog.ts`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 2 часа
+**Описание:** Дублирование логики загрузки продуктов.
+
+**Решение:**
+```typescript
+// app/hooks/useProducts.ts
+export function useProducts(options?: {
+  filters?: ProductFilters
+  pagination?: { skip: number; take: number }
+}) {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    const abortController = new AbortController()
+
+    async function fetchProducts() {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        // ... построение query string
+
+        const response = await fetch(`/api/products?${params}`, {
+          signal: abortController.signal
+        })
+        const data = await response.json()
+        setProducts(data)
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err as Error)
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+
+    return () => abortController.abort()
+  }, [/* deps */])
+
+  return { products, loading, error }
+}
+```
+
+---
+
+### 🔍 SEO-004: Убрать randomSuffix из slug (опционально)
+**Файл:** `app/api/products/route.ts:76`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 30 мин
+**Описание:** Случайный суффикс в slug делает URL менее читаемыми для SEO.
+
+**Текущее:** `gt1749v-volkswagen-tdi-19-a7x9k`
+**Предложение:** `gt1749v-volkswagen-tdi-19`
+
+**Решение:**
+```typescript
+// Вместо randomSuffix использовать ID или убрать совсем
+const slug = slugify(`${title} ${autoMark} ${engineModel}`, { lower: true })
+
+// Проверка уникальности
+const existing = await prisma.product.findUnique({ where: { slug } })
+if (existing) {
+  // Добавить счетчик только при коллизии
+  const count = await prisma.product.count({
+    where: { slug: { startsWith: slug } }
+  })
+  slug = `${slug}-${count + 1}`
+}
+```
+
+---
+
+## 🧪 ТЕСТИРОВАНИЕ
+
+### TEST-001: Настроить Jest/Vitest для unit тестов
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 3-4 часа
+**Описание:** Полное отсутствие тестов.
+
+**Задачи:**
+1. Установить Vitest: `pnpm add -D vitest @vitejs/plugin-react`
+2. Создать `vitest.config.ts`
+3. Добавить скрипт в package.json: `"test": "vitest"`
+4. Написать первые тесты:
+   - `app/lib/imageVariants.test.ts` - тесты для функций работы с вариантами
+   - `app/utils/catalogUtils.test.ts` - тесты для утилит каталога
+   - `app/api/lib/rateLimit.test.ts` - тесты rate limiting логики
+
+**Пример теста:**
+```typescript
+// app/lib/imageVariants.test.ts
+import { describe, it, expect } from 'vitest'
+import { variantUrl, sourceUrl } from './imageVariants'
+
+describe('imageVariants', () => {
+  it('should generate correct variant URL', () => {
+    const original = '/uploads/product-123.webp'
+    expect(variantUrl(original, 'card')).toBe('/uploads/product-123__card.webp')
+  })
+
+  it('should strip existing variant suffix', () => {
+    const original = '/uploads/product__detail.webp'
+    expect(variantUrl(original, 'thumb')).toBe('/uploads/product__thumb.webp')
+  })
+})
+```
+
+---
+
+### TEST-002: E2E тесты с Playwright
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 8-10 часов
+**Описание:** Отсутствуют E2E тесты для критических флоу.
+
+**Критические флоу для тестирования:**
+1. Вход в админ панель
+2. Создание продукта с загрузкой изображений
+3. Редактирование продукта
+4. Удаление продукта
+5. Фильтрация и поиск в каталоге
+6. Просмотр страницы продукта
+
+**Настройка:**
+```bash
+pnpm add -D @playwright/test
+pnpm exec playwright install
+```
+
+**Пример теста:**
+```typescript
+// e2e/admin-login.spec.ts
+import { test, expect } from '@playwright/test'
+
+test('admin login flow', async ({ page }) => {
+  await page.goto('/admin/login')
+
+  await page.fill('input[name="email"]', process.env.ADMIN_EMAIL!)
+  await page.fill('input[name="password"]', process.env.ADMIN_PASSWORD!)
+  await page.click('button[type="submit"]')
+
+  await expect(page).toHaveURL('/admin')
+  await expect(page.locator('h1')).toContainText('Управление продуктами')
+})
+```
+
+---
+
+### TEST-003: API Integration тесты
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 4-6 часов
+**Описание:** API routes не покрыты тестами.
+
+**Тестировать:**
+- `/api/products` - CRUD операции
+- `/api/upload` - загрузка и валидация файлов
+- `/api/auth` - авторизация
+- `/api/cleanup` - очистка файлов
+
+**Пример:**
+```typescript
+// __tests__/api/products.test.ts
+import { describe, it, expect, beforeAll } from 'vitest'
+
+describe('GET /api/products', () => {
+  it('should return products list', async () => {
+    const response = await fetch('http://localhost:3000/api/products')
+    expect(response.status).toBe(200)
+
+    const data = await response.json()
+    expect(data).toHaveProperty('products')
+    expect(Array.isArray(data.products)).toBe(true)
+  })
+
+  it('should filter by autoMark', async () => {
+    const response = await fetch('http://localhost:3000/api/products?autoMark=Volkswagen')
+    const data = await response.json()
+
+    data.products.forEach(p => {
+      expect(p.autoMark).toBe('Volkswagen')
+    })
+  })
+})
+```
+
+---
+
+## 🗄️ DATABASE & PERFORMANCE
+
+### DB-001: Connection pooling для PostgreSQL
+**Файл:** `.env`, `app/lib/prisma.ts`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 1 час
+**Описание:** Prisma использует дефолтный connection pool, который может быть недостаточен для production.
+
+**Решение:**
+```bash
+# .env
+DATABASE_URL="postgresql://user:pass@localhost:5432/db?schema=public&connection_limit=10&pool_timeout=20"
+```
+
+```typescript
+// app/lib/prisma.ts
+const prisma = new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+})
+
+// Graceful shutdown
+if (process.env.NODE_ENV === 'production') {
+  process.on('beforeExit', async () => {
+    await prisma.$disconnect()
+  })
+}
+```
+
+---
+
+### PERF-001: Отдельный endpoint для filter options
+**Файл:** `app/utils/useCatalog.ts:107`
+**Приоритет:** 🟡 СРЕДНИЙ
+**Время:** 2 часа
+**Описание:** Загружается до 1000 продуктов только для получения уникальных значений фильтров.
+
+**Решение:**
+```typescript
+// app/api/products/filters/route.ts
+import { NextResponse } from 'next/server'
+import prisma from '@/app/lib/prisma'
+
+export async function GET() {
+  try {
+    // Параллельные запросы для производительности
+    const [autoMarks, engineModels, compressors] = await Promise.all([
+      prisma.product.findMany({
+        select: { autoMark: true },
+        distinct: ['autoMark'],
+        orderBy: { autoMark: 'asc' }
+      }),
+      prisma.product.findMany({
+        select: { engineModel: true },
+        distinct: ['engineModel'],
+        orderBy: { engineModel: 'asc' }
+      }),
+      prisma.product.findMany({
+        select: { compressor: true },
+        distinct: ['compressor'],
+        orderBy: { compressor: 'asc' }
+      })
+    ])
+
+    return NextResponse.json({
+      autoMarks: autoMarks.map(p => p.autoMark),
+      engineModels: engineModels.map(p => p.engineModel),
+      compressors: compressors.map(p => p.compressor),
+    })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch filters' }, { status: 500 })
+  }
+}
+```
+
+---
+
+### PERF-002: Redis для rate limiting в production
+**Файл:** `app/api/lib/rateLimit.ts`
+**Приоритет:** 🟢 НИЗКИЙ (уже задокументировано)
+**Время:** 4-6 часов
+**Описание:** In-memory Map не работает в multi-instance deployments.
+
+**Решение:** См. `RATE_LIMITING.md` секцию "Миграция на Redis"
+
+---
+
+### PERF-003: Кеширование данных продуктов
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 6-8 часов
+**Описание:** Каждый запрос идет в БД, нет кеширования.
+
+**Опции:**
+1. Next.js `unstable_cache` для server components
+2. React Query для client-side кеширования
+3. Redis для полноценного кеша
+
+**Пример с unstable_cache:**
+```typescript
+// app/lib/products.ts
+import { unstable_cache } from 'next/cache'
+import prisma from './prisma'
+
+export const getProducts = unstable_cache(
+  async (filters: ProductFilters) => {
+    return await prisma.product.findMany({
+      where: buildWhereClause(filters),
+      orderBy: { createdAt: 'desc' }
+    })
+  },
+  ['products'], // cache key
+  {
+    revalidate: 3600, // 1 час
+    tags: ['products']
+  }
+)
+
+// Инвалидация кеша при изменениях
+import { revalidateTag } from 'next/cache'
+
+export async function createProduct(data: ProductData) {
+  const product = await prisma.product.create({ data })
+  revalidateTag('products')
+  return product
+}
+```
+
+---
+
+## 📋 ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ
+
+### MISC-001: Health check endpoint
+**Файл:** Создать `app/api/health/route.ts`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 30 мин
+**Описание:** Мониторинг здоровья приложения для load balancers.
+
+**Решение:**
+```typescript
+import { NextResponse } from 'next/server'
+import prisma from '@/app/lib/prisma'
+
+export async function GET() {
+  try {
+    // Проверка подключения к БД
+    await prisma.$queryRaw`SELECT 1`
+
+    return NextResponse.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: 'connected'
+    })
+  } catch (error) {
+    return NextResponse.json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      database: 'disconnected',
+      error: error.message
+    }, { status: 503 })
+  }
+}
+```
+
+---
+
+### MISC-002: Graceful shutdown handling
+**Файл:** Добавить в `app/lib/prisma.ts`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 30 мин
+**Описание:** Корректное закрытие соединений при остановке приложения.
+
+**Решение:**
+```typescript
+// app/lib/prisma.ts
+let shuttingDown = false
+
+async function gracefulShutdown() {
+  if (shuttingDown) return
+  shuttingDown = true
+
+  console.log('Shutting down gracefully...')
+
+  try {
+    await prisma.$disconnect()
+    console.log('Database connections closed')
+    process.exit(0)
+  } catch (error) {
+    console.error('Error during shutdown:', error)
+    process.exit(1)
+  }
+}
+
+process.on('SIGTERM', gracefulShutdown)
+process.on('SIGINT', gracefulShutdown)
+```
+
+---
+
+### MISC-003: Request logging для audit trail
+**Файл:** `middleware.ts`
+**Приоритет:** 🟢 НИЗКИЙ
+**Время:** 1 час
+**Описание:** Логирование всех запросов к защищенным endpoints.
+
+**Решение:**
+```typescript
+// middleware.ts
+export async function middleware(req: NextRequest) {
+  const start = Date.now()
+
+  // ... существующая логика
+
+  const response = NextResponse.next()
+
+  // Логирование после обработки
+  if (pathname.startsWith('/api/') || pathname.startsWith('/admin/')) {
+    const duration = Date.now() - start
+    logger.info('Request processed', {
+      method: req.method,
+      path: pathname,
+      duration,
+      status: response.status,
+      userAgent: req.headers.get('user-agent'),
+      ip: getClientIp(req)
+    })
+  }
+
+  return response
+}
+```
+
+---
+
+## 📊 МЕТРИКИ ПРОГРЕССА
+
+### По приоритетам:
+- 🔴 **Критические:** 4 задачи (~4-6 часов)
+- 🟠 **Высокие:** 6 задач (~8-10 часов)
+- 🟡 **Средние:** 11 задач (~15-20 часов)
+- 🟢 **Низкие:** 11 задач (~20-25 часов)
+- 🧪 **Тестирование:** 3 задачи (~15-20 часов)
+
+### По категориям:
+- 🔒 **Безопасность:** 6 задач
+- ♿ **Доступность:** 4 задачи
+- 🔍 **SEO:** 4 задачи
+- 🎨 **UX:** 4 задачи
+- ⚛️ **Архитектура:** 4 задачи
+- 📊 **Observability:** 2 задачи
+- 🗄️ **Database/Performance:** 3 задачи
+- 🧪 **Testing:** 3 задачи
+- 📋 **Misc:** 3 задачи
+
+**Общее время на все задачи:** ~62-81 час
+
+---
+
+## 🎯 РЕКОМЕНДОВАННЫЙ ПЛАН ВНЕДРЕНИЯ
+
+### Спринт 1 (Неделя 1): Критические исправления - 4-6 часов
+- [x] SECURITY-001: Убрать логирование email
+- [x] SEO-001: Динамический sitemap
+- [x] A11Y-001: Labels в форме входа
+- [x] SEO-002: Schema.org разметка
+
+**Результат:** Закрыты критические уязвимости безопасности и SEO
+
+---
+
+### Спринт 2 (Неделя 2): Безопасность и доступность - 8-10 часов
+- [x] SECURITY-002: Rate limiting на форме входа
+- [x] SECURITY-003: Валидация query параметров
+- [x] SECURITY-004: Timing-safe сравнение
+- [x] A11Y-002: Alt текст в галерее
+- [x] A11Y-003: Keyboard navigation для фильтров
+- [x] ARCH-001: Error Boundary
+
+**Результат:** Приложение соответствует WCAG 2.1 Level A, усилена защита
+
+---
+
+### Спринт 3 (Неделя 3): UX и производительность - 8-12 часов
+- [x] UX-001: Debouncing для поиска
+- [x] UX-002: Loading skeleton
+- [x] ARCH-003: AbortController
+- [x] SECURITY-005: Session timeout
+- [x] ARCH-002: Централизовать константы
+- [x] OBSERVABILITY-001: Структурированное логирование
+
+**Результат:** Улучшен UX, оптимизирована производительность
+
+---
+
+### Спринт 4 (Неделя 4): Мониторинг и SEO - 4-6 часов
+- [x] OBSERVABILITY-002: Web Vitals
+- [x] SEO-003: Breadcrumb schema
+- [x] UX-003: Dropdown positioning
+- [x] DB-001: Connection pooling
+- [x] PERF-001: Filter options endpoint
+
+**Результат:** Полный мониторинг, улучшен SEO
+
+---
+
+### Спринт 5 (Неделя 5-6): Тестирование - 15-20 часов
+- [x] TEST-001: Настроить Vitest
+- [x] TEST-002: E2E тесты Playwright
+- [x] TEST-003: API integration тесты
+
+**Результат:** 70%+ code coverage, защита от регрессий
+
+---
+
+### Спринт 6 (Опционально): Долгосрочные улучшения - 20-25 часов
+- [x] PERF-002: Redis для rate limiting
+- [x] PERF-003: Кеширование
+- [x] ARCH-004: Shared hooks
+- [x] Остальные низкоприоритетные задачи
+
+**Результат:** Production-ready infrastructure
+
+---
+
+## 🔗 ПОЛЕЗНЫЕ ССЫЛКИ
+
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+- [Next.js Security Headers](https://nextjs.org/docs/app/api-reference/next-config-js/headers)
+- [Schema.org Product](https://schema.org/Product)
+- [Google Rich Results Test](https://search.google.com/test/rich-results)
+- [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [Web.dev Performance](https://web.dev/performance/)
+
+---
+
+## ✅ КРИТЕРИИ ГОТОВНОСТИ К PRODUCTION
+
+### Must Have (перед запуском):
+- [x] SECURITY-001: Логирование очищено
+- [x] SEO-001: Динамический sitemap
+- [x] A11Y-001: Формы доступны
+- [x] SECURITY-003: Input validation
+- [x] ARCH-001: Error boundaries
+- [x] OBSERVABILITY-001: Structured logging
+
+### Should Have (в течение месяца):
+- [x] Все HIGH priority задачи
+- [x] Web Vitals мониторинг
+- [x] Unit тесты для критической логики
+- [x] E2E тесты для main flows
+
+### Nice to Have (долгосрочно):
+- [x] Full test coverage
+- [x] Redis caching
+- [x] Advanced monitoring
+- [x] Performance optimizations
+
+---
+
+**Статус документа:** 📝 Активен
+**Следующий review:** Через 2 недели после начала спринта 1

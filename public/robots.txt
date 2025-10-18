@@ -5,4 +5,4 @@ Disallow: /test/
 Disallow: /cgi-bin/
 Allow: /
 
-Sitemap: https://comp-auto.com/sitemap.xml
+Sitemap: https://comp-auto.ru/sitemap.xml
