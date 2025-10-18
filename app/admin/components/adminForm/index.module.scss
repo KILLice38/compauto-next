@@ -1,4 +1,5 @@
 @use '../../../styles/vars';
+@use '../../../styles/mixins';
 
 .form {
   display: flex;
@@ -6,175 +7,387 @@
   max-height: calc(100svh - 120px);
   max-height: calc(100vh - 120px);
   overflow: hidden; /* скролл только у .formScroll */
-  gap: 12px;
+  gap: 16px;
 }
 
 .formScroll {
   flex: 1 1 auto;
   overflow: auto;
-  padding-right: 8px;
+  padding-right: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
   min-height: 50vh;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: vars.$color-background-nonactive;
+    border-radius: 10px;
+
+    &:hover {
+      background: vars.$color-background-secondary;
+    }
+  }
 }
 
 .formActions {
   flex: 0 0 auto;
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-end;
-  padding: 12px 0 0;
-  border-top: 1px solid vars.$color-background-nonactive;
+  padding: 16px 0 0;
+  border-top: 1px solid rgba(212, 86, 74, 0.3);
 }
 
 .label {
   display: flex;
   flex-direction: column;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: vars.$color-text-main;
   gap: 8px;
-  /* ВАЖНО: БЕЗ max-height/overflow, иначе режет поля */
 }
 
 .input {
   margin-top: 4px;
-  padding: 10px 12px;
-  background-color: vars.$color-background-secondary;
-  border: 1px solid vars.$color-background-nonactive;
-  border-radius: 6px;
+  padding: 12px 14px;
+  background-color: rgba(44, 47, 54, 0.5);
+  border: 1px solid rgba(212, 86, 74, 0.3);
+  border-radius: 8px;
   color: vars.$color-text-main;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 
   &:focus {
     outline: none;
-    border-color: vars.$color-background-blur;
-    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+    border-color: vars.$color-background-secondary;
+    background-color: rgba(44, 47, 54, 0.7);
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
   }
 
   &::placeholder {
     color: vars.$color-text-description;
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    background-color: rgba(44, 47, 54, 0.3);
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 }
 
 .error {
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background-color: rgba(225, 91, 100, 0.15);
+  border: 1px solid rgba(225, 91, 100, 0.3);
+  border-radius: 6px;
   font-size: 0.85rem;
-  color: #e15b64;
+  color: #ff6b7a;
+  line-height: 1.4;
 }
 
 .hint {
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background-color: rgba(192, 57, 43, 0.1);
+  border-left: 3px solid vars.$color-background-secondary;
+  border-radius: 4px;
   font-size: 0.8rem;
   color: vars.$color-text-description;
   font-style: italic;
+  line-height: 1.5;
 }
 
 .loading {
   margin-top: 4px;
   font-size: 0.9rem;
   color: vars.$color-text-description;
+  font-style: italic;
 }
 
 .row {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: flex-start;
 }
 
 .galleryHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 12px;
+  background-color: rgba(44, 47, 54, 0.3);
+  border-radius: 8px;
+  border: 1px solid rgba(212, 86, 74, 0.2);
 }
+
 .spacer {
   flex: 1;
 }
+
 .muted {
   opacity: 0.7;
+  font-size: 0.85rem;
+  color: vars.$color-text-description;
 }
 
 .imagesGrid {
-  margin-top: 8px;
+  margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
 }
+
 .imageItem {
-  border: 1px solid vars.$color-background-nonactive;
-  padding: 8px;
-  border-radius: 8px;
+  border: 1px solid rgba(212, 86, 74, 0.3);
+  padding: 12px;
+  border-radius: 10px;
+  background-color: rgba(44, 47, 54, 0.4);
   display: grid;
-  gap: 6px;
+  gap: 10px;
   justify-items: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(44, 47, 54, 0.6);
+    border-color: vars.$color-background-secondary;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
 }
+
 .thumb {
   display: block;
   width: 106px;
   height: 69px;
   object-fit: cover;
+  border-radius: 6px;
 }
 
 /* Кнопки */
 .btn {
-  padding: 10px 16px;
+  padding: 12px 20px;
   font-size: 0.95rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   color: vars.$color-text-main;
   background-color: vars.$color-background-secondary;
-  transition:
-    background-color 0.2s,
-    opacity 0.2s;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.3);
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: vars.$color-background-blur;
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.5);
   }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(192, 57, 43, 0.3);
+  }
+
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
   }
 }
 
 .btnGhost {
-  padding: 8px 12px;
+  padding: 10px 16px;
   font-size: 0.95rem;
   font-weight: 600;
-  border-radius: 6px;
-  border: 1px solid vars.$color-background-nonactive;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 86, 74, 0.5);
   background: transparent;
   color: vars.$color-text-description;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: vars.$color-background-nonactive;
+    background-color: rgba(212, 86, 74, 0.15);
+    border-color: vars.$color-background-secondary;
     color: vars.$color-text-main;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
 .btnGhostSmall {
-  padding: 6px 10px;
+  padding: 8px 12px;
   font-size: 0.85rem;
+  font-weight: 500;
   border-radius: 6px;
-  border: 1px solid vars.$color-background-nonactive;
+  border: 1px solid rgba(212, 86, 74, 0.5);
   background: transparent;
   color: vars.$color-text-description;
   cursor: pointer;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: vars.$color-background-nonactive;
+    background-color: vars.$color-background-secondary;
+    border-color: vars.$color-background-secondary;
     color: vars.$color-text-main;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
-/* Мобилка — больше доступной высоты формы */
-@media (max-width: 575px) {
+/* Responsive breakpoints */
+@include mixins.responsive-1200 {
+  .imagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+  }
+}
+
+@include mixins.responsive-992 {
+  .form {
+    max-height: calc(100svh - 100px);
+    max-height: calc(100vh - 100px);
+  }
+
+  .formScroll {
+    gap: 16px;
+  }
+
+  .label {
+    font-size: 0.88rem;
+  }
+
+  .input {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .imagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+  }
+
+  .galleryHeader {
+    padding: 10px;
+    gap: 10px;
+  }
+}
+
+@include mixins.responsive-768 {
+  .form {
+    gap: 12px;
+  }
+
+  .formScroll {
+    gap: 14px;
+    padding-right: 8px;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+    gap: 10px;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .imagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+
+  .imageItem {
+    padding: 10px;
+  }
+
+  .galleryHeader {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .btn,
+  .btnGhost {
+    padding: 12px 16px;
+  }
+}
+
+@include mixins.responsive-575 {
   .form {
     max-height: calc(100svh - 80px);
     max-height: calc(100vh - 80px);
+    gap: 10px;
+  }
+
+  .formScroll {
+    gap: 12px;
+  }
+
+  .label {
+    font-size: 0.85rem;
+    gap: 6px;
+  }
+
+  .input {
+    padding: 10px;
+    font-size: 0.88rem;
+  }
+
+  .imagesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .imageItem {
+    padding: 8px;
+  }
+
+  .thumb {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/10;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  .error {
+    font-size: 0.8rem;
+    padding: 8px 10px;
+  }
+
+  .btn,
+  .btnGhost {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .btnGhostSmall {
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
 }
