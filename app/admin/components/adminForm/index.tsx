@@ -15,6 +15,12 @@ interface Props {
   onCancel: () => void
 }
 
+interface FilterOptions {
+  autoMark: Array<{ id: number; value: string }>
+  engineModel: Array<{ id: number; value: string }>
+  compressor: Array<{ id: number; value: string }>
+}
+
 export default function ProductForm({ editingProduct, onSave, onCancel }: Props) {
   const toast = useToast()
 
@@ -39,6 +45,31 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'details' })
+
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+    autoMark: [],
+    engineModel: [],
+    compressor: [],
+  })
+  const [loadingFilters, setLoadingFilters] = useState(true)
+
+  // Загружаем опции фильтров
+  useEffect(() => {
+    async function loadFilters() {
+      try {
+        const res = await fetch('/api/filters')
+        if (res.ok) {
+          const data = await res.json()
+          setFilterOptions(data)
+        }
+      } catch (error) {
+        console.error('Failed to load filters:', error)
+      } finally {
+        setLoadingFilters(false)
+      }
+    }
+    loadFilters()
+  }, [])
 
   useEffect(() => {
     if (editingProduct) {
@@ -238,17 +269,59 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
 
         <label className={css.label}>
           Модель двигателя
-          <input {...register('engineModel')} className={css.input} />
+          {loadingFilters ? (
+            <p className={css.loading}>Загрузка...</p>
+          ) : (
+            <select {...register('engineModel')} className={css.input}>
+              <option value="">Выберите модель двигателя</option>
+              {filterOptions.engineModel.map((opt) => (
+                <option key={opt.id} value={opt.value}>
+                  {opt.value}
+                </option>
+              ))}
+            </select>
+          )}
+          <small className={css.hint}>
+            Не нашли нужную модель? Добавьте её через "Редактировать фильтры"
+          </small>
         </label>
 
         <label className={css.label}>
           Марка авто
-          <input {...register('autoMark')} className={css.input} />
+          {loadingFilters ? (
+            <p className={css.loading}>Загрузка...</p>
+          ) : (
+            <select {...register('autoMark')} className={css.input}>
+              <option value="">Выберите марку автомобиля</option>
+              {filterOptions.autoMark.map((opt) => (
+                <option key={opt.id} value={opt.value}>
+                  {opt.value}
+                </option>
+              ))}
+            </select>
+          )}
+          <small className={css.hint}>
+            Не нашли нужную марку? Добавьте её через "Редактировать фильтры"
+          </small>
         </label>
 
         <label className={css.label}>
           Компрессор
-          <input {...register('compressor')} className={css.input} />
+          {loadingFilters ? (
+            <p className={css.loading}>Загрузка...</p>
+          ) : (
+            <select {...register('compressor')} className={css.input}>
+              <option value="">Выберите тип компрессора</option>
+              {filterOptions.compressor.map((opt) => (
+                <option key={opt.id} value={opt.value}>
+                  {opt.value}
+                </option>
+              ))}
+            </select>
+          )}
+          <small className={css.hint}>
+            Не нашли нужный тип? Добавьте его через "Редактировать фильтры"
+          </small>
         </label>
 
         <label className={css.label}>

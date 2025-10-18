@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import Button from '../components/button'
 import ProductForm from './components/adminForm'
 import AdminList from './components/adminList'
+import FilterManager from './components/filterManager'
 import { useAdminProducts } from './hooks/useAdminProducts'
 import css from './page.module.scss'
 import type { ProductType } from './types/types'
@@ -22,6 +24,8 @@ export default function AdminPageClient() {
     toggleForm,
     loadMore,
   } = useAdminProducts()
+
+  const [showFilterManager, setShowFilterManager] = useState(false)
 
   const handleSave = (savedProduct: ProductType) => {
     setProducts((cur) => {
@@ -49,6 +53,9 @@ export default function AdminPageClient() {
           <Button onClickFunction={toggleForm} type="modal">
             {showForm ? 'Отменить' : 'Добавить продукт'}
           </Button>
+          <Button onClickFunction={() => setShowFilterManager(true)} type="filter">
+            Редактировать фильтры
+          </Button>
           <Button onClickFunction={() => signOut({ callbackUrl: '/admin/login' })} type="out">
             Выйти
           </Button>
@@ -73,6 +80,8 @@ export default function AdminPageClient() {
           loadingMore={loadingMore}
           hasMore={hasMore}
         />
+
+        {showFilterManager && <FilterManager onClose={() => setShowFilterManager(false)} />}
       </div>
     </div>
   )

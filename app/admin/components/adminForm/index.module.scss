@@ -65,6 +65,19 @@
   color: #e15b64;
 }
 
+.hint {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: vars.$color-text-description;
+  font-style: italic;
+}
+
+.loading {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: vars.$color-text-description;
+}
+
 .row {
   display: flex;
   gap: 8px;

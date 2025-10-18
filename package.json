@@ -12,7 +12,8 @@
     "prettify": "prettify",
     "types": "tsc --noEmit",
     "prepare": "husky",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate-filters": "tsx prisma/migrate-filters.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
