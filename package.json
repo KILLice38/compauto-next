@@ -13,7 +13,9 @@
     "types": "tsc --noEmit",
     "prepare": "husky",
     "db:seed": "tsx prisma/seed.ts",
-    "db:migrate-filters": "tsx prisma/migrate-filters.ts"
+    "db:migrate-filters": "tsx prisma/migrate-filters.ts",
+    "migrate:images": "tsx scripts/migrate-images.ts",
+    "migrate:images:dry": "tsx scripts/migrate-images.ts --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -24,6 +26,7 @@
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-easy-crop": "^5.5.3",
     "react-hook-form": "^7.60.0",
     "react-responsive": "^10.0.1",
     "reset-css": "^5.0.2",

@@ -1,4 +1,9 @@
 // lib/imageVariants.ts
+// ОБРАТНАЯ СОВМЕСТИМОСТЬ:
+// Эта библиотека работает как со старыми изображениями (с белым фоном),
+// так и с новыми (с прозрачным фоном после обрезки).
+// Варианты изображений всегда создаются автоматически при загрузке.
+
 export type Variant = 'card' | 'detail' | 'thumb'
 
 function splitQuery(u: string): [string, string] {
@@ -18,12 +23,14 @@ function baseNoVariantNoExt(u: string) {
 }
 
 export function sourceUrl(originalUrl: string) {
+  if (!originalUrl) return ''
   const [, qs] = splitQuery(originalUrl)
   const base = baseNoVariantNoExt(originalUrl)
   return `${base}__source.webp${qs}`
 }
 
 export function variantUrl(originalUrl: string, variant: Variant) {
+  if (!originalUrl) return ''
   const [, qs] = splitQuery(originalUrl)
   const base = baseNoVariantNoExt(originalUrl)
   return `${base}__${variant}.webp${qs}`

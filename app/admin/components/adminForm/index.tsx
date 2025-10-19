@@ -8,6 +8,8 @@ import type { ProductType } from '../../types/types'
 import { AdminProductFormSchema, type AdminProductForm } from '../../types/types'
 import Image from 'next/image'
 import { useToast } from '../../../contexts/ToastContext'
+import ImageCropModal from '../imageCropModal'
+import { readFile } from '../../../utils/cropImage'
 
 interface Props {
   editingProduct: ProductType | null
@@ -83,12 +85,15 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         compressor: editingProduct.compressor ?? '',
       })
       setGalleryUrls(editingProduct.gallery ?? [])
+      setMainImageUrl(editingProduct.img ?? '')
     } else {
       setGalleryUrls([])
+      setMainImageUrl('')
     }
   }, [editingProduct, reset])
 
   const [galleryUrls, setGalleryUrls] = useState<string[]>([])
+  const [mainImageUrl, setMainImageUrl] = useState<string>('')
   const [isUploading, setIsUploading] = useState(false)
 
   const [uploadFolder] = useState(() => {
@@ -100,7 +105,15 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   })
 
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const mainImageInputRef = useRef<HTMLInputElement | null>(null)
   const uploadInProgressRef = useRef(false)
+
+  // Crop modal state
+  const [cropModalData, setCropModalData] = useState<{
+    imageSrc: string
+    originalFile: File
+    type: 'main' | 'gallery'
+  } | null>(null)
 
   const uploadOne = async (file: File) => {
     const fd = new FormData()
@@ -128,36 +141,69 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
 
   const freeSlots = Math.max(0, 4 - galleryUrls.length)
 
+  // Обработчик выбора главного изображения
+  const onPickMainImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    try {
+      const imageSrc = await readFile(file)
+      setCropModalData({ imageSrc, originalFile: file, type: 'main' })
+    } catch (err) {
+      toast.error('Ошибка при чтении файла: ' + (err instanceof Error ? err.message : String(err)))
+    }
+  }
+
+  // Обработчик выбора изображения для галереи
   const onPickGalleryFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Защита от race conditions
     if (uploadInProgressRef.current) {
       console.warn('Upload already in progress, ignoring click')
       return
     }
 
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+
+    if (freeSlots <= 0) {
+      toast.warning('Достигнут лимит: максимум 4 фото')
+      return
+    }
+
     try {
-      const f = e.target.files?.[0]
-      e.target.value = ''
-      if (!f) return
+      const imageSrc = await readFile(file)
+      setCropModalData({ imageSrc, originalFile: file, type: 'gallery' })
+    } catch (err) {
+      toast.error('Ошибка при чтении файла: ' + (err instanceof Error ? err.message : String(err)))
+    }
+  }
 
-      if (freeSlots <= 0) {
-        toast.warning('Достигнут лимит: максимум 4 фото')
-        return
-      }
+  // Обработчик завершения обрезки
+  const handleCropComplete = async (croppedFile: File) => {
+    if (!cropModalData) return
 
-      // Устанавливаем флаг загрузки
+    try {
       uploadInProgressRef.current = true
       setIsUploading(true)
 
-      const url = await uploadOne(f)
-      setGalleryUrls((prev) => [...prev, url])
-      toast.success('Фото успешно загружено')
+      const url = await uploadOne(croppedFile)
+
+      if (cropModalData.type === 'main') {
+        // Для главного изображения сохраняем URL
+        setMainImageUrl(url)
+        toast.success('Главное фото успешно обрезано и загружено')
+      } else {
+        // Для галереи добавляем URL
+        setGalleryUrls((prev) => [...prev, url])
+        toast.success('Фото успешно обрезано и добавлено в галерею')
+      }
     } catch (err) {
       toast.error('Ошибка загрузки: ' + (err instanceof Error ? err.message : String(err)))
     } finally {
-      // Снимаем флаг загрузки
       uploadInProgressRef.current = false
       setIsUploading(false)
+      setCropModalData(null)
     }
   }
 
@@ -173,13 +219,11 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
     try {
       const isEdit = Boolean(editingProduct)
 
-      let mainImgUrl = editingProduct?.img ?? ''
-      const mainFile = (data.img as FileList | undefined)?.[0]
-      if (!isEdit && !mainFile) {
-        toast.error('Выберите главную фотографию')
+      // Проверяем наличие главного изображения
+      if (!isEdit && !mainImageUrl) {
+        toast.error('Выберите и обрежьте главную фотографию')
         return
       }
-      if (mainFile) mainImgUrl = await uploadOne(mainFile) // в tmp/<uuid>
 
       if (galleryUrls.length > 4) {
         toast.warning('Максимум 4 фото в галерее')
@@ -194,7 +238,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         engineModel: data.engineModel || null,
         autoMark: data.autoMark || null,
         compressor: data.compressor || null,
-        img: mainImgUrl,
+        img: mainImageUrl,
         gallery: galleryUrls,
       }
 
@@ -219,9 +263,11 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   }
 
   const handleCancel = async () => {
-    await cleanupTmp(galleryUrls)
+    const allUrls = mainImageUrl ? [mainImageUrl, ...galleryUrls] : galleryUrls
+    await cleanupTmp(allUrls)
     reset()
     setGalleryUrls([])
+    setMainImageUrl('')
     onCancel()
   }
 
@@ -324,10 +370,41 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           </small>
         </label>
 
-        <label className={css.label}>
-          Главная фотография (обязательно при создании)
-          <input type="file" accept="image/*" {...register('img')} className={css.input} />
-        </label>
+        <div className={css.label}>
+          <label>Главная фотография (обязательно при создании)</label>
+          <input
+            ref={mainImageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={onPickMainImage}
+            className={css.input}
+          />
+          {mainImageUrl && (
+            <div className={css.imagePreview}>
+              <Image
+                src={makeThumb(mainImageUrl)}
+                alt="Главное фото"
+                width={106}
+                height={69}
+                className={css.thumb}
+                unoptimized
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setMainImageUrl('')
+                  if (mainImageInputRef.current) mainImageInputRef.current.value = ''
+                }}
+                className={css.btnGhostSmall}
+              >
+                Удалить
+              </button>
+            </div>
+          )}
+          <p className={css.hint}>
+            После выбора изображения откроется редактор для обрезки. Рекомендуется квадратное соотношение 1:1
+          </p>
+        </div>
 
         {/* Управляемая галерея */}
         <div className={css.label}>
@@ -383,6 +460,16 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           {editingProduct ? 'Сохранить' : 'Добавить'}
         </button>
       </div>
+
+      {/* Модалка для обрезки изображений */}
+      {cropModalData && (
+        <ImageCropModal
+          imageSrc={cropModalData.imageSrc}
+          originalFile={cropModalData.originalFile}
+          onComplete={handleCropComplete}
+          onCancel={() => setCropModalData(null)}
+        />
+      )}
     </form>
   )
 }
