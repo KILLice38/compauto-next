@@ -119,7 +119,10 @@ async function makeVariantsFromSource(absSource: string) {
     { suf: 'detail', w: 460, h: 299 },
     { suf: 'thumb', w: 106, h: 69 },
   ] as const
-  const bg = { r: 255, g: 255, b: 255, alpha: 1 }
+
+  // ИЗМЕНЕНО: Прозрачный фон вместо белого
+  // Это решает проблему с белыми полями на непрозрачных изображениях
+  const bg = { r: 255, g: 255, b: 255, alpha: 0 }
 
   try {
     await Promise.all(
