@@ -14,7 +14,6 @@ type RouteParams = Promise<{ id: string }>
 
 // ---------- FS helpers ----------
 const VARIANT_SUFFIXES = ['source', 'card', 'detail', 'thumb'] as const
-const IGNORABLE_FILES = new Set(['.DS_Store', 'Thumbs.db'])
 
 function isHttpUrl(str: string | null | undefined) {
   return !!str && /^https?:\/\//i.test(str)

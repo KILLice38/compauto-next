@@ -8,7 +8,7 @@ import { requireAuth } from '../lib/auth'
  */
 export async function GET() {
   try {
-    const filters = await (prisma as any).filterOption.findMany({
+    const filters = await prisma.filterOption.findMany({
       orderBy: [{ type: 'asc' }, { value: 'asc' }],
     })
 
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Создаем запись (unique constraint предотвратит дубликаты)
-    const filterOption = await (prisma as any).filterOption.create({
+    const filterOption = await prisma.filterOption.create({
       data: {
         type,
         value: value.trim(),
@@ -68,11 +68,11 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(filterOption, { status: 201 })
-  } catch (error: any) {
+  } catch (error) {
     console.error('[POST /api/filters] Error:', error)
 
     // Проверка на unique constraint violation
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json({ error: 'Это значение уже существует' }, { status: 409 })
     }
 

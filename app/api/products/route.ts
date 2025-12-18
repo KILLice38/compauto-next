@@ -137,7 +137,7 @@ export async function GET(req: NextRequest) {
     const sort = url.searchParams.get('sort') // 'recent' | 'az' | 'za' | 'priceAsc' | 'priceDesc'
 
     // Build where clause for filtering
-    const where: any = {}
+    const where: Record<string, string | { contains: string; mode: string }> = {}
 
     if (search) {
       where.title = { contains: search, mode: 'insensitive' }
@@ -156,7 +156,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Build orderBy clause for sorting
-    let orderBy: any = { createdAt: 'desc' } // default
+    let orderBy: { createdAt: 'desc' } | { title: 'asc' | 'desc' } | { price: 'asc' | 'desc' } = { createdAt: 'desc' } // default
 
     if (sort === 'az') {
       orderBy = { title: 'asc' }

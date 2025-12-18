@@ -45,15 +45,19 @@ export async function getCroppedImg(imageSrc: string, pixelCrop: Area, rotation 
     Math.round(0 - safeArea / 2 + image.height * 0.5 - pixelCrop.y)
   )
 
-  // Возвращаем Blob
+  // Возвращаем Blob в формате WebP с высоким качеством
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error('Canvas is empty'))
-        return
-      }
-      resolve(blob)
-    }, 'image/png')
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error('Canvas is empty'))
+          return
+        }
+        resolve(blob)
+      },
+      'image/webp',
+      0.95
+    )
   })
 }
 

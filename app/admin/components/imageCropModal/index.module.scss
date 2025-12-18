@@ -104,6 +104,25 @@
   font-style: italic;
 }
 
+.previewContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 120px;
+}
+
+.previewImage {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .actions {
   padding: 20px;
   border-top: 1px solid #e5e5e5;

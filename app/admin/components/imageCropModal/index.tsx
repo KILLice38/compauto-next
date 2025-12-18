@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 import { getCroppedImg, blobToFile } from '../../../utils/cropImage'
@@ -35,10 +35,47 @@ export default function ImageCropModal({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
   const [aspect, setAspect] = useState<number | undefined>(1)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels)
   }, [])
+
+  // Генерация preview при изменении области обрезки
+  useEffect(() => {
+    if (!croppedAreaPixels) return
+
+    let cancelled = false
+    const generatePreview = async () => {
+      try {
+        const blob = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
+        if (!cancelled) {
+          const url = URL.createObjectURL(blob)
+          setPreviewUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev)
+            return url
+          })
+        }
+      } catch (error) {
+        console.error('Preview generation error:', error)
+      }
+    }
+
+    generatePreview()
+
+    return () => {
+      cancelled = true
+    }
+  }, [croppedAreaPixels, imageSrc, rotation])
+
+  // Cleanup preview URL при размонтировании
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
 
   const handleCrop = useCallback(async () => {
     if (!croppedAreaPixels) return
@@ -48,7 +85,7 @@ export default function ImageCropModal({
       const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
       const croppedFile = blobToFile(
         croppedBlob,
-        originalFile.name.replace(/\.[^/.]+$/, '') + '-cropped.png'
+        originalFile.name.replace(/\.[^/.]+$/, '') + '-cropped.webp'
       )
       onComplete(croppedFile)
     } catch (error) {
@@ -58,6 +95,19 @@ export default function ImageCropModal({
       setIsProcessing(false)
     }
   }, [croppedAreaPixels, imageSrc, rotation, originalFile, onComplete])
+
+  // Keyboard shortcuts (ESC для закрытия, Enter для применения)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isProcessing) {
+        onCancel()
+      } else if (e.key === 'Enter' && !isProcessing) {
+        handleCrop()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isProcessing, onCancel, handleCrop])
 
   return (
     <div className={css.overlay} onClick={onCancel}>
@@ -123,6 +173,16 @@ export default function ImageCropModal({
               onChange={(e) => setRotation(Number(e.target.value))}
             />
           </div>
+
+          {previewUrl && (
+            <div className={css.controlGroup}>
+              <label>Предпросмотр результата:</label>
+              <div className={css.previewContainer}>
+                <img src={previewUrl} alt="Preview" className={css.previewImage} />
+              </div>
+              <p className={css.hint}>Так будет выглядеть обрезанное изображение</p>
+            </div>
+          )}
         </div>
 
         <div className={css.actions}>

@@ -12,10 +12,10 @@ interface Props {
  * Используется в Server Components для изоляции ошибок
  */
 export default function ClientErrorBoundary({ children }: Props) {
-  const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
+  const handleError = (error: Error) => {
     // В production можно отправить в error tracking
     if (process.env.NODE_ENV === 'production') {
-      // Example: Sentry.captureException(error, { extra: errorInfo })
+      // Example: Sentry.captureException(error)
       console.error('[Production Error]:', error)
     }
   }

@@ -108,6 +108,10 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   const mainImageInputRef = useRef<HTMLInputElement | null>(null)
   const uploadInProgressRef = useRef(false)
 
+  // Drag & Drop state
+  const [isDraggingMain, setIsDraggingMain] = useState(false)
+  const [isDraggingGallery, setIsDraggingGallery] = useState(false)
+
   // Crop modal state
   const [cropModalData, setCropModalData] = useState<{
     imageSrc: string
@@ -179,6 +183,82 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
     }
   }
 
+  // Drag & Drop handlers для главного изображения
+  const handleMainDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingMain(true)
+  }
+
+  const handleMainDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingMain(false)
+  }
+
+  const handleMainDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingMain(false)
+
+    const file = e.dataTransfer.files?.[0]
+    if (!file || !file.type.startsWith('image/')) {
+      toast.error('Пожалуйста, загрузите файл изображения')
+      return
+    }
+
+    try {
+      const imageSrc = await readFile(file)
+      setCropModalData({ imageSrc, originalFile: file, type: 'main' })
+    } catch (err) {
+      toast.error('Ошибка при чтении файла: ' + (err instanceof Error ? err.message : String(err)))
+    }
+  }
+
+  // Drag & Drop handlers для галереи
+  const handleGalleryDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (freeSlots > 0 && !uploadInProgressRef.current) {
+      setIsDraggingGallery(true)
+    }
+  }
+
+  const handleGalleryDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingGallery(false)
+  }
+
+  const handleGalleryDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingGallery(false)
+
+    if (uploadInProgressRef.current) {
+      console.warn('Upload already in progress')
+      return
+    }
+
+    if (freeSlots <= 0) {
+      toast.warning('Достигнут лимит: максимум 4 фото')
+      return
+    }
+
+    const file = e.dataTransfer.files?.[0]
+    if (!file || !file.type.startsWith('image/')) {
+      toast.error('Пожалуйста, загрузите файл изображения')
+      return
+    }
+
+    try {
+      const imageSrc = await readFile(file)
+      setCropModalData({ imageSrc, originalFile: file, type: 'gallery' })
+    } catch (err) {
+      toast.error('Ошибка при чтении файла: ' + (err instanceof Error ? err.message : String(err)))
+    }
+  }
+
   // Обработчик завершения обрезки
   const handleCropComplete = async (croppedFile: File) => {
     if (!cropModalData) return
@@ -187,7 +267,12 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
       uploadInProgressRef.current = true
       setIsUploading(true)
 
-      const url = await uploadOne(croppedFile)
+      // Переименовываем файл с .png на .webp расширение
+      const webpFile = new File([croppedFile], croppedFile.name.replace(/\.(png|jpg|jpeg)$/i, '.webp'), {
+        type: 'image/webp',
+      })
+
+      const url = await uploadOne(webpFile)
 
       if (cropModalData.type === 'main') {
         // Для главного изображения сохраняем URL
@@ -328,7 +413,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
             </select>
           )}
           <small className={css.hint}>
-            Не нашли нужную модель? Добавьте её через "Редактировать фильтры"
+            Не нашли нужную модель? Добавьте её через &quot;Редактировать фильтры&quot;
           </small>
         </label>
 
@@ -347,7 +432,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
             </select>
           )}
           <small className={css.hint}>
-            Не нашли нужную марку? Добавьте её через "Редактировать фильтры"
+            Не нашли нужную марку? Добавьте её через &quot;Редактировать фильтры&quot;
           </small>
         </label>
 
@@ -366,19 +451,27 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
             </select>
           )}
           <small className={css.hint}>
-            Не нашли нужный тип? Добавьте его через "Редактировать фильтры"
+            Не нашли нужный тип? Добавьте его через &quot;Редактировать фильтры&quot;
           </small>
         </label>
 
         <div className={css.label}>
           <label>Главная фотография (обязательно при создании)</label>
-          <input
-            ref={mainImageInputRef}
-            type="file"
-            accept="image/*"
-            onChange={onPickMainImage}
-            className={css.input}
-          />
+          <div
+            className={`${css.dropZone} ${isDraggingMain ? css.dragging : ''}`}
+            onDragOver={handleMainDragOver}
+            onDragLeave={handleMainDragLeave}
+            onDrop={handleMainDrop}
+          >
+            <input
+              ref={mainImageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onPickMainImage}
+              className={css.input}
+            />
+            {isDraggingMain && <div className={css.dropHint}>Отпустите для загрузки</div>}
+          </div>
           {mainImageUrl && (
             <div className={css.imagePreview}>
               <Image
@@ -438,7 +531,17 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
             />
           </div>
 
-          <div className={css.imagesGrid}>
+          <div
+            className={`${css.imagesGrid} ${isDraggingGallery ? css.dragging : ''}`}
+            onDragOver={handleGalleryDragOver}
+            onDragLeave={handleGalleryDragLeave}
+            onDrop={handleGalleryDrop}
+          >
+            {isDraggingGallery && freeSlots > 0 && (
+              <div className={css.dropOverlay}>
+                <div className={css.dropHint}>Отпустите для загрузки в галерею</div>
+              </div>
+            )}
             {galleryUrls.map((u, i) => (
               <div key={i} className={css.imageItem}>
                 <Image src={makeThumb(u)} alt="" width={106} height={69} className={css.thumb} unoptimized />

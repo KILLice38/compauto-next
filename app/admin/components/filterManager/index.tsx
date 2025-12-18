@@ -82,8 +82,8 @@ export default function FilterManager({ onClose }: { onClose: () => void }) {
         ),
       }))
       setNewValue('')
-    } catch (err: any) {
-      setError(err.message || 'Ошибка при добавлении')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка при добавлении')
     } finally {
       setAdding(false)
     }
@@ -106,8 +106,8 @@ export default function FilterManager({ onClose }: { onClose: () => void }) {
         ...prev,
         [activeTab]: prev[activeTab].filter((f) => f.id !== id),
       }))
-    } catch (err: any) {
-      alert(err.message || 'Ошибка при удалении')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Ошибка при удалении')
     }
   }
 

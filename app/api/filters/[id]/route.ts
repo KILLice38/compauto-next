@@ -20,7 +20,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     }
 
     // Проверяем, используется ли это значение в продуктах
-    const filter = await (prisma as any).filterOption.findUnique({
+    const filter = await prisma.filterOption.findUnique({
       where: { id: filterId },
     })
 
@@ -46,7 +46,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     }
 
     // Удаляем
-    await (prisma as any).filterOption.delete({
+    await prisma.filterOption.delete({
       where: { id: filterId },
     })
 

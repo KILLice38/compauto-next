@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import Link from 'next/link'
 import ErrorBoundary from '../../components/errorBoundary'
 
 interface Props {
@@ -39,7 +40,7 @@ export default function AdminErrorBoundary({ children }: Props) {
         Попробуйте обновить страницу или вернуться на главную страницу.
       </p>
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-        <a
+        <Link
           href="/admin"
           style={{
             padding: '10px 20px',
@@ -52,8 +53,8 @@ export default function AdminErrorBoundary({ children }: Props) {
           }}
         >
           Вернуться в админку
-        </a>
-        <a
+        </Link>
+        <Link
           href="/"
           style={{
             padding: '10px 20px',
@@ -66,7 +67,7 @@ export default function AdminErrorBoundary({ children }: Props) {
           }}
         >
           На главную
-        </a>
+        </Link>
       </div>
     </div>
   )

@@ -17,14 +17,6 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp
 // Максимальный размер файла: 2 MB
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
-// Магические байты для проверки типа файла
-const IMAGE_SIGNATURES = {
-  jpeg: [0xff, 0xd8, 0xff],
-  png: [0x89, 0x50, 0x4e, 0x47],
-  gif: [0x47, 0x49, 0x46],
-  webp: [0x52, 0x49, 0x46, 0x46], // RIFF (WebP)
-}
-
 function isValidImageType(file: File): boolean {
   return ALLOWED_IMAGE_TYPES.includes(file.type.toLowerCase())
 }
@@ -115,8 +107,8 @@ function variantAbsFromSource(absSource: string, suf: 'card' | 'detail' | 'thumb
 async function makeVariantsFromSource(absSource: string) {
   const buf = await fs.readFile(absSource)
   const targets = [
-    { suf: 'card', w: 260, h: 260 },
-    { suf: 'detail', w: 460, h: 299 },
+    { suf: 'card', w: 400, h: 400 },
+    { suf: 'detail', w: 800, h: 800 },
     { suf: 'thumb', w: 106, h: 69 },
   ] as const
 
@@ -131,7 +123,7 @@ async function makeVariantsFromSource(absSource: string) {
         try {
           await sharp(buf)
             .resize(w, h, { fit: 'contain', background: bg })
-            .toFormat('webp', { quality: 82 })
+            .toFormat('webp', { quality: 82, effort: 6 })
             .toFile(out)
         } catch (error) {
           console.error(`Sharp error creating variant ${suf}:`, error)
@@ -183,6 +175,17 @@ export async function POST(req: NextRequest) {
 
       try {
         const { abs, buffer } = await saveTemp(basePublic, one)
+
+        // Дополнительная проверка размера после загрузки
+        if (buffer.length > MAX_FILE_SIZE) {
+          try {
+            await fs.unlink(abs)
+          } catch {}
+          return NextResponse.json(
+            { error: `Файл слишком большой (${(buffer.length / 1024 / 1024).toFixed(2)} MB). Максимум: 2 MB` },
+            { status: 413 }
+          )
+        }
 
         // Проверка магических байтов
         if (!checkImageSignature(buffer)) {

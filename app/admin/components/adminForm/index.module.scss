@@ -263,6 +263,60 @@
   }
 }
 
+/* Drag & Drop Styles */
+.dropZone {
+  position: relative;
+  transition: all 0.3s ease;
+  border: 2px dashed transparent;
+  border-radius: 8px;
+  padding: 4px;
+
+  &.dragging {
+    border-color: vars.$color-background-secondary;
+    background: rgba(212, 86, 74, 0.1);
+  }
+}
+
+.dropOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(212, 86, 74, 0.15);
+  border: 2px dashed vars.$color-background-secondary;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.dropHint {
+  background: vars.$color-background-secondary;
+  color: vars.$color-text-main;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.imagesGrid.dragging {
+  position: relative;
+  border: 2px dashed vars.$color-background-secondary;
+  background: rgba(212, 86, 74, 0.05);
+  min-height: 150px;
+}
+
 /* Responsive breakpoints */
 @include mixins.responsive-1200 {
   .imagesGrid {
