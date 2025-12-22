@@ -1,4 +1,6 @@
-import { useMediaQuery } from 'react-responsive'
+'use client'
+
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import Burger from '../burger'
 import Logo from '../logo'
 import SvgIcon from '../svgIcon'
@@ -40,8 +42,8 @@ const Header = ({
   setIsNavOpen: React.Dispatch<React.SetStateAction<boolean>>
   isNavOpen: boolean
 }) => {
-  const isTablet = useMediaQuery({ query: '(max-width: 992px)' })
-  const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+  const isTablet = useMediaQuery('(max-width: 992px)')
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   const activeWhatsappIconSizes = {
     width: isMobile

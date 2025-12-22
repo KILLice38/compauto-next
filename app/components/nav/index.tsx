@@ -1,6 +1,6 @@
 'use client'
 
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import Button from '../button'
 import SvgIcon from '../svgIcon'
 import css from './index.module.scss'
@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { linkToSocial } from '../header'
 
 const Nav = ({ setIsNavOpen }: { setIsNavOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
-  const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   const handleClose = () => setIsNavOpen((prev) => !prev)
 

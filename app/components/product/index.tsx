@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import type { ProductType } from '../../types/interfaces'
 import css from './index.module.scss'
 import Image from 'next/image'
@@ -10,7 +10,7 @@ import { variantUrl } from '../../lib/imageVariants'
 
 const Product = ({ type, product }: { type: string; product: ProductType }) => {
   const { img, title, description, price, slug } = product
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isMobile = useMediaQuery('(max-width: 575px)')
 
   return (
     <Link href={`/catalog/${slug}`} className={`${css.product} ${isMobile ? css[type] : ''}`} aria-label={title}>

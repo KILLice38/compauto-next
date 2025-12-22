@@ -1,4 +1,6 @@
-import { useMediaQuery } from 'react-responsive'
+'use client'
+
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import SvgIcon from '../svgIcon'
 import css from './index.module.scss'
 import Image from 'next/image'
@@ -33,8 +35,8 @@ const aboutUsData = {
 }
 
 const AboutUs = () => {
-  const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
-  const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
+  const isLess992 = useMediaQuery('(max-width: 992px)')
+  const isLess768 = useMediaQuery('(max-width: 768px)')
 
   return (
     <section id="aboutUs" className={css.aboutUs}>

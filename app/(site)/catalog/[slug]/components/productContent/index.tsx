@@ -1,6 +1,6 @@
 'use client'
 
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../../../../hooks/useMediaQuery'
 import Characteristics from '../characteristics'
 import css from './index.module.scss'
 import { Product } from '@prisma/client'
@@ -21,8 +21,8 @@ const ProductContent = ({
   hasDetails: boolean
   hasShort: boolean
 }) => {
-  const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
-  const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
+  const isLess992 = useMediaQuery('(max-width: 992px)')
+  const isLess768 = useMediaQuery('(max-width: 768px)')
   const hasImages = images.length > 0
 
   if (isLess768) {

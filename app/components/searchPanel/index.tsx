@@ -1,5 +1,7 @@
+'use client'
+
 import { useState } from 'react'
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import css from './index.module.scss'
 
 const SearchPanel = ({
@@ -9,7 +11,7 @@ const SearchPanel = ({
   onSearch: (searchTerm: string) => void
   isSortExpanded: boolean
 }) => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isMobile = useMediaQuery('(max-width: 575px)')
   const [value, setValue] = useState('')
   const placeholder = isMobile && isSortExpanded ? 'Поиск' : 'Поиск по каталогу'
 

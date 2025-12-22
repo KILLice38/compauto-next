@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import Button from '../button'
 import Product from '../product'
 import SvgIcon from '../svgIcon'
@@ -12,9 +12,9 @@ import { ProductType } from '../../types/interfaces'
 const MAX_SLIDER_ITEMS = 8
 
 const Novelty = () => {
-  const isLess992 = useMediaQuery({ query: '(max-width: 992px)' })
-  const isLess768 = useMediaQuery({ query: '(max-width: 768px)' })
-  const isLess575 = useMediaQuery({ query: '(max-width: 575px)' })
+  const isLess992 = useMediaQuery('(max-width: 992px)')
+  const isLess768 = useMediaQuery('(max-width: 768px)')
+  const isLess575 = useMediaQuery('(max-width: 575px)')
 
   const [products, setProducts] = useState<ProductType[]>([])
   const [loading, setLoading] = useState(true)

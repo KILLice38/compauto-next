@@ -3,13 +3,13 @@
 import 'reset-css/reset.css'
 import './globals.scss'
 import { useEffect, useState } from 'react'
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from './hooks/useMediaQuery'
 import Header from './components/header'
 import Nav from './components/nav'
 import Footer from './components/footer'
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const isMobile = useMediaQuery({ query: '(max-width: 768px)' })
+  const isMobile = useMediaQuery('(max-width: 768px)')
   const [isNavOpen, setIsNavOpen] = useState(false)
 
   useEffect(() => {

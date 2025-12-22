@@ -1,14 +1,16 @@
+import './polyfills'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+// import { Inter } from 'next/font/google'
 import { ToastProvider } from './contexts/ToastContext'
 import { generateOrganizationSchema, generateWebSiteSchema } from './lib/structuredData'
 import ClientErrorBoundary from './components/clientErrorBoundary'
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-})
+// Временно отключаем Google Fonts из-за проблем с VPN/прокси
+// const inter = Inter({
+//   subsets: ['latin'],
+//   display: 'swap',
+//   variable: '--font-inter',
+// })
 
 export const metadata: Metadata = {
   title: 'Комплектующие для автомобилей | Komp-Auto',
@@ -50,13 +52,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Генерируем Schema.org разметку для сайта
   const organizationSchema = generateOrganizationSchema()
   const webSiteSchema = generateWebSiteSchema()
 
   return (
-    <html lang="ru" className={inter.variable}>
+    <html lang="ru" suppressHydrationWarning>
       <head>
         {/* Schema.org JSON-LD разметка для всего сайта */}
         <script
@@ -68,7 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ClientErrorBoundary>
           <ToastProvider>{children}</ToastProvider>
         </ClientErrorBoundary>

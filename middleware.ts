@@ -13,14 +13,17 @@ function buildCSPHeader(nonce: string) {
   const isDev = process.env.NODE_ENV === 'development'
 
   // В development режиме Next.js требует eval для HMR
-  const scriptSrc = isDev ? `'self' 'nonce-${nonce}' 'unsafe-eval'` : `'self' 'nonce-${nonce}'`
+  // Разрешаем unsafe-inline для JSON-LD скриптов (они статические и безопасные)
+  const scriptSrc = isDev
+    ? `'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval'`
+    : `'self' 'nonce-${nonce}' 'unsafe-inline'`
 
   return `
     default-src 'self';
     script-src ${scriptSrc};
-    style-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data:;
-    font-src 'self' data:;
+    font-src 'self' data: https://fonts.gstatic.com;
     connect-src 'self' https://*.vercel.app http://localhost:* ws://localhost:*;
     form-action 'self';
     frame-ancestors 'none';

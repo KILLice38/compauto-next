@@ -1,6 +1,6 @@
 'use client'
 
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 // import DownloadIcon from '../../components/downloadIcon'
 import Filters, { TestData } from '../../components/filters'
 import SearchPanel from '../../components/searchPanel'
@@ -13,7 +13,7 @@ import { ProductType } from '../../types/interfaces'
 import { useState } from 'react'
 
 const CatalogPage = () => {
-  const isLess1200 = useMediaQuery({ query: '(max-width: 1200px)' })
+  const isLess1200 = useMediaQuery('(max-width: 1200px)')
   const [isSortExpanded, setIsSortExpanded] = useState(false)
 
   const { visibleProducts, hasMore, loading, filters, setSearchTerm, setFilters, setSort, loadMore, allProducts } =

@@ -1,9 +1,11 @@
-import { useMediaQuery } from 'react-responsive'
+'use client'
+
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import Logo from '../logo'
 import css from './index.module.scss'
 
 const Footer = () => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isMobile = useMediaQuery('(max-width: 575px)')
 
   return (
     <footer className={css.footer}>

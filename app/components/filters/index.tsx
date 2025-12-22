@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useMediaQuery } from 'react-responsive'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import type { ProductType } from '../../types/interfaces'
 import Button from '../button'
 import FilterList from '../filterList'
@@ -20,7 +20,7 @@ type FilterProps = {
 }
 
 const Filters = ({ filterData, currentFilters, onFilterChange }: FilterProps) => {
-  const isMobile = useMediaQuery({ query: '(max-width: 575px)' })
+  const isMobile = useMediaQuery('(max-width: 575px)')
   const [openDropdown, setOpenDropdown] = useState<null | keyof ProductType>(null)
 
   const rootRef = useRef<HTMLDivElement>(null)
