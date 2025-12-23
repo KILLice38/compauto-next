@@ -1,3 +1,7 @@
+.slider {
+  width: 460px;
+}
+
 .actions {
   margin-top: 35px;
   display: flex;
@@ -21,6 +25,8 @@
 
 .mainImg {
   border-radius: 8px;
+  object-fit: cover;
+  width: 100%;
 }
 
 .slide {
@@ -51,7 +57,6 @@
   }
   .mainImg {
     width: 100%;
-    object-fit: cover; // Проверить, могут поломаться картинки
   }
   .actions {
     margin-top: 40px;

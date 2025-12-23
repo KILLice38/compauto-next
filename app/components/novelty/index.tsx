@@ -39,8 +39,7 @@ const Novelty = () => {
   const itemsPerPage = isLess575 ? 1 : isLess768 ? 2 : isLess992 ? 3 : 4
 
   const sliderItems = useMemo(() => {
-    const last = products.slice(-MAX_SLIDER_ITEMS)
-    return [...last].reverse()
+    return products.slice(0, MAX_SLIDER_ITEMS)
   }, [products])
 
   const totalPages = Math.max(Math.ceil(sliderItems.length / itemsPerPage), 1)
