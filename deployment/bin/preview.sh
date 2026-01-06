@@ -89,7 +89,7 @@ fi
 # Install dependencies
 echo -e "${YELLOW}Installing dependencies with pnpm...${NC}"
 cd "$STAGING_DIR"
-pnpm install --prod --frozen-lockfile
+pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Generate Prisma Client
 echo -e "${YELLOW}Generating Prisma Client...${NC}"

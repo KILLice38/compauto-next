@@ -88,6 +88,50 @@ GRANT ALL PRIVILEGES ON DATABASE compauto_staging_shadow TO compauto_user;
 \q
 ```
 
+### Создание схемы "app" в каждой базе
+
+После создания баз данных создайте схему `app` в каждой из них:
+
+```bash
+sudo -u postgres psql
+
+-- Подключитесь к каждой базе и создайте схему app
+\c compauto_production
+CREATE SCHEMA IF NOT EXISTS app;
+GRANT ALL ON SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA app TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON TABLES TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON SEQUENCES TO compauto_user;
+
+\c compauto_production_shadow
+CREATE SCHEMA IF NOT EXISTS app;
+GRANT ALL ON SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA app TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON TABLES TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON SEQUENCES TO compauto_user;
+
+\c compauto_staging
+CREATE SCHEMA IF NOT EXISTS app;
+GRANT ALL ON SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA app TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON TABLES TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON SEQUENCES TO compauto_user;
+
+\c compauto_staging_shadow
+CREATE SCHEMA IF NOT EXISTS app;
+GRANT ALL ON SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA app TO compauto_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA app TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON TABLES TO compauto_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT ALL ON SEQUENCES TO compauto_user;
+
+-- Выход
+\q
+```
+
 ### Что такое Shadow Database?
 
 Shadow database - это временная база данных, которую Prisma использует для безопасного выполнения миграций:
@@ -101,16 +145,16 @@ Shadow database - это временная база данных, котору�
 
 ### Важно
 
-Обязательно добавьте `SHADOW_DATABASE_URL` в оба .env файла:
+Обязательно добавьте `SHADOW_DATABASE_URL` в оба .env файла и используйте схему `app`:
 
 ```bash
 # В /etc/compauto/.env
-DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_production?schema=public"
-SHADOW_DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_production_shadow?schema=public"
+DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_production?schema=app"
+SHADOW_DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_production_shadow?schema=app"
 
 # В /etc/compauto-staging/.env
-DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_staging?schema=public"
-SHADOW_DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_staging_shadow?schema=public"
+DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_staging?schema=app"
+SHADOW_DATABASE_URL="postgresql://compauto_user:ваш_пароль@localhost:5432/compauto_staging_shadow?schema=app"
 ```
 
 ## Как это работает
