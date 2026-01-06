@@ -1,75 +1,120 @@
-#!/bin/bash
-#
-# deploy.sh - Deploy new release from GitHub via SSH
-# Usage: ./bin/deploy.sh <version>
-# Example: ./bin/deploy.sh v1.0.0
-#
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -e  # Exit on error
+# ============================================
+# Deploy Script - Compauto Next
+# ============================================
+# Создает новый релиз из Git репозитория
+# Использование: ./bin/deploy.sh <version>
+# Пример: ./bin/deploy.sh v1.0.0
+# ============================================
 
-# Colors for output
+# Цвета для вывода
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration
-APP_DIR="/var/www/compauto"
-REPO_URL="git@github.com:KILLice38/compauto-next.git"
-SSH_KEY="$HOME/.ssh/github"
-RELEASES_DIR="$APP_DIR/releases"
+# Конфигурация
+BASE="/var/www/compauto"
+RELEASES="$BASE/releases"
+REPO="git@github.com:KILLice38/compauto-next.git"
 
-# Check if version argument is provided
-if [ -z "$1" ]; then
-    echo -e "${RED}Error: Version argument is required${NC}"
-    echo "Usage: $0 <version>"
-    echo "Example: $0 v1.0.0"
+# Проверка аргумента версии
+if [ -z "${1:-}" ]; then
+    echo -e "${RED}Ошибка: Не указана версия релиза${NC}"
+    echo -e "${YELLOW}Использование: $0 <version>${NC}"
+    echo -e "${YELLOW}Пример: $0 v1.0.0${NC}"
     exit 1
 fi
 
 VERSION="$1"
-RELEASE_DIR="$RELEASES_DIR/$VERSION"
+REL="$RELEASES/$VERSION"
 
-echo -e "${YELLOW}====================================${NC}"
-echo -e "${YELLOW}Deploying version: $VERSION${NC}"
-echo -e "${YELLOW}====================================${NC}"
+# SSH ключ для Git
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME=$(eval echo ~$REAL_USER)
+SSH_KEY="${SSH_KEY:-$REAL_HOME/.ssh/github}"
 
-# Check if SSH key exists
+# Альтернативные пути для SSH ключа
 if [ ! -f "$SSH_KEY" ]; then
-    echo -e "${RED}Error: SSH key not found at $SSH_KEY${NC}"
-    echo "Please ensure your GitHub SSH key is located at $SSH_KEY"
+    if [ -f "$REAL_HOME/.ssh/id_rsa" ]; then
+        SSH_KEY="$REAL_HOME/.ssh/id_rsa"
+    elif [ -f "$REAL_HOME/.ssh/id_ed25519" ]; then
+        SSH_KEY="$REAL_HOME/.ssh/id_ed25519"
+    fi
+fi
+
+export GIT_SSH_COMMAND="ssh -i ${SSH_KEY} -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}Разворачивание Compauto - $VERSION${NC}"
+echo -e "${GREEN}========================================${NC}"
+
+# Проверяем что релиз не существует
+if [ -d "$REL" ]; then
+    echo -e "${RED}Ошибка: Релиз $VERSION уже существует${NC}"
+    echo -e "${YELLOW}Используйте другую версию или удалите существующий релиз:${NC}"
+    echo -e "  sudo rm -rf $REL"
     exit 1
 fi
 
-# Check if release already exists
-if [ -d "$RELEASE_DIR" ]; then
-    echo -e "${RED}Error: Release $VERSION already exists at $RELEASE_DIR${NC}"
-    echo "If you want to redeploy, first remove the existing release:"
-    echo "  sudo rm -rf $RELEASE_DIR"
+# Проверка SSH ключа
+if [ ! -f "$SSH_KEY" ]; then
+    echo -e "${RED}Ошибка: SSH ключ не найден${NC}"
+    echo -e "${YELLOW}Проверенные пути:${NC}"
+    echo -e "  - $REAL_HOME/.ssh/github"
+    echo -e "  - $REAL_HOME/.ssh/id_rsa"
+    echo -e "  - $REAL_HOME/.ssh/id_ed25519"
+    echo -e "${YELLOW}Текущая конфигурация:${NC}"
+    echo -e "  REAL_USER=$REAL_USER"
+    echo -e "  REAL_HOME=$REAL_HOME"
     exit 1
 fi
 
-# Create releases directory if it doesn't exist
-if [ ! -d "$RELEASES_DIR" ]; then
-    echo -e "${YELLOW}Creating releases directory...${NC}"
-    mkdir -p "$RELEASES_DIR"
+echo -e "${YELLOW}Используется SSH ключ: $SSH_KEY${NC}"
+
+# Проверяем доступ к репозиторию
+echo -e "${YELLOW}[1/3] Проверка доступа к репозиторию...${NC}"
+if ! git ls-remote --tags "$REPO" "$VERSION" >/dev/null 2>&1; then
+    echo -e "${RED}Ошибка: Не удалось найти тег $VERSION в репозитории${NC}"
+    echo -e "${YELLOW}Создайте тег в Git:${NC}"
+    echo -e "  git tag $VERSION"
+    echo -e "  git push origin $VERSION"
+    exit 1
 fi
+echo -e "${GREEN}  ✓ Тег $VERSION найден в репозитории${NC}"
 
-# Clone repository via SSH
-echo -e "${YELLOW}Cloning repository via SSH...${NC}"
-GIT_SSH_COMMAND="ssh -i $SSH_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=no" \
-  git clone --branch "$VERSION" --depth 1 "$REPO_URL" "$RELEASE_DIR"
+# Клонирование репозитория
+echo -e "${YELLOW}[2/3] Клонирование кода из Git (тег: $VERSION)...${NC}"
+mkdir -p "$RELEASES"
+if ! git clone --depth=1 --branch "$VERSION" "$REPO" "$REL"; then
+    echo -e "${RED}Ошибка при клонировании репозитория${NC}"
+    rm -rf "$REL"
+    exit 1
+fi
+echo -e "${GREEN}  ✓ Код успешно склонирован${NC}"
 
-# Remove .git directory to save space
-echo -e "${YELLOW}Cleaning up .git directory...${NC}"
-rm -rf "$RELEASE_DIR/.git"
+# Удаление .git для экономии места
+echo -e "${YELLOW}[3/3] Очистка .git директории...${NC}"
+rm -rf "$REL/.git"
+echo -e "${GREEN}  ✓ .git директория удалена${NC}"
 
-# Success message
-echo -e "${GREEN}====================================${NC}"
-echo -e "${GREEN}✓ Release $VERSION deployed successfully${NC}"
-echo -e "${GREEN}Location: $RELEASE_DIR${NC}"
-echo -e "${GREEN}====================================${NC}"
+# Сохраняем информацию о релизе
+echo "$VERSION" > "$BASE/.last_deployed"
+date '+%Y-%m-%d %H:%M:%S' > "$REL/.deployed_at"
+
 echo ""
-echo -e "${YELLOW}Next steps:${NC}"
-echo "  1. Test the release:      ./bin/preview.sh $VERSION"
-echo "  2. Promote to production: ./bin/promote.sh $VERSION"
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN} ✓ Релиз $VERSION готов${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo -e "${GREEN}Путь: $REL${NC}"
+echo -e "${GREEN}========================================${NC}"
+echo ""
+echo -e "${BLUE}Следующие шаги:${NC}"
+echo -e "  1. Тестирование на staging:"
+echo -e "     ${YELLOW}./bin/preview.sh $VERSION${NC}"
+echo -e "  2. Деплой в production:"
+echo -e "     ${YELLOW}./bin/promote.sh $VERSION${NC}"
+echo ""
