@@ -178,6 +178,7 @@ export default function ImageCropModal({
             <div className={css.controlGroup}>
               <label>Предпросмотр результата:</label>
               <div className={css.previewContainer}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={previewUrl} alt="Preview" className={css.previewImage} />
               </div>
               <p className={css.hint}>Так будет выглядеть обрезанное изображение</p>
