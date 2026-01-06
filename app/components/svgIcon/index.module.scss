@@ -28,6 +28,10 @@
   color: vars.$color-text-main;
 }
 
+.social {
+  cursor: pointer;
+}
+
 @media (max-width: 992px) {
   .round {
     width: 50px;

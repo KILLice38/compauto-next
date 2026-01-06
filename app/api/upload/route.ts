@@ -122,7 +122,7 @@ async function makeVariantsFromSource(absSource: string) {
         const out = variantAbsFromSource(absSource, suf)
         try {
           await sharp(buf)
-            .resize(w, h, { fit: 'contain', background: bg })
+            .resize(w, h, { fit: 'cover', position: 'center' })
             .toFormat('webp', { quality: 82, effort: 6 })
             .toFile(out)
         } catch (error) {

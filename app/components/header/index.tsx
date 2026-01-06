@@ -93,7 +93,7 @@ const Header = ({
                 widthIcon={activeTelegramIconSizes.width}
                 heightIcon={activeTelegramIconSizes.height}
                 type="social"
-                actionFunction={() => linkToSocial('https://t.me/KILLice38')}
+                actionFunction={() => linkToSocial('https://t.me/andreyrodnyy')}
               />
             </div>
             {/* <div className={css.searchPanel}>
