@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# deploy.sh - Deploy new release from GitHub
+# deploy.sh - Deploy new release from GitHub via SSH
 # Usage: ./bin/deploy.sh <version>
 # Example: ./bin/deploy.sh v1.0.0
 #
@@ -15,7 +15,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 APP_DIR="/var/www/compauto"
-REPO_URL="https://github.com/YOUR_USERNAME/compauto-next.git"  # ЗАМЕНИТЬ НА ВАШ РЕПОЗИТОРИЙ
+REPO_URL="git@github.com:KILLice38/compauto-next.git"
+SSH_KEY="$HOME/.ssh/github"
 RELEASES_DIR="$APP_DIR/releases"
 
 # Check if version argument is provided
@@ -33,6 +34,13 @@ echo -e "${YELLOW}====================================${NC}"
 echo -e "${YELLOW}Deploying version: $VERSION${NC}"
 echo -e "${YELLOW}====================================${NC}"
 
+# Check if SSH key exists
+if [ ! -f "$SSH_KEY" ]; then
+    echo -e "${RED}Error: SSH key not found at $SSH_KEY${NC}"
+    echo "Please ensure your GitHub SSH key is located at $SSH_KEY"
+    exit 1
+fi
+
 # Check if release already exists
 if [ -d "$RELEASE_DIR" ]; then
     echo -e "${RED}Error: Release $VERSION already exists at $RELEASE_DIR${NC}"
@@ -47,9 +55,10 @@ if [ ! -d "$RELEASES_DIR" ]; then
     mkdir -p "$RELEASES_DIR"
 fi
 
-# Clone repository
-echo -e "${YELLOW}Cloning repository...${NC}"
-git clone --branch "$VERSION" --depth 1 "$REPO_URL" "$RELEASE_DIR"
+# Clone repository via SSH
+echo -e "${YELLOW}Cloning repository via SSH...${NC}"
+GIT_SSH_COMMAND="ssh -i $SSH_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=no" \
+  git clone --branch "$VERSION" --depth 1 "$REPO_URL" "$RELEASE_DIR"
 
 # Remove .git directory to save space
 echo -e "${YELLOW}Cleaning up .git directory...${NC}"
@@ -62,5 +71,5 @@ echo -e "${GREEN}Location: $RELEASE_DIR${NC}"
 echo -e "${GREEN}====================================${NC}"
 echo ""
 echo -e "${YELLOW}Next steps:${NC}"
-echo "  1. Test the release:    ./bin/preview.sh $VERSION"
+echo "  1. Test the release:      ./bin/preview.sh $VERSION"
 echo "  2. Promote to production: ./bin/promote.sh $VERSION"
