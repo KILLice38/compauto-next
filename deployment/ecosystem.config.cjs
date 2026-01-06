@@ -12,7 +12,7 @@ module.exports = {
     {
       name: 'compauto-production',
       script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3000 --hostname 0.0.0.0',
+      args: 'start -p 3003 --hostname 0.0.0.0',
       cwd: '/var/www/compauto/current',
       instances: 2,
       exec_mode: 'cluster',
@@ -22,7 +22,7 @@ module.exports = {
       // Environment variables
       env: {
         NODE_ENV: 'production',
-        PORT: '3000',
+        PORT: '3003',
       },
 
       // >38
@@ -48,7 +48,7 @@ module.exports = {
     {
       name: 'compauto-staging',
       script: 'node_modules/next/dist/bin/next',
-      args: 'start -p 3001 --hostname 0.0.0.0',
+      args: 'start -p 3004 --hostname 0.0.0.0',
       cwd: '/var/www/compauto/staging',
       instances: 1,
       exec_mode: 'cluster',
@@ -58,7 +58,7 @@ module.exports = {
       // Environment variables
       env: {
         NODE_ENV: 'production',
-        PORT: '3001',
+        PORT: '3004',
       },
 
       // >38
