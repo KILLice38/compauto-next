@@ -20,6 +20,7 @@ NC='\033[0m' # No Color
 BASE="/var/www/compauto"
 RELEASES="$BASE/releases"
 REPO="git@github.com:KILLice38/compauto-next.git"
+BRANCH="${BRANCH:-main}"  # Можно переопределить: BRANCH=dev ./bin/deploy.sh v1.0.0
 
 # Проверка аргумента версии
 if [ -z "${1:-}" ]; then
@@ -76,25 +77,23 @@ fi
 echo -e "${YELLOW}Используется SSH ключ: $SSH_KEY${NC}"
 
 # Проверяем доступ к репозиторию
-echo -e "${YELLOW}[1/3] Проверка доступа к репозиторию...${NC}"
-if ! git ls-remote --tags "$REPO" "$VERSION" >/dev/null 2>&1; then
-    echo -e "${RED}Ошибка: Не удалось найти тег $VERSION в репозитории${NC}"
-    echo -e "${YELLOW}Создайте тег в Git:${NC}"
-    echo -e "  git tag $VERSION"
-    echo -e "  git push origin $VERSION"
+echo -e "${YELLOW}[1/3] Проверка доступа к репозиторию (ветка: $BRANCH)...${NC}"
+if ! git ls-remote --heads "$REPO" "$BRANCH" >/dev/null 2>&1; then
+    echo -e "${RED}Ошибка: Не удалось получить доступ к ветке $BRANCH в репозитории${NC}"
+    echo -e "${YELLOW}Проверьте SSH ключ и права доступа к репозиторию${NC}"
     exit 1
 fi
-echo -e "${GREEN}  ✓ Тег $VERSION найден в репозитории${NC}"
+echo -e "${GREEN}  ✓ Доступ к ветке $BRANCH подтвержден${NC}"
 
 # Клонирование репозитория
-echo -e "${YELLOW}[2/3] Клонирование кода из Git (тег: $VERSION)...${NC}"
+echo -e "${YELLOW}[2/3] Клонирование кода из Git (ветка: $BRANCH)...${NC}"
 mkdir -p "$RELEASES"
-if ! git clone --depth=1 --branch "$VERSION" "$REPO" "$REL"; then
+if ! git clone --depth=1 --branch "$BRANCH" "$REPO" "$REL"; then
     echo -e "${RED}Ошибка при клонировании репозитория${NC}"
     rm -rf "$REL"
     exit 1
 fi
-echo -e "${GREEN}  ✓ Код успешно склонирован${NC}"
+echo -e "${GREEN}  ✓ Код успешно склонирован из ветки $BRANCH${NC}"
 
 # Удаление .git для экономии места
 echo -e "${YELLOW}[3/3] Очистка .git директории...${NC}"
@@ -102,14 +101,22 @@ rm -rf "$REL/.git"
 echo -e "${GREEN}  ✓ .git директория удалена${NC}"
 
 # Сохраняем информацию о релизе
+cd "$REL"
 echo "$VERSION" > "$BASE/.last_deployed"
+echo "$BRANCH" > "$REL/.branch"
 date '+%Y-%m-%d %H:%M:%S' > "$REL/.deployed_at"
+git rev-parse HEAD > "$REL/.commit" 2>/dev/null || true
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN} ✓ Релиз $VERSION готов${NC}"
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}Путь: $REL${NC}"
+echo -e "${GREEN}Версия: $VERSION${NC}"
+echo -e "${GREEN}Ветка:  $BRANCH${NC}"
+echo -e "${GREEN}Путь:   $REL${NC}"
+if [ -f "$REL/.commit" ]; then
+    echo -e "${GREEN}Commit: $(cat $REL/.commit)${NC}"
+fi
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo -e "${BLUE}Следующие шаги:${NC}"
