@@ -8,15 +8,13 @@ function generateNonce() {
   return Buffer.from(array).toString('base64')
 }
 
-// CSP header с nonce вместо unsafe-inline
+// CSP header для Next.js 15
 function buildCSPHeader(nonce: string) {
   const isDev = process.env.NODE_ENV === 'development'
 
-  // В development режиме Next.js требует eval для HMR
-  // Разрешаем unsafe-inline для JSON-LD скриптов (они статические и безопасные)
-  const scriptSrc = isDev
-    ? `'self' 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval'`
-    : `'self' 'nonce-${nonce}' 'unsafe-inline'`
+  // Next.js 15 в production генерирует inline скрипты без nonce
+  // Поэтому используем 'unsafe-inline' без nonce для совместимости
+  const scriptSrc = isDev ? `'self' 'unsafe-inline' 'unsafe-eval'` : `'self' 'unsafe-inline'`
 
   return `
     default-src 'self';
