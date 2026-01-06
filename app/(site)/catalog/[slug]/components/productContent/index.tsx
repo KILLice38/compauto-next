@@ -3,7 +3,7 @@
 import { useMediaQuery } from '../../../../../hooks/useMediaQuery'
 import Characteristics from '../characteristics'
 import css from './index.module.scss'
-import { Product } from '@prisma/client'
+import { Product } from '../../../../../generated/prisma/client'
 import dynamic from 'next/dynamic'
 
 const ProductGallery = dynamic(() => import('../productGallery'), { ssr: false })

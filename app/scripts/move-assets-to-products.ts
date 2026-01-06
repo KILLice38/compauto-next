@@ -1,9 +1,13 @@
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 import path from 'path'
 import fs from 'fs/promises'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(new pg.Pool({ connectionString: process.env.DATABASE_URL })),
+})
 const DRY = process.env.DRY_RUN === '1'
 const PUBLIC_ROOT = process.env.PUBLIC_ROOT ? path.resolve(process.env.PUBLIC_ROOT) : path.join(process.cwd(), 'public')
 

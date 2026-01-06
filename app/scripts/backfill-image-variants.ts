@@ -1,11 +1,15 @@
 // app/scripts/backfill-image-variants.ts
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 import path from 'path'
 import { promises as fs } from 'fs'
 import sharp from 'sharp'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(new pg.Pool({ connectionString: process.env.DATABASE_URL })),
+})
 
 function absFromPublic(url: string) {
   return path.join(process.cwd(), 'public', url.startsWith('/') ? url.slice(1) : url)

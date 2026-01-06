@@ -1,4 +1,4 @@
-import { Product } from '@prisma/client'
+import { Product } from '../../../../../generated/prisma/client'
 import css from './index.module.scss'
 
 const Characteristics = ({ product }: { product: Product }) => {

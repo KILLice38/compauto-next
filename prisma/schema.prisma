@@ -1,11 +1,17 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  provider = "postgresql"
+  schemas  = ["app", "public"]
 }
 
 model Product {
@@ -28,6 +34,7 @@ model Product {
   @@index([autoMark])
   @@index([compressor])
   @@index([engineModel])
+  @@schema("app")
 }
 
 model User {
@@ -36,14 +43,17 @@ model User {
   email          String   @unique
   hashedPassword String
   createdAt      DateTime @default(now())
+
+  @@schema("app")
 }
 
 model FilterOption {
   id        Int      @id @default(autoincrement())
-  type      String   // 'autoMark', 'engineModel', 'compressor'
+  type      String // 'autoMark', 'engineModel', 'compressor'
   value     String
   createdAt DateTime @default(now())
 
   @@unique([type, value])
   @@index([type])
+  @@schema("app")
 }

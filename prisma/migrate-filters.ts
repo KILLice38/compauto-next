@@ -1,13 +1,11 @@
-/**
- * Скрипт миграции фильтров
- * Собирает все уникальные значения из Product и создает FilterOption записи
- *
- * Запуск: pnpm tsx prisma/migrate-filters.ts
- */
+import 'dotenv/config'
+import { PrismaClient } from '../app/generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(new pg.Pool({ connectionString: process.env.DATABASE_URL })),
+})
 
 async function migrateFilters() {
   console.log('🔄 Начинаем миграцию фильтров...\n')

@@ -1,10 +1,14 @@
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 import path from 'path'
 import { promises as fs } from 'fs'
 import sharp from 'sharp'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(new pg.Pool({ connectionString: process.env.DATABASE_URL })),
+})
 const BG = { r: 255, g: 255, b: 255, alpha: 1 }
 
 function abs(u: string) {

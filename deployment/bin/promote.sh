@@ -110,11 +110,11 @@ HUSKY=0 pnpm install --prod --frozen-lockfile
 
 # Generate Prisma Client
 echo -e "${YELLOW}Generating Prisma Client...${NC}"
-pnpm prisma generate
+pnpm dlx prisma generate
 
 # Run database migrations
 echo -e "${YELLOW}Running database migrations...${NC}"
-pnpm prisma migrate deploy
+pnpm dlx prisma migrate deploy
 
 # Build Next.js application
 echo -e "${YELLOW}Building Next.js application...${NC}"

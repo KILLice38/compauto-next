@@ -1,4 +1,4 @@
-import type { Product } from '@prisma/client'
+import type { Product } from '../generated/prisma/client'
 
 // Use Prisma-generated types as the source of truth
 export type ProductType = Product

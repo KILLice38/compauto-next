@@ -56,3 +56,5 @@ next-env.d.ts
 /public/uploads
 
 AUDIT_TODO.md
+
+/app/generated/prisma

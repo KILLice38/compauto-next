@@ -1,10 +1,14 @@
-// prisma/seed.ts
-import { PrismaClient } from '@prisma/client'
+import 'dotenv/config'
+import { PrismaClient } from '../app/generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 import { promises as fs } from 'fs'
 import path from 'path'
 import sharp from 'sharp'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  adapter: new PrismaPg(new pg.Pool({ connectionString: process.env.DATABASE_URL })),
+})
 
 // Константы для путей
 const PUBLIC_DIR = path.join(process.cwd(), 'public')
@@ -108,8 +112,6 @@ async function generateGallery(
 
   return gallery
 }
-
-// Данные для seed
 const productsData = [
   {
     title: 'Турбокомпрессор GT1749V',
@@ -257,7 +259,6 @@ async function main() {
 
   // Создание товаров
   console.log('Creating products with images...')
-
   for (const data of productsData) {
     // Генерируем slug
     const slug = data.title

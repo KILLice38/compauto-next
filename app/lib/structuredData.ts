@@ -1,4 +1,4 @@
-import { Product } from '@prisma/client'
+import { Product } from '../generated/prisma/client'
 
 const BASE_URL = 'https://comp-auto.ru'
 
