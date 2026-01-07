@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import Cropper from 'react-easy-crop'
 import type { Area } from 'react-easy-crop'
 import { getCroppedImg, blobToFile } from '../../../utils/cropImage'
@@ -36,6 +36,7 @@ export default function ImageCropModal({
   const [aspect, setAspect] = useState<number | undefined>(1)
   const [isProcessing, setIsProcessing] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const isProcessingRef = useRef(false) // Для немедленной проверки без ожидания ререндера
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels)
@@ -78,20 +79,26 @@ export default function ImageCropModal({
   }, [previewUrl])
 
   const handleCrop = useCallback(async () => {
-    if (!croppedAreaPixels) return
+    // Используем ref для немедленной проверки без ожидания ререндера
+    if (!croppedAreaPixels || isProcessingRef.current) return
 
     try {
+      isProcessingRef.current = true
       setIsProcessing(true)
+
       const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, rotation)
       const croppedFile = blobToFile(
         croppedBlob,
         originalFile.name.replace(/\.[^/.]+$/, '') + '-cropped.webp'
       )
+
+      // НЕ сбрасываем isProcessing - пусть модалка остается заблокированной
+      // до тех пор, пока родитель не закроет её после завершения загрузки
       onComplete(croppedFile)
     } catch (error) {
       console.error('Ошибка при обрезке:', error)
       alert('Не удалось обрезать изображение')
-    } finally {
+      isProcessingRef.current = false
       setIsProcessing(false)
     }
   }, [croppedAreaPixels, imageSrc, rotation, originalFile, onComplete])
