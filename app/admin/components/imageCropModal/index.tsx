@@ -110,7 +110,7 @@ export default function ImageCropModal({
   }, [isProcessing, onCancel, handleCrop])
 
   return (
-    <div className={css.overlay} onClick={onCancel}>
+    <div className={css.overlay} onClick={isProcessing ? undefined : onCancel}>
       <div className={css.modal} onClick={(e) => e.stopPropagation()}>
         <div className={css.header}>
           <h2>Обрезка изображения</h2>
@@ -123,10 +123,10 @@ export default function ImageCropModal({
             zoom={zoom}
             rotation={rotation}
             aspect={aspect}
-            onCropChange={setCrop}
+            onCropChange={isProcessing ? () => {} : setCrop}
             onCropComplete={onCropComplete}
-            onZoomChange={setZoom}
-            onRotationChange={setRotation}
+            onZoomChange={isProcessing ? () => {} : setZoom}
+            onRotationChange={isProcessing ? () => {} : setRotation}
           />
         </div>
 
@@ -140,6 +140,7 @@ export default function ImageCropModal({
                   type="button"
                   className={`${css.aspectButton} ${aspect === ratio.value ? css.active : ''}`}
                   onClick={() => setAspect(ratio.value)}
+                  disabled={isProcessing}
                 >
                   {ratio.label}
                 </button>
@@ -159,6 +160,7 @@ export default function ImageCropModal({
               step={0.1}
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
+              disabled={isProcessing}
             />
           </div>
 
@@ -171,6 +173,7 @@ export default function ImageCropModal({
               step={1}
               value={rotation}
               onChange={(e) => setRotation(Number(e.target.value))}
+              disabled={isProcessing}
             />
           </div>
 
@@ -204,6 +207,13 @@ export default function ImageCropModal({
             {isProcessing ? 'Обработка...' : 'Применить'}
           </button>
         </div>
+
+        {isProcessing && (
+          <div className={css.loadingOverlay}>
+            <div className={css.spinner}></div>
+            <p>Обработка изображения...</p>
+          </div>
+        )}
       </div>
     </div>
   )
