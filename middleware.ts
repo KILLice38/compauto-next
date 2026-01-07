@@ -16,13 +16,16 @@ function buildCSPHeader(nonce: string) {
   // Поэтому используем 'unsafe-inline' без nonce для совместимости
   const scriptSrc = isDev ? `'self' 'unsafe-inline' 'unsafe-eval'` : `'self' 'unsafe-inline'`
 
+  // В development разрешаем localhost для HMR, в production только 'self'
+  const connectSrc = isDev ? `'self' http://localhost:* ws://localhost:* wss://localhost:*` : `'self'`
+
   return `
     default-src 'self';
     script-src ${scriptSrc};
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data:;
     font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://*.vercel.app http://localhost:* ws://localhost:*;
+    connect-src ${connectSrc};
     form-action 'self';
     frame-ancestors 'none';
     base-uri 'self';
