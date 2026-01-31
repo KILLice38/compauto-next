@@ -6,27 +6,30 @@ import { audit } from '../lib/auditLog'
 /**
  * GET /api/filters
  * Получить все фильтры, сгруппированные по типу
+ * Оптимизировано: 3 параллельных запроса вместо загрузки всех + фильтрация в памяти
  */
 export async function GET() {
   try {
-    const filters = await prisma.filterOption.findMany({
-      orderBy: [{ type: 'asc' }, { value: 'asc' }],
-    })
+    // Параллельные запросы к БД — каждый фильтрует на уровне SQL
+    const [autoMark, engineModel, compressor] = await Promise.all([
+      prisma.filterOption.findMany({
+        where: { type: 'autoMark' },
+        select: { id: true, value: true },
+        orderBy: { value: 'asc' },
+      }),
+      prisma.filterOption.findMany({
+        where: { type: 'engineModel' },
+        select: { id: true, value: true },
+        orderBy: { value: 'asc' },
+      }),
+      prisma.filterOption.findMany({
+        where: { type: 'compressor' },
+        select: { id: true, value: true },
+        orderBy: { value: 'asc' },
+      }),
+    ])
 
-    // Группируем по типу для удобства
-    const grouped = {
-      autoMark: filters
-        .filter((f: { type: string }) => f.type === 'autoMark')
-        .map((f: { id: number; value: string }) => ({ id: f.id, value: f.value })),
-      engineModel: filters
-        .filter((f: { type: string }) => f.type === 'engineModel')
-        .map((f: { id: number; value: string }) => ({ id: f.id, value: f.value })),
-      compressor: filters
-        .filter((f: { type: string }) => f.type === 'compressor')
-        .map((f: { id: number; value: string }) => ({ id: f.id, value: f.value })),
-    }
-
-    return NextResponse.json(grouped)
+    return NextResponse.json({ autoMark, engineModel, compressor })
   } catch (error) {
     console.error('[GET /api/filters] Error:', error)
     return NextResponse.json({ error: 'Failed to fetch filters' }, { status: 500 })
