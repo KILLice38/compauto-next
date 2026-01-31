@@ -194,14 +194,18 @@ export async function GET(req: NextRequest) {
       orderBy = { price: 'desc' }
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      skip,
-      take,
-      orderBy,
-    })
+    // Parallel queries: products + total count
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take,
+        orderBy,
+      }),
+      prisma.product.count({ where }),
+    ])
 
-    return NextResponse.json(products)
+    return NextResponse.json({ products, total })
   } catch (error) {
     console.error('Failed to fetch products:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })

@@ -23,6 +23,7 @@ interface UseAdminProductsOptions {
 
 export function useAdminProducts({ confirm, toast }: UseAdminProductsOptions) {
   const [products, setProducts] = useState<ProductType[] | null>(null)
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -38,10 +39,11 @@ export function useAdminProducts({ confirm, toast }: UseAdminProductsOptions) {
       try {
         const res = await fetch(`/api/products?skip=0&take=${ITEMS_PER_PAGE}`)
         if (!res.ok) throw new Error(`Fetch error: ${res.status}`)
-        const data: ProductType[] = await res.json()
+        const data: { products: ProductType[]; total: number } = await res.json()
         if (!cancelled) {
-          setProducts(data)
-          setHasMore(data.length === ITEMS_PER_PAGE)
+          setProducts(data.products)
+          setTotal(data.total)
+          setHasMore(data.products.length < data.total)
         }
       } catch (err: unknown) {
         if (!cancelled) {
@@ -110,10 +112,12 @@ export function useAdminProducts({ confirm, toast }: UseAdminProductsOptions) {
     try {
       const res = await fetch(`/api/products?skip=${products.length}&take=${ITEMS_PER_PAGE}`)
       if (!res.ok) throw new Error(`Fetch error: ${res.status}`)
-      const newData: ProductType[] = await res.json()
+      const data: { products: ProductType[]; total: number } = await res.json()
 
-      setProducts([...products, ...newData])
-      setHasMore(newData.length === ITEMS_PER_PAGE)
+      const newProducts = [...products, ...data.products]
+      setProducts(newProducts)
+      setTotal(data.total)
+      setHasMore(newProducts.length < data.total)
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message)
@@ -127,6 +131,7 @@ export function useAdminProducts({ confirm, toast }: UseAdminProductsOptions) {
 
   return {
     products,
+    total,
     loading,
     loadingMore,
     error,
@@ -134,6 +139,7 @@ export function useAdminProducts({ confirm, toast }: UseAdminProductsOptions) {
     editingProduct,
     hasMore,
     setProducts,
+    setTotal,
     setShowForm,
     setEditingProduct,
     handleDelete,

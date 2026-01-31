@@ -12,6 +12,7 @@ interface FilterVariants {
 
 export function useCatalog() {
   const [visibleProducts, setVisibleProducts] = useState<ProductType[]>([])
+  const [total, setTotal] = useState(0)
   const [filterVariants, setFilterVariants] = useState<FilterVariants>({
     autoMark: [],
     engineModel: [],
@@ -72,10 +73,12 @@ export function useCatalog() {
         const skip = reset ? 0 : visibleProducts.length
         const queryString = buildQueryString(skip)
         const res = await fetch(`/api/products?${queryString}`)
-        const data: ProductType[] = await res.json()
+        const data: { products: ProductType[]; total: number } = await res.json()
 
-        setVisibleProducts((prev) => (reset ? data : [...prev, ...data]))
-        setHasMore(data.length === PAGE_SIZE)
+        const newProducts = reset ? data.products : [...visibleProducts, ...data.products]
+        setVisibleProducts(newProducts)
+        setTotal(data.total)
+        setHasMore(newProducts.length < data.total)
       } catch {
         setHasMore(false)
       } finally {
@@ -83,7 +86,7 @@ export function useCatalog() {
         setLoading(false)
       }
     },
-    [buildQueryString, visibleProducts.length]
+    [buildQueryString, visibleProducts]
   )
 
   // Initial load on mount
@@ -135,6 +138,7 @@ export function useCatalog() {
 
   return {
     visibleProducts,
+    total,
     hasMore,
     loading,
     filters,
