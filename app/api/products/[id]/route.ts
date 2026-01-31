@@ -17,6 +17,30 @@ type RouteParams = Promise<{ id: string }>
 // ---------- FS helpers ----------
 const VARIANT_SUFFIXES = ['source', 'card', 'detail', 'thumb'] as const
 
+// Тип для отслеживания перемещённых файлов (для rollback)
+interface MovedFile {
+  from: string
+  to: string
+}
+
+/**
+ * Откатывает перемещение файлов — перемещает обратно из to в from
+ */
+async function rollbackMoves(movedFiles: MovedFile[]): Promise<void> {
+  for (const { from, to } of movedFiles) {
+    try {
+      await fs.rename(to, from)
+    } catch {
+      // Если не удалось откатить, удаляем файл из целевой папки
+      try {
+        await fs.unlink(to)
+      } catch {
+        // Игнорируем — файл мог не существовать
+      }
+    }
+  }
+}
+
 function isHttpUrl(str: string | null | undefined) {
   return !!str && /^https?:\/\//i.test(str)
 }
@@ -49,11 +73,14 @@ async function unlinkWithVariants(publicUrl: string | null | undefined) {
 }
 
 // Перенос сета (__source/__card/__detail/__thumb) из tmp → products/<slug>
-// Возвращает канонический public URL на __source.webp и (опц.) tmp-токен для последующей очистки.
-async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<{ url: string; tmpToken?: string }> {
+// Возвращает канонический public URL, tmp-токен и список перемещённых файлов для rollback
+async function finalizeAssetToProduct(
+  publicUrl: string,
+  slug: string
+): Promise<{ url: string; tmpToken?: string; movedFiles: MovedFile[] }> {
   if (!isTmpUrl(publicUrl)) {
     // уже в products или внешний URL
-    return { url: publicUrl }
+    return { url: publicUrl, movedFiles: [] }
   }
 
   const token = extractTmpToken(publicUrl) ?? undefined
@@ -61,13 +88,16 @@ async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<
   const destDir = getProductDir(slug)
   await fs.mkdir(destDir, { recursive: true })
 
+  const movedFiles: MovedFile[] = []
   let finalUrl = ''
+
   for (const p of variantsPub) {
     const absOld = publicUrlToAbs(p) // из tmp/<token>/*
     const fileName = path.basename(absOld)
     const absNew = path.join(destDir, fileName)
     try {
       await fs.rename(absOld, absNew) // переносим если есть
+      movedFiles.push({ from: absOld, to: absNew })
       if (fileName.endsWith('__source.webp')) {
         finalUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
       }
@@ -83,7 +113,7 @@ async function finalizeAssetToProduct(publicUrl: string, slug: string): Promise<
     finalUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
   }
 
-  return { url: finalUrl, tmpToken: token }
+  return { url: finalUrl, tmpToken: token, movedFiles }
 }
 
 // ---------- Handlers (Next 15: params is Promise) ----------
@@ -108,6 +138,10 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
   const numId = Number(id)
   if (Number.isNaN(numId)) return NextResponse.json({ error: 'Bad id' }, { status: 400 })
 
+  // Для rollback при ошибке БД
+  const allMovedFiles: MovedFile[] = []
+  const usedTmpTokens = new Set<string>()
+
   try {
     const current = await prisma.product.findUnique({ where: { id: numId } })
     if (!current) return NextResponse.json({ error: 'Продукт не найден' }, { status: 404 })
@@ -122,12 +156,12 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
     const validated = parseResult.data
 
     // Сначала переносим возможные tmp-файлы → products/<slug>
-    const usedTmpTokens = new Set<string>()
     let finalImg = validated.img
     if (typeof finalImg === 'string' && isTmpUrl(finalImg)) {
       const res = await finalizeAssetToProduct(finalImg, current.slug)
       finalImg = res.url
       if (res.tmpToken) usedTmpTokens.add(res.tmpToken)
+      allMovedFiles.push(...res.movedFiles)
     }
 
     let finalGallery: string[] | undefined
@@ -138,6 +172,7 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
           const res = await finalizeAssetToProduct(u, current.slug)
           out.push(res.url)
           if (res.tmpToken) usedTmpTokens.add(res.tmpToken)
+          allMovedFiles.push(...res.movedFiles)
         } else {
           out.push(u)
         }
@@ -232,6 +267,13 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
     return NextResponse.json(updated)
   } catch (error) {
     console.error('Failed to update product:', error)
+
+    // Rollback: возвращаем файлы обратно в tmp
+    if (allMovedFiles.length > 0) {
+      console.log(`Rolling back ${allMovedFiles.length} moved files...`)
+      await rollbackMoves(allMovedFiles)
+    }
+
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
   }
 }

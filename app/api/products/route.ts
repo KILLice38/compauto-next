@@ -10,13 +10,40 @@ import { audit } from '../lib/auditLog'
 import { createProductSchema, productQuerySchema, formatZodError } from '../lib/validation'
 import { checkRateLimit, RateLimitPresets } from '../lib/rateLimit'
 
+// Тип для отслеживания перемещённых файлов (для rollback)
+interface MovedFile {
+  from: string
+  to: string
+}
+
+/**
+ * Откатывает перемещение файлов — перемещает обратно из to в from
+ */
+async function rollbackMoves(movedFiles: MovedFile[]): Promise<void> {
+  for (const { from, to } of movedFiles) {
+    try {
+      await fs.rename(to, from)
+    } catch {
+      // Если не удалось откатить, удаляем файл из целевой папки
+      try {
+        await fs.unlink(to)
+      } catch {
+        // Игнорируем — файл мог не существовать
+      }
+    }
+  }
+}
+
 /**
  * Переносит набор (__source/__card/__detail/__thumb) из tmp → products/<slug>.
- * Возвращает: { url: publicUrlНа__source.webp, token?: tmpTokenIfAny }
+ * Возвращает: { url, token, movedFiles } — movedFiles для возможного rollback
  */
-async function finalizeAsset(sourceUrl: string, slug: string): Promise<{ url: string; token?: string }> {
+async function finalizeAsset(
+  sourceUrl: string,
+  slug: string
+): Promise<{ url: string; token?: string; movedFiles: MovedFile[] }> {
   if (!isTmpUrl(sourceUrl)) {
-    return { url: sourceUrl } // уже в products или внешний URL
+    return { url: sourceUrl, movedFiles: [] } // уже в products или внешний URL
   }
 
   const token = extractTmpToken(sourceUrl) ?? undefined
@@ -24,13 +51,16 @@ async function finalizeAsset(sourceUrl: string, slug: string): Promise<{ url: st
   await fs.mkdir(targetDir, { recursive: true })
 
   const publics = allVariantPublicsFromAny(sourceUrl)
+  const movedFiles: MovedFile[] = []
   let finalSourceUrl = ''
+
   for (const pub of publics) {
     const absOld = publicUrlToAbs(pub)
     const fileName = path.basename(absOld)
     const absNew = path.join(targetDir, fileName)
     try {
       await fs.rename(absOld, absNew) // move если файл есть
+      movedFiles.push({ from: absOld, to: absNew })
       if (fileName.endsWith('__source.webp')) {
         finalSourceUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
       }
@@ -46,7 +76,7 @@ async function finalizeAsset(sourceUrl: string, slug: string): Promise<{ url: st
     finalSourceUrl = `${PRODUCTS_BASE_URL}/${slug}/${fileName}`
   }
 
-  return { url: finalSourceUrl, token }
+  return { url: finalSourceUrl, token, movedFiles }
 }
 
 /** --- slug helpers --- */
@@ -69,6 +99,10 @@ export async function POST(req: NextRequest) {
   const authError = await requireAuth(req)
   if (authError) return authError
 
+  // Для rollback при ошибке БД
+  const allMovedFiles: MovedFile[] = []
+  const usedTokens = new Set<string>()
+
   try {
     const raw = await req.json()
 
@@ -83,23 +117,24 @@ export async function POST(req: NextRequest) {
     const base = slugify(validated.title)
     const slug = `${base}-${randomSuffix()}`
 
-    // 2) перенос ассетов + сбор использованных tmp-токенов
-    const usedTokens = new Set<string>()
-
+    // 2) перенос ассетов + сбор использованных tmp-токенов + отслеживание для rollback
     const imgRes = await finalizeAsset(validated.img, slug)
     if (imgRes.token) usedTokens.add(imgRes.token)
+    allMovedFiles.push(...imgRes.movedFiles)
     const img = imgRes.url
 
     const gallery: string[] = []
     for (const u of validated.gallery) {
       const gRes = await finalizeAsset(u, slug)
       if (gRes.token) usedTokens.add(gRes.token)
+      allMovedFiles.push(...gRes.movedFiles)
       gallery.push(gRes.url)
     }
 
     const details = validated.details.map((s) => s.trim()).filter(Boolean)
 
     // 3) создаём продукт - only validated fields
+    // Если здесь произойдёт ошибка, файлы будут откачены в catch блоке
     const product = await prisma.product.create({
       data: {
         slug,
@@ -132,7 +167,14 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
-    console.error('Prisma create error:', error)
+    console.error('Product create error:', error)
+
+    // Rollback: возвращаем файлы обратно в tmp
+    if (allMovedFiles.length > 0) {
+      console.log(`Rolling back ${allMovedFiles.length} moved files...`)
+      await rollbackMoves(allMovedFiles)
+    }
+
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 })
   }
 }
