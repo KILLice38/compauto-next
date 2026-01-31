@@ -58,3 +58,6 @@ next-env.d.ts
 AUDIT_TODO.md
 
 /app/generated/prisma
+
+deployment
+deployment/

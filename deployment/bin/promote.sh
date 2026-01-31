@@ -103,29 +103,33 @@ if [ -d "$CURRENT_DIR/.next/cache" ]; then
     ln -s "$SHARED_DIR/.next/cache" "$CURRENT_DIR/.next/cache"
 fi
 
-# Install dependencies
+# Install ALL dependencies (including devDependencies for build)
 echo -e "${YELLOW}Installing dependencies with pnpm...${NC}"
 cd "$CURRENT_DIR"
-HUSKY=0 pnpm install --prod --frozen-lockfile
+HUSKY=0 pnpm install --frozen-lockfile
 
 # Generate Prisma Client
 echo -e "${YELLOW}Generating Prisma Client...${NC}"
-pnpm dlx prisma generate
+pnpm exec prisma generate
 
 # Run database migrations
 echo -e "${YELLOW}Running database migrations...${NC}"
-pnpm dlx prisma migrate deploy
+pnpm exec prisma migrate deploy
 
 # Build Next.js application
 echo -e "${YELLOW}Building Next.js application...${NC}"
 pnpm build
+
+# Remove devDependencies after build to save space
+echo -e "${YELLOW}Cleaning up devDependencies...${NC}"
+pnpm prune --prod
 
 # Restart PM2 application
 echo -e "${YELLOW}Restarting production application...${NC}"
 if pm2 describe compauto-production > /dev/null 2>&1; then
     pm2 reload compauto-production --update-env
 else
-    pm2 start /var/www/compauto/deployment/ecosystem.config.cjs --only compauto-production
+    pm2 startOrReload /var/www/compauto/ecosystem.config.cjs --only compauto-production
 fi
 
 # Save PM2 configuration

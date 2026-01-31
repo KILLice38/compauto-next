@@ -75,8 +75,10 @@ export async function middleware(req: NextRequest) {
   })
 
   if (!token) {
-    const loginUrl = req.nextUrl.clone()
-    loginUrl.pathname = '/admin/login'
+    // Используем X-Forwarded заголовки от nginx для правильного URL
+    const host = req.headers.get('x-forwarded-host') || req.headers.get('host') || req.nextUrl.host
+    const proto = req.headers.get('x-forwarded-proto') || 'https'
+    const loginUrl = new URL('/admin/login', `${proto}://${host}`)
     return NextResponse.redirect(loginUrl)
   }
 
