@@ -8,7 +8,6 @@ import SortIcon from '../../components/sortIcon'
 import { useCatalog } from '../../utils/useCatalog'
 import css from './page.module.scss'
 import Products from '../../components/products'
-import { getUniqueValues } from '../../utils/getUniqueValues'
 import { ProductType } from '../../types/interfaces'
 import { useState } from 'react'
 
@@ -16,7 +15,7 @@ const CatalogPage = () => {
   const isLess1200 = useMediaQuery('(max-width: 1200px)')
   const [isSortExpanded, setIsSortExpanded] = useState(false)
 
-  const { visibleProducts, hasMore, loading, filters, setSearchTerm, setFilters, setSort, loadMore, allProducts } =
+  const { visibleProducts, hasMore, loading, filters, setSearchTerm, setFilters, setSort, loadMore, filterVariants } =
     useCatalog()
 
   const handleFilterChange = <K extends keyof ProductType>(key: K, value: ProductType[K] | null) => {
@@ -26,24 +25,20 @@ const CatalogPage = () => {
     }))
   }
 
-  const autoMarkVariants = getUniqueValues(allProducts, 'autoMark')
-  const engineModelVariants = getUniqueValues(allProducts, 'engineModel')
-  const compressorVariants = getUniqueValues(allProducts, 'compressor')
-
   const dynamicFilterData: TestData[] = [
     {
       content: 'Марка автомобиля',
-      variants: autoMarkVariants,
+      variants: filterVariants.autoMark,
       key: 'autoMark',
     },
     {
       content: 'Модель двигателя',
-      variants: engineModelVariants,
+      variants: filterVariants.engineModel,
       key: 'engineModel',
     },
     {
       content: 'Тип компрессора',
-      variants: compressorVariants,
+      variants: filterVariants.compressor,
       key: 'compressor',
     },
   ]

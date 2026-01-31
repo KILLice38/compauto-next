@@ -3,9 +3,20 @@ import type { ProductType } from '../types/interfaces'
 
 const PAGE_SIZE = 12
 
+// Тип для вариантов фильтров
+interface FilterVariants {
+  autoMark: string[]
+  engineModel: string[]
+  compressor: string[]
+}
+
 export function useCatalog() {
   const [visibleProducts, setVisibleProducts] = useState<ProductType[]>([])
-  const [allProducts, setAllProducts] = useState<ProductType[]>([]) // For filter variants only
+  const [filterVariants, setFilterVariants] = useState<FilterVariants>({
+    autoMark: [],
+    engineModel: [],
+    compressor: [],
+  })
   const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<{ [K in keyof ProductType]?: string | null }>({})
   const [sort, setSort] = useState<'recent' | 'az' | 'za' | 'priceAsc' | 'priceDesc' | null>('recent')
@@ -100,18 +111,26 @@ export function useCatalog() {
     prevSort.current = sort
   }, [searchTerm, filters, sort, loadFromServer])
 
-  // Load all products once for filter variants (unfiltered)
+  // Load filter variants from dedicated endpoint (not from products)
   useEffect(() => {
-    const loadAllForFilters = async () => {
+    const loadFilterVariants = async () => {
       try {
-        const res = await fetch('/api/products?skip=0&take=1000') // Load up to 1000 products for filter options
-        const data: ProductType[] = await res.json()
-        setAllProducts(data)
+        const res = await fetch('/api/filters')
+        const data: {
+          autoMark: { value: string }[]
+          engineModel: { value: string }[]
+          compressor: { value: string }[]
+        } = await res.json()
+        setFilterVariants({
+          autoMark: data.autoMark.map((f) => f.value),
+          engineModel: data.engineModel.map((f) => f.value),
+          compressor: data.compressor.map((f) => f.value),
+        })
       } catch (error) {
-        console.error('Failed to load products for filters:', error)
+        console.error('Failed to load filter variants:', error)
       }
     }
-    loadAllForFilters()
+    loadFilterVariants()
   }, [])
 
   return {
@@ -123,6 +142,6 @@ export function useCatalog() {
     setFilters,
     setSort,
     loadMore: () => loadFromServer(false),
-    allProducts,
+    filterVariants,
   }
 }
