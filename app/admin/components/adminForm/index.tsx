@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ProductType } from '../../types/types'
 import { AdminProductFormSchema, type AdminProductForm } from '../../types/types'
 import Image from 'next/image'
-import { useToast } from '../../../contexts/ToastContext'
+import { useUI } from '../../context/UIContext'
 import ImageCropModal from '../imageCropModal'
 import { readFile } from '../../../utils/cropImage'
 
@@ -24,7 +24,7 @@ interface FilterOptions {
 }
 
 export default function ProductForm({ editingProduct, onSave, onCancel }: Props) {
-  const toast = useToast()
+  const { toast } = useUI()
 
   const {
     register,

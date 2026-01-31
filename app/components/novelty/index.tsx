@@ -26,8 +26,8 @@ const Novelty = () => {
         setLoading(true)
         const res = await fetch('/api/products', { signal: ctrl.signal })
         if (!res.ok) throw new Error('Network error')
-        const data: ProductType[] = await res.json()
-        setProducts(data)
+        const data: { products: ProductType[]; total: number } = await res.json()
+        setProducts(data.products)
       } catch {
       } finally {
         setLoading(false)
