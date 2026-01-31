@@ -8,6 +8,7 @@ import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PR
 import { allVariantPublicsFromAny, pruneFolderIfEmpty, baseNoVariantNoExt } from '../lib/fileUtils'
 import { audit } from '../lib/auditLog'
 import { createProductSchema, productQuerySchema, formatZodError } from '../lib/validation'
+import { checkRateLimit, RateLimitPresets } from '../lib/rateLimit'
 
 /**
  * Переносит набор (__source/__card/__detail/__thumb) из tmp → products/<slug>.
@@ -137,6 +138,10 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  // Rate limiting for public API - 60 requests per minute
+  const rateLimitError = checkRateLimit(req, 'api:products:get', RateLimitPresets.API_LIGHT)
+  if (rateLimitError) return rateLimitError
+
   try {
     const url = new URL(req.url)
 
