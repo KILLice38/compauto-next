@@ -10,6 +10,13 @@
   gap: 16px;
 }
 
+.formTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: vars.$color-text-main;
+}
+
 .formScroll {
   flex: 1 1 auto;
   overflow: auto;
@@ -83,6 +90,13 @@
     background-color: rgba(44, 47, 54, 0.3);
     cursor: not-allowed;
     opacity: 0.6;
+  }
+
+  // Стили для select dropdown
+  option {
+    background-color: vars.$color-background-main;
+    color: vars.$color-text-main;
+    padding: 10px;
   }
 }
 

@@ -56,7 +56,7 @@ export default function AdminPageClient() {
           <Button onClickFunction={toggleForm} type="modal">
             {showForm ? 'Отменить' : 'Добавить продукт'}
           </Button>
-          <Button onClickFunction={() => setShowFilterManager(true)} type="filter">
+          <Button onClickFunction={() => setShowFilterManager(true)} type="modal">
             Редактировать фильтры
           </Button>
           <Button onClickFunction={() => signOut({ callbackUrl: '/admin/login' })} type="out">
