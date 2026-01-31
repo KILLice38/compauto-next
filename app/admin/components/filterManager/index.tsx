@@ -140,19 +140,28 @@ export default function FilterManager({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay} onClick={onClose} role="presentation">
+      <div
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="filter-manager-title"
+      >
         <div className={styles.header}>
-          <h2>Управление фильтрами</h2>
+          <h2 id="filter-manager-title">Управление фильтрами</h2>
           <button onClick={onClose} className={styles.closeButton} aria-label="Закрыть">
             ✕
           </button>
         </div>
 
-        <div className={styles.tabs}>
+        <div className={styles.tabs} role="tablist" aria-label="Типы фильтров">
           {(Object.keys(FILTER_LABELS) as Array<keyof Filters>).map((type) => (
             <button
               key={type}
+              role="tab"
+              aria-selected={activeTab === type}
+              aria-controls={`tabpanel-${type}`}
               className={`${styles.tab} ${activeTab === type ? styles.active : ''}`}
               onClick={() => setActiveTab(type)}
             >
@@ -161,7 +170,7 @@ export default function FilterManager({ onClose }: { onClose: () => void }) {
           ))}
         </div>
 
-        <div className={styles.content}>
+        <div className={styles.content} role="tabpanel" id={`tabpanel-${activeTab}`}>
           <div className={styles.addSection}>
             <input
               type="text"

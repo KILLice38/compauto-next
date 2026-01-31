@@ -65,9 +65,19 @@ export default function AdminPageClient() {
         </div>
 
         {showForm && (
-          <div className={css.overlay} onClick={handleCancel}>
-            <div className={css.modal} onClick={(e) => e.stopPropagation()}>
-              <button className={css['close-button']} onClick={handleCancel}>
+          <div className={css.overlay} onClick={handleCancel} role="presentation">
+            <div
+              className={css.modal}
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="product-form-title"
+            >
+              <button
+                className={css['close-button']}
+                onClick={handleCancel}
+                aria-label="Закрыть форму"
+              >
                 ✕
               </button>
               <ProductForm editingProduct={editingProduct} onSave={handleSave} onCancel={handleCancel} />

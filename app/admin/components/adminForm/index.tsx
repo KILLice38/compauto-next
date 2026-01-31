@@ -356,8 +356,13 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
     onCancel()
   }
 
+  const isEdit = !!editingProduct
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={css.form}>
+      <h2 id="product-form-title" className={css.formTitle}>
+        {isEdit ? 'Редактирование продукта' : 'Добавление продукта'}
+      </h2>
       <div className={css.formScroll}>
         <label className={css.label}>
           Название

@@ -121,10 +121,16 @@ export default function ImageCropModal({
   }, [isProcessing, onCancel, handleCrop])
 
   return (
-    <div className={css.overlay} onClick={isProcessing ? undefined : onCancel}>
-      <div className={css.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={css.overlay} onClick={isProcessing ? undefined : onCancel} role="presentation">
+      <div
+        className={css.modal}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="crop-modal-title"
+      >
         <div className={css.header}>
-          <h2>Обрезка изображения</h2>
+          <h2 id="crop-modal-title">Обрезка изображения</h2>
         </div>
 
         <div className={css.cropContainer}>
@@ -163,7 +169,7 @@ export default function ImageCropModal({
           </div>
 
           <div className={css.controlGroup}>
-            <label>Масштаб: {zoom.toFixed(1)}x</label>
+            <label id="zoom-label">Масштаб: {zoom.toFixed(1)}x</label>
             <input
               type="range"
               min={1}
@@ -172,11 +178,12 @@ export default function ImageCropModal({
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
               disabled={isProcessing}
+              aria-labelledby="zoom-label"
             />
           </div>
 
           <div className={css.controlGroup}>
-            <label>Поворот: {rotation}°</label>
+            <label id="rotation-label">Поворот: {rotation}°</label>
             <input
               type="range"
               min={0}
@@ -185,6 +192,7 @@ export default function ImageCropModal({
               value={rotation}
               onChange={(e) => setRotation(Number(e.target.value))}
               disabled={isProcessing}
+              aria-labelledby="rotation-label"
             />
           </div>
 
