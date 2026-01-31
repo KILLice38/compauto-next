@@ -7,6 +7,7 @@ import { audit } from '../lib/auditLog'
  * GET /api/filters
  * Получить все фильтры, сгруппированные по типу
  * Оптимизировано: 3 параллельных запроса вместо загрузки всех + фильтрация в памяти
+ * Кэширование: 5 минут + stale-while-revalidate 10 минут
  */
 export async function GET() {
   try {
@@ -29,7 +30,16 @@ export async function GET() {
       }),
     ])
 
-    return NextResponse.json({ autoMark, engineModel, compressor })
+    return NextResponse.json(
+      { autoMark, engineModel, compressor },
+      {
+        headers: {
+          // Фильтры меняются редко — кэшируем на 5 минут
+          // stale-while-revalidate позволяет отдавать устаревший кэш пока идёт обновление
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      }
+    )
   } catch (error) {
     console.error('[GET /api/filters] Error:', error)
     return NextResponse.json({ error: 'Failed to fetch filters' }, { status: 500 })

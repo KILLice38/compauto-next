@@ -126,7 +126,12 @@ export async function GET(_req: NextRequest, ctx: { params: RouteParams }) {
   const product = await prisma.product.findUnique({ where: { id: numId } })
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  return NextResponse.json(product)
+  return NextResponse.json(product, {
+    headers: {
+      // Кэшируем страницу продукта на 1 минуту
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+    },
+  })
 }
 
 export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {

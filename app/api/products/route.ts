@@ -247,7 +247,16 @@ export async function GET(req: NextRequest) {
       prisma.product.count({ where }),
     ])
 
-    return NextResponse.json({ products, total })
+    return NextResponse.json(
+      { products, total },
+      {
+        headers: {
+          // Продукты меняются чаще — кэшируем на 1 минуту
+          // stale-while-revalidate позволяет отдавать устаревший кэш пока идёт обновление
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      }
+    )
   } catch (error) {
     console.error('Failed to fetch products:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
