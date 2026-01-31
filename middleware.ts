@@ -14,10 +14,14 @@ function buildCSPHeader(nonce: string) {
 
   // Next.js 15 в production генерирует inline скрипты без nonce
   // Поэтому используем 'unsafe-inline' без nonce для совместимости
+  // TODO: После обновления Next.js проверить поддержку nonce
   const scriptSrc = isDev ? `'self' 'unsafe-inline' 'unsafe-eval'` : `'self' 'unsafe-inline'`
 
   // В development разрешаем localhost для HMR, в production только 'self'
   const connectSrc = isDev ? `'self' http://localhost:* ws://localhost:* wss://localhost:*` : `'self'`
+
+  // upgrade-insecure-requests только в production
+  const upgradeInsecure = isDev ? '' : 'upgrade-insecure-requests;'
 
   return `
     default-src 'self';
@@ -30,9 +34,29 @@ function buildCSPHeader(nonce: string) {
     frame-ancestors 'none';
     base-uri 'self';
     object-src 'none';
+    worker-src 'self' blob:;
+    child-src 'self' blob:;
+    manifest-src 'self';
+    media-src 'self';
+    ${upgradeInsecure}
   `
     .replace(/\s{2,}/g, ' ')
     .trim()
+}
+
+// Permissions-Policy header - ограничивает доступ к браузерным API
+function buildPermissionsPolicy() {
+  return [
+    'accelerometer=()',
+    'camera=()',
+    'geolocation=()',
+    'gyroscope=()',
+    'magnetometer=()',
+    'microphone=()',
+    'payment=()',
+    'usb=()',
+    'interest-cohort=()', // Отключаем FLoC tracking
+  ].join(', ')
 }
 
 export async function middleware(req: NextRequest) {
@@ -42,7 +66,7 @@ export async function middleware(req: NextRequest) {
   const nonce = generateNonce()
   const cspHeader = buildCSPHeader(nonce)
 
-  // Для не-админских страниц просто добавляем CSP header
+  // Для не-админских страниц просто добавляем security headers
   if (!pathname.startsWith('/admin')) {
     const response = NextResponse.next()
     response.headers.set('Content-Security-Policy', cspHeader)
@@ -50,12 +74,13 @@ export async function middleware(req: NextRequest) {
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('X-XSS-Protection', '1; mode=block')
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.set('Permissions-Policy', buildPermissionsPolicy())
     // Передаём nonce для использования в компонентах (если понадобится)
     response.headers.set('x-nonce', nonce)
     return response
   }
 
-  // Для login и auth страниц только CSP
+  // Для login и auth страниц security headers без проверки авторизации
   if (pathname === '/admin/login' || pathname.startsWith('/api/auth')) {
     const response = NextResponse.next()
     response.headers.set('Content-Security-Policy', cspHeader)
@@ -63,6 +88,7 @@ export async function middleware(req: NextRequest) {
     response.headers.set('X-Frame-Options', 'DENY')
     response.headers.set('X-XSS-Protection', '1; mode=block')
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.set('Permissions-Policy', buildPermissionsPolicy())
     response.headers.set('x-nonce', nonce)
     return response
   }
@@ -82,13 +108,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Возвращаем ответ с security headers
+  // Возвращаем ответ с security headers для авторизованных пользователей
   const response = NextResponse.next()
   response.headers.set('Content-Security-Policy', cspHeader)
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('X-XSS-Protection', '1; mode=block')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  response.headers.set('Permissions-Policy', buildPermissionsPolicy())
   response.headers.set('x-nonce', nonce)
   return response
 }
