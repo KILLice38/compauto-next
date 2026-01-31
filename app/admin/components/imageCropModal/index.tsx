@@ -105,7 +105,7 @@ export default function ImageCropModal({
       isProcessingRef.current = false
       setIsProcessing(false)
     }
-  }, [croppedAreaPixels, imageSrc, rotation, originalFile, onComplete])
+  }, [croppedAreaPixels, imageSrc, rotation, originalFile, onComplete, onError])
 
   // Keyboard shortcuts (ESC для закрытия, Enter для применения)
   useEffect(() => {
