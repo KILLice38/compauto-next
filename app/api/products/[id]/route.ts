@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../lib/prisma'
 import fs from 'fs/promises'
 import path from 'path'
-import { requireAuth } from '../../lib/auth'
+import { requireAuth, getCurrentUser } from '../../lib/auth'
 import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../../lib/paths'
 import { stripQuery, baseNoVariantNoExt, allVariantPublicsFromAny, pruneFolderIfEmpty } from '../../lib/fileUtils'
+import { audit } from '../../lib/auditLog'
 
 export const runtime = 'nodejs'
 
@@ -182,6 +183,30 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
       },
     })
 
+    // Логируем изменение
+    const user = await getCurrentUser(req)
+    await audit.productUpdated(
+      { id: updated.id, title: updated.title },
+      {
+        title: current.title,
+        description: current.description,
+        price: current.price,
+        autoMark: current.autoMark,
+        engineModel: current.engineModel,
+        compressor: current.compressor,
+      },
+      {
+        title: updated.title,
+        description: updated.description,
+        price: updated.price,
+        autoMark: updated.autoMark,
+        engineModel: updated.engineModel,
+        compressor: updated.compressor,
+      },
+      user ? { id: user.id as string, email: user.email as string } : null,
+      req
+    )
+
     // Чистим пустые tmp/<token> (после переноса всех файлов этого токена)
     await Promise.all(
       Array.from(usedTmpTokens).map(async (t) => {
@@ -218,10 +243,18 @@ export async function DELETE(req: NextRequest, ctx: { params: RouteParams }) {
     await unlinkWithVariants(product.img)
     await Promise.all((product.gallery ?? []).map(unlinkWithVariants))
 
-    // 2) удаляем запись из БД
+    // 2) логируем удаление
+    const user = await getCurrentUser(req)
+    await audit.productDeleted(
+      { id: product.id, title: product.title },
+      user ? { id: user.id as string, email: user.email as string } : null,
+      req
+    )
+
+    // 3) удаляем запись из БД
     await prisma.product.delete({ where: { id: numId } })
 
-    // 3) удаляем папку товара рекурсивно
+    // 4) удаляем папку товара рекурсивно
     if (product.slug) {
       const dir = getProductDir(product.slug)
       try {

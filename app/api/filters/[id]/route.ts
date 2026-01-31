@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../lib/prisma'
-import { requireAuth } from '../../lib/auth'
+import { requireAuth, getCurrentUser } from '../../lib/auth'
+import { audit } from '../../lib/auditLog'
 
 /**
  * DELETE /api/filters/[id]
@@ -44,6 +45,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         { status: 409 }
       )
     }
+
+    // Логируем удаление
+    const user = await getCurrentUser(req)
+    await audit.filterDeleted(
+      { id: filter.id, value: filter.value, type: filter.type },
+      user ? { id: user.id as string, email: user.email as string } : null,
+      req
+    )
 
     // Удаляем
     await prisma.filterOption.delete({

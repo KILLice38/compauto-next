@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../lib/prisma'
-import { requireAuth } from '../lib/auth'
+import { requireAuth, getCurrentUser } from '../lib/auth'
+import { audit } from '../lib/auditLog'
 
 /**
  * GET /api/filters
@@ -66,6 +67,14 @@ export async function POST(req: NextRequest) {
         value: value.trim(),
       },
     })
+
+    // Логируем создание фильтра
+    const user = await getCurrentUser(req)
+    await audit.filterCreated(
+      { id: filterOption.id, value: filterOption.value, type: filterOption.type },
+      user ? { id: user.id as string, email: user.email as string } : null,
+      req
+    )
 
     return NextResponse.json(filterOption, { status: 201 })
   } catch (error) {

@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../lib/prisma'
 import path from 'path'
 import { promises as fs } from 'fs'
-import { requireAuth } from '../lib/auth'
+import { requireAuth, getCurrentUser } from '../lib/auth'
 import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../lib/paths'
 import { allVariantPublicsFromAny, pruneFolderIfEmpty, baseNoVariantNoExt } from '../lib/fileUtils'
+import { audit } from '../lib/auditLog'
 
 /**
  * Переносит набор (__source/__card/__detail/__thumb) из tmp → products/<slug>.
@@ -107,7 +108,15 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // 4) чистим пустые tmp/<token>
+    // 4) логируем действие
+    const user = await getCurrentUser(req)
+    await audit.productCreated(
+      { id: product.id, title: product.title },
+      user ? { id: user.id as string, email: user.email as string } : null,
+      req
+    )
+
+    // 5) чистим пустые tmp/<token>
     await Promise.all(
       Array.from(usedTokens).map(async (t) => {
         await pruneFolderIfEmpty(getTmpDir(t))
