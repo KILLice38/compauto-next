@@ -433,6 +433,7 @@
 @include mixins.responsive-575 {
   .form {
     max-height: none; // На мобильных скролл в модалке
+    overflow: visible; // Убираем overflow: hidden
     gap: 10px;
   }
 
@@ -440,6 +441,19 @@
     gap: 12px;
     overflow: visible; // Скролл обрабатывается модалкой
     min-height: auto;
+    flex: none; // Убираем flex-grow, чтобы контент не сжимался
+  }
+
+  .formActions {
+    position: sticky;
+    bottom: 0;
+    background: vars.$color-background-main;
+    padding: 12px 0;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border-top: 1px solid rgba(212, 86, 74, 0.3);
+    z-index: 5;
   }
 
   .label {
