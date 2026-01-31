@@ -7,10 +7,13 @@ import ProductForm from './components/adminForm'
 import AdminList from './components/adminList'
 import FilterManager from './components/filterManager'
 import { useAdminProducts } from './hooks/useAdminProducts'
+import { useUI } from './context/UIContext'
 import css from './page.module.scss'
 import type { ProductType } from './types/types'
 
 export default function AdminPageClient() {
+  const { confirm, toast } = useUI()
+
   const {
     products,
     showForm,
@@ -23,7 +26,7 @@ export default function AdminPageClient() {
     handleDelete,
     toggleForm,
     loadMore,
-  } = useAdminProducts()
+  } = useAdminProducts({ confirm, toast })
 
   const [showFilterManager, setShowFilterManager] = useState(false)
 

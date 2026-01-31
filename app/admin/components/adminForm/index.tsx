@@ -571,6 +571,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           originalFile={cropModalData.originalFile}
           onComplete={handleCropComplete}
           onCancel={() => setCropModalData(null)}
+          onError={(message) => toast.error(message)}
         />
       )}
     </form>

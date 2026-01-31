@@ -11,6 +11,7 @@ interface ImageCropModalProps {
   originalFile: File
   onComplete: (croppedFile: File) => void
   onCancel: () => void
+  onError?: (message: string) => void
 }
 
 type AspectRatio = { label: string; value: number | undefined }
@@ -28,6 +29,7 @@ export default function ImageCropModal({
   originalFile,
   onComplete,
   onCancel,
+  onError,
 }: ImageCropModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
@@ -97,7 +99,9 @@ export default function ImageCropModal({
       onComplete(croppedFile)
     } catch (error) {
       console.error('Ошибка при обрезке:', error)
-      alert('Не удалось обрезать изображение')
+      if (onError) {
+        onError('Не удалось обрезать изображение')
+      }
       isProcessingRef.current = false
       setIsProcessing(false)
     }

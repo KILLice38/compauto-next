@@ -1,0 +1,231 @@
+@use '../../../styles/vars';
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: vars.$color-background-main;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+  text-align: center;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(212, 86, 74, 0.2);
+  animation: slideUp 0.2s ease-out;
+
+  &.danger {
+    .icon {
+      color: #e74c3c;
+      background: rgba(231, 76, 60, 0.15);
+    }
+  }
+
+  &.warning {
+    .icon {
+      color: #f39c12;
+      background: rgba(243, 156, 18, 0.15);
+    }
+  }
+
+  &.info {
+    .icon {
+      color: #3498db;
+      background: rgba(52, 152, 219, 0.15);
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.title {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 600;
+  color: vars.$color-text-main;
+}
+
+.message {
+  margin: 0 0 28px;
+  font-size: 15px;
+  color: vars.$color-text-description;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.cancelButton,
+.confirmButton {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.cancelButton {
+  background: rgba(44, 47, 54, 0.5);
+  border: 1px solid rgba(212, 86, 74, 0.3);
+  color: vars.$color-text-main;
+
+  &:hover:not(:disabled) {
+    background: rgba(44, 47, 54, 0.7);
+    border-color: rgba(212, 86, 74, 0.5);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}
+
+.confirmButton {
+  border: none;
+  color: #fff;
+
+  &.danger {
+    background: #e74c3c;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+
+    &:hover:not(:disabled) {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+    }
+  }
+
+  &.warning {
+    background: #f39c12;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+
+    &:hover:not(:disabled) {
+      background: #d68910;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+    }
+  }
+
+  &.info {
+    background: #3498db;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+
+    &:hover:not(:disabled) {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .modal {
+    padding: 24px;
+    max-width: 100%;
+  }
+
+  .icon {
+    width: 56px;
+    height: 56px;
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .message {
+    font-size: 14px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelButton,
+  .confirmButton {
+    width: 100%;
+    min-width: unset;
+  }
+}

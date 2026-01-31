@@ -5,7 +5,23 @@ import type { ProductType } from '../types/types'
 
 const ITEMS_PER_PAGE = 12
 
-export function useAdminProducts() {
+interface ConfirmOptions {
+  title: string
+  message: string
+  confirmText?: string
+  cancelText?: string
+  variant?: 'danger' | 'warning' | 'info'
+}
+
+interface UseAdminProductsOptions {
+  confirm: (options: ConfirmOptions) => Promise<boolean>
+  toast: {
+    success: (message: string) => void
+    error: (message: string) => void
+  }
+}
+
+export function useAdminProducts({ confirm, toast }: UseAdminProductsOptions) {
   const [products, setProducts] = useState<ProductType[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -52,23 +68,34 @@ export function useAdminProducts() {
 
   const handleDelete = useCallback(
     async (id: number) => {
-      if (!window.confirm('Удалить продукт?')) return
+      const product = products?.find((p) => p.id === id)
+      const productName = product?.title || `#${id}`
+
+      const confirmed = await confirm({
+        title: 'Удаление продукта',
+        message: `Вы уверены, что хотите удалить "${productName}"? Это действие нельзя отменить.`,
+        confirmText: 'Удалить',
+        cancelText: 'Отмена',
+        variant: 'danger',
+      })
+
+      if (!confirmed) return
+
       const prev = products
       setProducts(prev?.filter((p) => p.id !== id) ?? null)
 
       try {
         const res = await fetch(`/api/products/${id}`, { method: 'DELETE' })
         if (!res.ok) throw new Error(`Delete failed: ${res.status}`)
+        toast.success(`Продукт "${productName}" удалён`)
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message)
-        } else {
-          setError('Произошла неизвестная ошибка')
-        }
+        const errorMessage = err instanceof Error ? err.message : 'Произошла неизвестная ошибка'
+        setError(errorMessage)
+        toast.error(errorMessage)
         setProducts(prev)
       }
     },
-    [products]
+    [products, confirm, toast]
   )
 
   const toggleForm = useCallback(() => {

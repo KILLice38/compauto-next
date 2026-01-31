@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useUI } from '../../context/UIContext'
 import styles from './filterManager.module.scss'
 
 interface FilterOption {
@@ -21,6 +22,7 @@ const FILTER_LABELS = {
 } as const
 
 export default function FilterManager({ onClose }: { onClose: () => void }) {
+  const { confirm, toast } = useUI()
   const [filters, setFilters] = useState<Filters>({
     autoMark: [],
     engineModel: [],
@@ -90,7 +92,15 @@ export default function FilterManager({ onClose }: { onClose: () => void }) {
   }
 
   async function handleDelete(id: number, value: string) {
-    if (!confirm(`Удалить "${value}"?`)) return
+    const confirmed = await confirm({
+      title: 'Удаление фильтра',
+      message: `Вы уверены, что хотите удалить "${value}"?`,
+      confirmText: 'Удалить',
+      cancelText: 'Отмена',
+      variant: 'danger',
+    })
+
+    if (!confirmed) return
 
     try {
       const res = await fetch(`/api/filters/${id}`, {
@@ -106,8 +116,10 @@ export default function FilterManager({ onClose }: { onClose: () => void }) {
         ...prev,
         [activeTab]: prev[activeTab].filter((f) => f.id !== id),
       }))
+
+      toast.success(`Фильтр "${value}" удалён`)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Ошибка при удалении')
+      toast.error(err instanceof Error ? err.message : 'Ошибка при удалении')
     }
   }
 
