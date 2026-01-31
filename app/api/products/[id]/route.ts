@@ -7,6 +7,7 @@ import { requireAuth, getCurrentUser } from '../../lib/auth'
 import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../../lib/paths'
 import { stripQuery, baseNoVariantNoExt, allVariantPublicsFromAny, pruneFolderIfEmpty } from '../../lib/fileUtils'
 import { audit } from '../../lib/auditLog'
+import { updateProductSchema, formatZodError } from '../../lib/validation'
 
 export const runtime = 'nodejs'
 
@@ -111,14 +112,18 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
     const current = await prisma.product.findUnique({ where: { id: numId } })
     if (!current) return NextResponse.json({ error: 'Продукт не найден' }, { status: 404 })
 
-    const body = (await req.json()) as Record<string, unknown> | null
-    const { id: _omitId, slug: _omitSlug, ...data } = body ?? {}
-    void _omitId
-    void _omitSlug
+    const body = await req.json()
+
+    // Validate input with Zod - prevents mass assignment
+    const parseResult = updateProductSchema.safeParse(body)
+    if (!parseResult.success) {
+      return NextResponse.json({ error: formatZodError(parseResult.error) }, { status: 400 })
+    }
+    const validated = parseResult.data
 
     // Сначала переносим возможные tmp-файлы → products/<slug>
     const usedTmpTokens = new Set<string>()
-    let finalImg = data.img as string | undefined
+    let finalImg = validated.img
     if (typeof finalImg === 'string' && isTmpUrl(finalImg)) {
       const res = await finalizeAssetToProduct(finalImg, current.slug)
       finalImg = res.url
@@ -126,14 +131,14 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
     }
 
     let finalGallery: string[] | undefined
-    if (Array.isArray(data.gallery)) {
+    if (Array.isArray(validated.gallery)) {
       const out: string[] = []
-      for (const u of data.gallery) {
-        if (typeof u === 'string' && isTmpUrl(u)) {
+      for (const u of validated.gallery) {
+        if (isTmpUrl(u)) {
           const res = await finalizeAssetToProduct(u, current.slug)
           out.push(res.url)
           if (res.tmpToken) usedTmpTokens.add(res.tmpToken)
-        } else if (typeof u === 'string') {
+        } else {
           out.push(u)
         }
       }
@@ -142,8 +147,8 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
 
     // Нормализуем поля
     const nextGallery: string[] | undefined = Array.isArray(finalGallery) ? finalGallery.slice(0, 4) : undefined
-    const nextDetails: string[] | undefined = Array.isArray(data.details)
-      ? data.details.map((s: string) => String(s).trim()).filter(Boolean)
+    const nextDetails: string[] | undefined = Array.isArray(validated.details)
+      ? validated.details.map((s) => s.trim()).filter(Boolean)
       : undefined
 
     const droppedTmp = Array.isArray(finalGallery)
@@ -172,11 +177,16 @@ export async function PUT(req: NextRequest, ctx: { params: RouteParams }) {
       await Promise.all(removed.map(unlinkWithVariants))
     }
 
-    // Обновляем запись
+    // Обновляем запись - only validated fields
     const updated = await prisma.product.update({
       where: { id: numId },
       data: {
-        ...data,
+        ...(validated.title !== undefined && { title: validated.title }),
+        ...(validated.description !== undefined && { description: validated.description }),
+        ...(validated.price !== undefined && { price: validated.price }),
+        ...(validated.autoMark !== undefined && { autoMark: validated.autoMark }),
+        ...(validated.engineModel !== undefined && { engineModel: validated.engineModel }),
+        ...(validated.compressor !== undefined && { compressor: validated.compressor }),
         img: finalImg ?? current.img,
         gallery: nextGallery ?? current.gallery,
         details: nextDetails,

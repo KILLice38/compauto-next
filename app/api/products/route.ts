@@ -7,6 +7,7 @@ import { requireAuth, getCurrentUser } from '../lib/auth'
 import { getProductDir, getTmpDir, publicUrlToAbs, isTmpUrl, extractTmpToken, PRODUCTS_BASE_URL } from '../lib/paths'
 import { allVariantPublicsFromAny, pruneFolderIfEmpty, baseNoVariantNoExt } from '../lib/fileUtils'
 import { audit } from '../lib/auditLog'
+import { createProductSchema, productQuerySchema, formatZodError } from '../lib/validation'
 
 /**
  * Переносит набор (__source/__card/__detail/__thumb) из tmp → products/<slug>.
@@ -69,42 +70,47 @@ export async function POST(req: NextRequest) {
 
   try {
     const raw = await req.json()
-    if (!raw.title) return NextResponse.json({ error: 'Title required' }, { status: 400 })
-    if (!raw.img) return NextResponse.json({ error: 'Main image required' }, { status: 400 })
+
+    // Validate input with Zod - prevents mass assignment
+    const parseResult = createProductSchema.safeParse(raw)
+    if (!parseResult.success) {
+      return NextResponse.json({ error: formatZodError(parseResult.error) }, { status: 400 })
+    }
+    const validated = parseResult.data
 
     // 1) slug
-    const base = slugify(raw.title)
+    const base = slugify(validated.title)
     const slug = `${base}-${randomSuffix()}`
 
     // 2) перенос ассетов + сбор использованных tmp-токенов
     const usedTokens = new Set<string>()
 
-    const imgRes = await finalizeAsset(raw.img, slug)
+    const imgRes = await finalizeAsset(validated.img, slug)
     if (imgRes.token) usedTokens.add(imgRes.token)
     const img = imgRes.url
 
     const gallery: string[] = []
-    if (Array.isArray(raw.gallery)) {
-      for (const u of raw.gallery) {
-        if (typeof u !== 'string') continue
-        const gRes = await finalizeAsset(u, slug)
-        if (gRes.token) usedTokens.add(gRes.token)
-        gallery.push(gRes.url)
-      }
+    for (const u of validated.gallery) {
+      const gRes = await finalizeAsset(u, slug)
+      if (gRes.token) usedTokens.add(gRes.token)
+      gallery.push(gRes.url)
     }
 
-    const details: string[] | undefined = Array.isArray(raw.details)
-      ? raw.details.map((s: string) => s.trim()).filter(Boolean)
-      : undefined
+    const details = validated.details.map((s) => s.trim()).filter(Boolean)
 
-    // 3) создаём продукт
+    // 3) создаём продукт - only validated fields
     const product = await prisma.product.create({
       data: {
-        ...raw,
         slug,
+        title: validated.title,
+        description: validated.description,
+        price: validated.price,
         img,
         gallery: gallery.slice(0, 4),
         details,
+        autoMark: validated.autoMark,
+        engineModel: validated.engineModel,
+        compressor: validated.compressor,
       },
     })
 
@@ -133,17 +139,23 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url)
-    const skip = Number(url.searchParams.get('skip')) || 0
-    const take = Number(url.searchParams.get('take')) || 12
 
-    // Filtering parameters
-    const search = url.searchParams.get('search')
-    const autoMark = url.searchParams.get('autoMark')
-    const engineModel = url.searchParams.get('engineModel')
-    const compressor = url.searchParams.get('compressor')
+    // Validate query params with Zod
+    const queryParams = {
+      skip: url.searchParams.get('skip') ?? undefined,
+      take: url.searchParams.get('take') ?? undefined,
+      search: url.searchParams.get('search') ?? undefined,
+      autoMark: url.searchParams.get('autoMark') ?? undefined,
+      engineModel: url.searchParams.get('engineModel') ?? undefined,
+      compressor: url.searchParams.get('compressor') ?? undefined,
+      sort: url.searchParams.get('sort') ?? undefined,
+    }
 
-    // Sorting parameter
-    const sort = url.searchParams.get('sort') // 'recent' | 'az' | 'za' | 'priceAsc' | 'priceDesc'
+    const parseResult = productQuerySchema.safeParse(queryParams)
+    if (!parseResult.success) {
+      return NextResponse.json({ error: formatZodError(parseResult.error) }, { status: 400 })
+    }
+    const { skip, take, search, autoMark, engineModel, compressor, sort } = parseResult.data
 
     // Build where clause for filtering
     const where: Record<string, string | { contains: string; mode: string }> = {}
