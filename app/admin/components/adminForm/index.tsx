@@ -318,7 +318,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
       const payload = {
         title: data.title,
         description: data.description,
-        details: (data.details ?? []).map((s) => s.trim()).filter(Boolean),
+        details: (data.details ?? []).map((s: string) => s.trim()).filter(Boolean),
         price: Number(data.price),
         engineModel: data.engineModel || null,
         autoMark: data.autoMark || null,
