@@ -1,8 +1,31 @@
 // app/api/cron/cleanup/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { cleanupOldTmpFiles } from '../../lib/cleanup'
 
 export const runtime = 'nodejs'
+
+/**
+ * Timing-safe token comparison
+ * Prevents timing attacks by using constant-time comparison
+ */
+function isValidToken(provided: string | undefined, expected: string): boolean {
+  if (!provided) return false
+
+  // Convert to buffers for timingSafeEqual
+  const providedBuffer = Buffer.from(provided)
+  const expectedBuffer = Buffer.from(expected)
+
+  // If lengths differ, compare with expected to prevent timing leak
+  // We still need to do the comparison to maintain constant time
+  if (providedBuffer.length !== expectedBuffer.length) {
+    // Compare expected with itself to maintain constant time
+    crypto.timingSafeEqual(expectedBuffer, expectedBuffer)
+    return false
+  }
+
+  return crypto.timingSafeEqual(providedBuffer, expectedBuffer)
+}
 
 /**
  * Cron endpoint для автоматической очистки временных файлов
@@ -24,7 +47,7 @@ export async function GET(req: NextRequest) {
     // Проверяем токен в формате "Bearer <token>" или просто "<token>"
     const providedToken = authHeader?.replace(/^Bearer\s+/i, '')
 
-    if (providedToken !== expectedToken) {
+    if (!isValidToken(providedToken, expectedToken)) {
       console.warn('Unauthorized cron attempt')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
