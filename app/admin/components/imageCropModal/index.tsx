@@ -17,10 +17,10 @@ interface ImageCropModalProps {
 type AspectRatio = { label: string; value: number | undefined }
 
 const ASPECT_RATIOS: AspectRatio[] = [
+  { label: 'Альбом 3:2 (рекомендуется)', value: 3 / 2 },
   { label: 'Квадрат 1:1', value: 1 },
-  { label: 'Альбом 3:2', value: 3 / 2 },
-  { label: 'Портрет 2:3', value: 2 / 3 },
   { label: 'Широкий 16:9', value: 16 / 9 },
+  { label: 'Портрет 2:3', value: 2 / 3 },
   { label: 'Свободно', value: undefined },
 ]
 
@@ -35,9 +35,10 @@ export default function ImageCropModal({
   const [zoom, setZoom] = useState(1)
   const [rotation, setRotation] = useState(0)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
-  const [aspect, setAspect] = useState<number | undefined>(1)
+  const [aspect, setAspect] = useState<number | undefined>(3 / 2)
   const [isProcessing, setIsProcessing] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [squarePreviewUrl, setSquarePreviewUrl] = useState<string | null>(null)
   const isProcessingRef = useRef(false) // Для немедленной проверки без ожидания ререндера
 
   const onCropComplete = useCallback((_croppedArea: Area, croppedAreaPixels: Area) => {
@@ -58,6 +59,35 @@ export default function ImageCropModal({
             if (prev) URL.revokeObjectURL(prev)
             return url
           })
+
+          // Генерируем квадратное превью (центральная часть)
+          const img = new Image()
+          img.src = url
+          await new Promise((resolve) => {
+            img.onload = resolve
+          })
+
+          const canvas = document.createElement('canvas')
+          const size = Math.min(img.width, img.height)
+          canvas.width = size
+          canvas.height = size
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            // Вырезаем центральную квадратную часть
+            const offsetX = (img.width - size) / 2
+            const offsetY = (img.height - size) / 2
+            ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, size, size)
+
+            canvas.toBlob((squareBlob) => {
+              if (squareBlob && !cancelled) {
+                const squareUrl = URL.createObjectURL(squareBlob)
+                setSquarePreviewUrl((prev) => {
+                  if (prev) URL.revokeObjectURL(prev)
+                  return squareUrl
+                })
+              }
+            }, 'image/webp')
+          }
         }
       } catch (error) {
         console.error('Preview generation error:', error)
@@ -71,14 +101,17 @@ export default function ImageCropModal({
     }
   }, [croppedAreaPixels, imageSrc, rotation])
 
-  // Cleanup preview URL при размонтировании
+  // Cleanup preview URLs при размонтировании
   useEffect(() => {
     return () => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl)
       }
+      if (squarePreviewUrl) {
+        URL.revokeObjectURL(squarePreviewUrl)
+      }
     }
-  }, [previewUrl])
+  }, [previewUrl, squarePreviewUrl])
 
   const handleCrop = useCallback(async () => {
     // Используем ref для немедленной проверки без ожидания ререндера
@@ -164,7 +197,7 @@ export default function ImageCropModal({
               ))}
             </div>
             <p className={css.hint}>
-              Рекомендуется: Квадрат 1:1 для карточек товаров
+              Рекомендуется 3:2 — полностью видно на странице товара, в карточках обрезается до квадрата
             </p>
           </div>
 
@@ -198,12 +231,25 @@ export default function ImageCropModal({
 
           {previewUrl && (
             <div className={css.controlGroup}>
-              <label>Предпросмотр результата:</label>
-              <div className={css.previewContainer}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewUrl} alt="Preview" className={css.previewImage} />
+              <label>Предпросмотр:</label>
+              <div className={css.previewRow}>
+                <div className={css.previewItem}>
+                  <div className={css.previewContainer}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={previewUrl} alt="Preview" className={css.previewImage} />
+                  </div>
+                  <span className={css.previewLabel}>Страница товара</span>
+                </div>
+                {squarePreviewUrl && (
+                  <div className={css.previewItem}>
+                    <div className={css.previewContainerSquare}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={squarePreviewUrl} alt="Square preview" className={css.previewImageSquare} />
+                    </div>
+                    <span className={css.previewLabel}>Карточка каталога</span>
+                  </div>
+                )}
               </div>
-              <p className={css.hint}>Так будет выглядеть обрезанное изображение</p>
             </div>
           )}
         </div>

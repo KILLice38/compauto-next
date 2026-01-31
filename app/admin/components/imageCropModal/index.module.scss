@@ -115,6 +115,26 @@
   font-style: italic;
 }
 
+.previewRow {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.previewItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.previewLabel {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
 .previewContainer {
   display: flex;
   justify-content: center;
@@ -122,14 +142,31 @@
   background: #f9fafb;
   border: 2px dashed #d1d5db;
   border-radius: 8px;
-  padding: 16px;
-  min-height: 120px;
+  padding: 12px;
+}
+
+.previewContainerSquare {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9fafb;
+  border: 2px dashed #10b981;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .previewImage {
-  max-width: 200px;
-  max-height: 200px;
+  max-width: 180px;
+  max-height: 120px;
   object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.previewImageSquare {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
