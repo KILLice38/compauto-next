@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import type { ProductType } from '../types/interfaces'
 
 const PAGE_SIZE = 12
+const SEARCH_DEBOUNCE_MS = 400
+const MIN_SEARCH_LENGTH = 2
 
 // Тип для вариантов фильтров
 interface FilterVariants {
@@ -19,17 +21,32 @@ export function useCatalog() {
     compressor: [],
   })
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [filters, setFilters] = useState<{ [K in keyof ProductType]?: string | null }>({})
   const [sort, setSort] = useState<'recent' | 'az' | 'za' | 'priceAsc' | 'priceDesc' | null>('recent')
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
 
-  const prevSearch = useRef(searchTerm)
+  const prevSearch = useRef(debouncedSearch)
   const prevFilters = useRef(filters)
   const prevSort = useRef(sort)
   const initialLoadDone = useRef(false)
 
   const loadingRef = useRef(false)
+
+  // Debounce search term
+  useEffect(() => {
+    // Если меньше минимальной длины — сразу сбрасываем (без задержки)
+    if (searchTerm.length > 0 && searchTerm.length < MIN_SEARCH_LENGTH) {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   // Build query string from current filters and sort
   const buildQueryString = useCallback(
@@ -38,8 +55,8 @@ export function useCatalog() {
       params.set('skip', skip.toString())
       params.set('take', PAGE_SIZE.toString())
 
-      if (searchTerm) {
-        params.set('search', searchTerm)
+      if (debouncedSearch) {
+        params.set('search', debouncedSearch)
       }
 
       if (filters.autoMark) {
@@ -60,7 +77,7 @@ export function useCatalog() {
 
       return params.toString()
     },
-    [searchTerm, filters, sort]
+    [debouncedSearch, filters, sort]
   )
 
   const loadFromServer = useCallback(
@@ -101,7 +118,7 @@ export function useCatalog() {
   useEffect(() => {
     if (!initialLoadDone.current) return // Skip initial load, handled above
 
-    const searchChanged = prevSearch.current !== searchTerm
+    const searchChanged = prevSearch.current !== debouncedSearch
     const filtersChanged = JSON.stringify(prevFilters.current) !== JSON.stringify(filters)
     const sortChanged = prevSort.current !== sort
 
@@ -109,10 +126,10 @@ export function useCatalog() {
       loadFromServer(true)
     }
 
-    prevSearch.current = searchTerm
+    prevSearch.current = debouncedSearch
     prevFilters.current = filters
     prevSort.current = sort
-  }, [searchTerm, filters, sort, loadFromServer])
+  }, [debouncedSearch, filters, sort, loadFromServer])
 
   // Load filter variants from dedicated endpoint (not from products)
   useEffect(() => {

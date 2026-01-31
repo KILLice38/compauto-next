@@ -205,10 +205,18 @@ export async function GET(req: NextRequest) {
     const { skip, take, search, autoMark, engineModel, compressor, sort } = parseResult.data
 
     // Build where clause for filtering
-    const where: Record<string, string | { contains: string; mode: string }> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: Record<string, any> = {}
 
+    // Поиск по нескольким полям с использованием OR
     if (search) {
-      where.title = { contains: search, mode: 'insensitive' }
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+        { autoMark: { contains: search, mode: 'insensitive' } },
+        { engineModel: { contains: search, mode: 'insensitive' } },
+        { compressor: { contains: search, mode: 'insensitive' } },
+      ]
     }
 
     if (autoMark) {
