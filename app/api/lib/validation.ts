@@ -11,15 +11,15 @@ import { z } from 'zod'
  * Only allows specific fields, prevents mass assignment
  */
 export const createProductSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(255),
-  description: z.string().max(10000).default(''),
-  price: z.number().int().min(0).max(100_000_000),
-  img: z.string().min(1, 'Main image is required').max(500),
+  title: z.string().min(1, 'Название обязательно').max(255),
+  description: z.string().min(1, 'Описание обязательно').max(10000),
+  price: z.number().int().min(1, 'Укажите цену').max(100_000_000),
+  img: z.string().min(1, 'Загрузите главное изображение').max(500),
   gallery: z.array(z.string().max(500)).max(4).optional().default([]),
   details: z.array(z.string().max(1000)).max(20).optional().default([]),
-  autoMark: z.string().max(100).default(''),
-  engineModel: z.string().max(100).default(''),
-  compressor: z.string().max(100).default(''),
+  autoMark: z.string().min(1, 'Выберите марку авто').max(100),
+  engineModel: z.string().min(1, 'Выберите модель двигателя').max(100),
+  compressor: z.string().min(1, 'Выберите тип компрессора').max(100),
 })
 
 /**

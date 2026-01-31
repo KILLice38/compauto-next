@@ -10,7 +10,7 @@ export const AdminProductFormSchema = z.object({
   // ВАЖНО: z.any() для details из-за ограничений react-hook-form useFieldArray с примитивами
   // Валидация происходит на уровне API (app/api/lib/validation.ts)
   details: z.any().optional(),
-  price: z.coerce.number().int().nonnegative(),
+  price: z.coerce.number().int().min(1, 'Укажите цену'),
   engineModel: z.string().optional(),
   autoMark: z.string().optional(),
   compressor: z.string().optional(),

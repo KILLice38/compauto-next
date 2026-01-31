@@ -1,7 +1,7 @@
 'use client'
 
 import css from './index.module.scss'
-import { useForm, useFieldArray, type SubmitHandler, FieldError } from 'react-hook-form'
+import { useForm, useFieldArray, type SubmitHandler, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useRef, useState } from 'react'
 import type { ProductType } from '../../types/types'
@@ -31,7 +31,7 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
     handleSubmit,
     reset,
     control,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<AdminProductForm>({
     resolver: zodResolver(AdminProductFormSchema),
     defaultValues: {
@@ -320,9 +320,9 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         description: data.description,
         details: (data.details ?? []).map((s: string) => s.trim()).filter(Boolean),
         price: Number(data.price),
-        engineModel: data.engineModel || null,
-        autoMark: data.autoMark || null,
-        compressor: data.compressor || null,
+        engineModel: data.engineModel || '',
+        autoMark: data.autoMark || '',
+        compressor: data.compressor || '',
         img: mainImageUrl,
         gallery: galleryUrls,
       }
@@ -335,7 +335,12 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error(`${method} failed: ${res.status}`)
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null)
+        const errorMessage = errorData?.error || `Ошибка сервера: ${res.status}`
+        throw new Error(errorMessage)
+      }
 
       const saved: ProductType = await res.json()
       toast.success(`Товар "${saved.title}" успешно ${isEdit ? 'обновлён' : 'создан'}`)
@@ -343,7 +348,20 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
       reset()
       setGalleryUrls([])
     } catch (err) {
-      toast.error('Ошибка при сохранении: ' + (err instanceof Error ? err.message : String(err)))
+      toast.error(err instanceof Error ? err.message : 'Ошибка при сохранении')
+    }
+  }
+
+  // Обработчик ошибок валидации формы — показываем через toast
+  const onFormError = (formErrors: FieldErrors<AdminProductForm>) => {
+    const errorMessages: string[] = []
+
+    if (formErrors.title) errorMessages.push('Введите название товара')
+    if (formErrors.description) errorMessages.push('Введите краткое описание')
+    if (formErrors.price) errorMessages.push('Укажите цену товара')
+
+    if (errorMessages.length > 0) {
+      toast.error(errorMessages.join('. '))
     }
   }
 
@@ -359,21 +377,19 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
   const isEdit = !!editingProduct
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className={css.form}>
+    <form onSubmit={handleSubmit(onSubmit, onFormError)} className={css.form}>
       <h2 id="product-form-title" className={css.formTitle}>
         {isEdit ? 'Редактирование продукта' : 'Добавление продукта'}
       </h2>
       <div className={css.formScroll}>
         <label className={css.label}>
-          Название
-          <input {...register('title')} className={css.input} />
-          {errors.title && <p className={css.error}>{String(errors.title.message)}</p>}
+          Название <span className={css.required}>*</span>
+          <input {...register('title')} className={css.input} placeholder="Введите название товара" />
         </label>
 
         <label className={css.label}>
-          Короткое описание
-          <textarea {...register('description')} className={css.input} />
-          {errors.description && <p className={css.error}>{String(errors.description.message)}</p>}
+          Короткое описание <span className={css.required}>*</span>
+          <textarea {...register('description')} className={css.input} placeholder="Краткое описание товара" />
         </label>
 
         <div className={css.label}>
@@ -389,18 +405,11 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
           <button type="button" onClick={() => append('')} className={css.btnGhost}>
             + Абзац
           </button>
-          {/* {errors.details && <p className={css.error}>{String((errors.details as any)?.message ?? '')}</p>} */}
-          {(() => {
-            const d = errors.details
-            const msg = d && typeof d === 'object' && 'message' in d ? String((d as FieldError).message ?? '') : ''
-            return msg ? <p className={css.error}>{msg}</p> : null
-          })()}
         </div>
 
         <label className={css.label}>
-          Цена
-          <input type="number" {...register('price', { valueAsNumber: true })} className={css.input} />
-          {errors.price && <p className={css.error}>{String(errors.price.message)}</p>}
+          Цена <span className={css.required}>*</span>
+          <input type="number" {...register('price', { valueAsNumber: true })} className={css.input} placeholder="Укажите цену" />
         </label>
 
         <label className={css.label}>

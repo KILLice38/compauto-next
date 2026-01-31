@@ -34,7 +34,7 @@ const Characteristics = ({ product }: { product: Product }) => {
           </li>
         )}
       </ul>
-      {product.price && <p className={css.price}>Цена: {product.price.toLocaleString('ru-RU')} ₽</p>}
+      {product.price > 0 && <p className={css.price}>от {product.price.toLocaleString('ru-RU')} ₽</p>}
     </div>
   )
 }
