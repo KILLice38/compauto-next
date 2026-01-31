@@ -470,20 +470,34 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
         </label>
 
         <div className={css.label}>
-          <label>Главная фотография (обязательно при создании)</label>
-          <div
-            className={`${css.dropZone} ${isDraggingMain ? css.dragging : ''}`}
-            onDragOver={handleMainDragOver}
-            onDragLeave={handleMainDragLeave}
-            onDrop={handleMainDrop}
-          >
+          <div className={css.galleryHeader}>
+            <strong>Главная фотография <span className={css.required}>*</span></strong>
+            <div className={css.spacer} />
+            {!mainImageUrl && (
+              <button
+                type="button"
+                onClick={() => mainImageInputRef.current?.click()}
+                disabled={isUploading}
+                className={css.btn}
+              >
+                {isUploading ? 'Загрузка...' : 'Добавить изображение'}
+              </button>
+            )}
             <input
               ref={mainImageInputRef}
               type="file"
               accept="image/*"
+              style={{ display: 'none' }}
               onChange={onPickMainImage}
-              className={css.input}
             />
+          </div>
+          <div
+            className={`${css.dropZone} ${isDraggingMain ? css.dragging : ''} ${mainImageUrl ? css.hidden : ''}`}
+            onDragOver={handleMainDragOver}
+            onDragLeave={handleMainDragLeave}
+            onDrop={handleMainDrop}
+          >
+            <p className={css.dropText}>или перетащите изображение сюда</p>
             {isDraggingMain && <div className={css.dropHint}>Отпустите для загрузки</div>}
           </div>
           {mainImageUrl && (
@@ -508,9 +522,6 @@ export default function ProductForm({ editingProduct, onSave, onCancel }: Props)
               </button>
             </div>
           )}
-          <p className={css.hint}>
-            После выбора изображения откроется редактор для обрезки. Рекомендуется квадратное соотношение 1:1
-          </p>
         </div>
 
         {/* Управляемая галерея */}

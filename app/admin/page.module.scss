@@ -184,14 +184,20 @@
   }
 
   .overlay {
-    padding: 8px;
+    padding: 0;
+    align-items: flex-start;
   }
 
   .modal {
     max-height: 100vh;
+    max-height: 100dvh; // dynamic viewport height для мобильных
+    height: 100vh;
+    height: 100dvh;
     padding: 16px;
-    border-radius: 10px;
+    padding-top: 48px; // место для кнопки закрытия
+    border-radius: 0;
     gap: 12px;
+    overflow-y: auto;
   }
 
   .close-button {
@@ -200,5 +206,7 @@
     font-size: 0.95rem;
     top: 8px;
     right: 8px;
+    position: fixed;
+    z-index: 10;
   }
 }

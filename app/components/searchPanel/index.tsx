@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import css from './index.module.scss'
 
-const MIN_SEARCH_LENGTH = 2
-
 const SearchPanel = ({
   onSearch,
   isSortExpanded,
@@ -16,8 +14,6 @@ const SearchPanel = ({
   const isMobile = useMediaQuery('(max-width: 575px)')
   const [value, setValue] = useState('')
   const placeholder = isMobile && isSortExpanded ? 'Поиск' : 'Поиск по каталогу'
-
-  const showHint = value.length > 0 && value.length < MIN_SEARCH_LENGTH
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
@@ -31,7 +27,6 @@ const SearchPanel = ({
       <svg className={css.icon} width={isMobile ? 20 : 24} height={isMobile ? 20 : 24}>
         <use xlinkHref="/assets/icons/sprites.svg#loop" />
       </svg>
-      {showHint && <span className={css.hint}>Мин. {MIN_SEARCH_LENGTH} символа</span>}
     </div>
   )
 }

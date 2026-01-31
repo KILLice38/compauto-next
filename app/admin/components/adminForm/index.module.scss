@@ -286,14 +286,26 @@
 .dropZone {
   position: relative;
   transition: all 0.3s ease;
-  border: 2px dashed transparent;
+  border: 2px dashed rgba(212, 86, 74, 0.3);
   border-radius: 8px;
-  padding: 4px;
+  padding: 20px;
+  text-align: center;
 
   &.dragging {
     border-color: vars.$color-background-secondary;
     background: rgba(212, 86, 74, 0.1);
   }
+
+  &.hidden {
+    display: none;
+  }
+}
+
+.dropText {
+  margin: 0;
+  font-size: 0.85rem;
+  color: vars.$color-text-description;
+  opacity: 0.7;
 }
 
 .dropOverlay {
@@ -420,13 +432,14 @@
 
 @include mixins.responsive-575 {
   .form {
-    max-height: calc(100svh - 80px);
-    max-height: calc(100vh - 80px);
+    max-height: none; // На мобильных скролл в модалке
     gap: 10px;
   }
 
   .formScroll {
     gap: 12px;
+    overflow: visible; // Скролл обрабатывается модалкой
+    min-height: auto;
   }
 
   .label {
